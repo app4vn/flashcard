@@ -26,12 +26,14 @@
             <button id="hamburger-menu-btn" title="Mở bộ lọc" class="text-2xl p-2 hover:bg-slate-700 rounded-md">
                 <i class="fas fa-bars"></i>
             </button>
-            <h1 id="main-header-title" class="text-xl sm:text-2xl font-semibold text-center flex-grow">Flashcard</h1>
-            <div id="auth-container" class="flex items-center space-x-3 ml-4">
-                <span id="user-email-display" class="text-sm hidden"></span>
-                <button id="auth-action-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
-                    Đăng nhập
-                </button>
+            <h1 id="main-header-title" class="text-lg sm:text-xl md:text-2xl font-semibold text-center flex-grow px-2 truncate">Flashcard</h1>
+            
+            <div id="auth-container" class="flex items-center space-x-2 sm:space-x-3">
+                <span id="user-email-display" class="text-xs sm:text-sm hidden sm:inline-block truncate max-w-[100px] sm:max-w-[150px]"></span>
+                
+                <button id="auth-action-btn" 
+                        class="text-white font-semibold py-2 px-3 sm:px-4 rounded-md text-sm flex items-center justify-center transition-colors duration-150 ease-in-out">
+                    </button>
             </div>
         </div>
     </header>
