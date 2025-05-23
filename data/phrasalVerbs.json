@@ -1,0 +1,59 @@
+{
+  "phrasalVerbs": [
+    {
+      "phrasalVerb": "Get up to",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡet ʌp tuː/",
+      "meanings": [
+        {
+          "id": "m_pv_001_1",
+          "text": "Làm (điều gì đó, thường là nghịch ngợm, không mong muốn hoặc bí mật)",
+          "notes": "Thường dùng với ý tò mò hoặc nghi ngờ về hành động của ai đó, đặc biệt là trẻ con hoặc khi ai đó có vẻ đang làm điều gì đó lén lút.",
+          "examples": [
+            {
+              "id": "ex_pv_001_1_1",
+              "eng": "What have the children been getting up to while we were out?",
+              "vie": "Bọn trẻ đã làm những trò gì trong khi chúng ta đi vắng vậy?"
+            },
+            {
+              "id": "ex_pv_001_1_2",
+              "eng": "I wonder what he's getting up to in the garage.",
+              "vie": "Tôi tự hỏi anh ấy đang làm gì trong gara."
+            },
+            {
+              "id": "ex_pv_001_1_3",
+              "eng": "She's been very quiet. I'm sure she's getting up to something.",
+              "vie": "Con bé im lặng lắm. Tôi chắc là nó đang bày trò gì đó."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_001_2",
+          "text": "Đạt đến một điểm hoặc một mức độ nào đó (thường là về số lượng, tiến độ)",
+          "notes": "Dùng để chỉ việc hoàn thành hoặc tiến triển đến một giai đoạn cụ thể trong một công việc hoặc quá trình.",
+          "examples": [
+            {
+              "id": "ex_pv_001_2_1",
+              "eng": "What page did you get up to in the book?",
+              "vie": "Bạn đã đọc đến trang nào của cuốn sách rồi?"
+            },
+            {
+              "id": "ex_pv_001_2_2",
+              "eng": "We got up to chapter 5 in our studies last week.",
+              "vie": "Chúng tôi đã học đến chương 5 vào tuần trước."
+            },
+            {
+              "id": "ex_pv_001_2_3",
+              "eng": "The builders have only got up to the first floor.",
+              "vie": "Đội thợ xây mới chỉ xây xong tầng một thôi."
+            }
+          ]
+        }
+      ],
+      "tags": ["activity", "behavior", "progress"],
+      "generalNotes": "Một cụm động từ phổ biến, có thể mang nghĩa tiêu cực (nghịch ngợm) hoặc trung tính (tiến độ)."
+    }
+    // Bạn có thể thêm các phrasal verbs khác vào đây, mỗi cái là một đối tượng trong mảng "phrasalVerbs"
+  ]
+}
