@@ -1,15 +1,8 @@
-// Import the functions you need from the SDKs you need
+// Firebase App and Auth imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"; 
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { 
-  getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, getDoc, Timestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"; 
+// Firestore specific imports, serverTimestamp and Timestamp might be needed for data preparation
+import { getFirestore, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
@@ -55,7 +48,8 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     copyToDeckErrorMessage, copyToDeckSuccessMessage, cancelCopyToDeckBtn, confirmCopyToDeckBtn,
     bottomSheetOverlay, bottomSheet, bottomSheetTitle, closeBottomSheetBtn, bottomSheetContent,
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
-    authActionButtonMain, userEmailDisplayMain; 
+    authActionButtonMain, userEmailDisplayMain,
+    srsFeedbackToastEl; // *** THÊM MỚI: Biến cho Toast Notification ***
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
@@ -273,6 +267,31 @@ async function handleAuthStateChangedInApp(user) {
     }
 }
 
+// *** THÊM MỚI: Hàm hiển thị Toast Notification ***
+let toastTimeout;
+function showToast(message, duration = 3000, type = 'info') {
+    if (!srsFeedbackToastEl) return;
+
+    srsFeedbackToastEl.textContent = message;
+    srsFeedbackToastEl.classList.remove('bg-slate-700', 'bg-red-600', 'bg-green-600'); // Xóa các class màu cũ
+
+    if (type === 'error') {
+        srsFeedbackToastEl.classList.add('bg-red-600');
+    } else if (type === 'success') {
+        srsFeedbackToastEl.classList.add('bg-green-600');
+    } else {
+        srsFeedbackToastEl.classList.add('bg-slate-700'); // Màu mặc định
+    }
+
+    srsFeedbackToastEl.classList.add('show');
+
+    clearTimeout(toastTimeout); // Xóa timeout cũ nếu có
+    toastTimeout = setTimeout(() => {
+        srsFeedbackToastEl.classList.remove('show');
+    }, duration);
+}
+// *** KẾT THÚC THÊM MỚI ***
+
 
 // Logic chính của ứng dụng
 document.addEventListener('DOMContentLoaded', async () => { 
@@ -371,6 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     cardOptionsMenuBtnBack = document.getElementById('card-options-menu-btn-back'); 
     authActionButtonMain = document.getElementById('auth-action-btn'); 
     userEmailDisplayMain = document.getElementById('user-email-display');
+    srsFeedbackToastEl = document.getElementById('srs-feedback-toast'); // *** GÁN BIẾN CHO TOAST ***
     
     window.wordDisplay = wordDisplay; 
     window.updateSidebarFilterVisibility = updateSidebarFilterVisibility;
@@ -383,13 +403,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({ 
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getWebCardGlobalId, // Hàm này vẫn ở script.js
+        utilGetWebCardGlobalIdFunc: getWebCardGlobalId,
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
         dataGetCurrentCardFunc: () => window.currentData[window.currentIndex],
         dataGetWindowCurrentDataFunc: () => window.currentData,
-        dataGetCurrentIndexFunc: () => window.currentIndex
+        dataGetCurrentIndexFunc: () => window.currentIndex,
+        uiShowToastFunc: showToast // *** TRUYỀN HÀM SHOWTOAST VÀO SRS MODULE ***
     });
     
     if (!getCurrentUserId()) { 
@@ -1041,8 +1062,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             interval: 0,          
             easeFactor: 2.5,      
             repetitions: 0,       
-            updatedAt: serverTimestamp(),
-            isSuspended: false // Thêm trường isSuspended
+            isSuspended: false,
+            updatedAt: serverTimestamp() 
         }; 
         
         if (cardCategory === 'phrasalVerbs' || cardCategory === 'collocations') { 
@@ -1129,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             today.setHours(0, 0, 0, 0); 
             const reviewTodayCards = [];
             for (const item of lTP) {
-                if (item.isSuspended) continue; // Bỏ qua thẻ bị tạm ngưng
+                if (item.isSuspended) continue; 
 
                 if (item.nextReviewDate && typeof item.nextReviewDate === 'number') {
                     const reviewDate = new Date(item.nextReviewDate);
@@ -1146,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (sFV !== 'all_visible') { 
             const filteredByStatus = [];
             for (const item of lTP) {
-                if (item.isSuspended && sFV !== 'all_visible') continue; // Bỏ qua thẻ tạm ngưng trừ khi xem tất cả
+                if (item.isSuspended && sFV !== 'all_visible') continue; 
                 const sV = item.status || 'new'; 
                 if(sFV==='all_study' && (sV==='new'||sV==='learning')) filteredByStatus.push(item);
                 else if(sFV==='new' && sV==='new') filteredByStatus.push(item);
@@ -1238,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             interval: 0,
                             easeFactor: 2.5,
                             repetitions: 0,
-                            isSuspended: false // Thêm trường isSuspended
+                            isSuspended: false 
                         };
                     }); 
 
@@ -1255,7 +1276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     card.interval = firestoreStatus.interval || 0;
                                     card.easeFactor = firestoreStatus.easeFactor || 2.5;
                                     card.repetitions = firestoreStatus.repetitions || 0;
-                                    card.isSuspended = firestoreStatus.isSuspended || false; // Tải isSuspended
+                                    card.isSuspended = firestoreStatus.isSuspended || false;
                                 }
                             }
                             return card;
@@ -1712,10 +1733,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     interval: 0,          
                     easeFactor: 2.5,      
                     repetitions: 0,  
+                    isSuspended: false,
                     isUserCard: true,
                     createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp(),
-                    isSuspended: false 
+                    updatedAt: serverTimestamp()
                 };
 
                 if (cardJson.category === 'phrasalVerbs') {
@@ -1845,7 +1866,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardToCopy.interval = 0;          
             cardToCopy.easeFactor = 2.5;      
             cardToCopy.repetitions = 0;  
-            cardToCopy.isSuspended = false; // Thêm trường isSuspended
+            cardToCopy.isSuspended = false;
             cardToCopy.createdAt = serverTimestamp();
             cardToCopy.updatedAt = serverTimestamp();
 
@@ -1882,36 +1903,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             let hasActions = false;
 
             // --- Hiển thị thông tin SRS ---
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || cardItem.repetitions > 0) )) { // Chỉ hiển thị nếu đã có dữ liệu SRS hoặc là thẻ người dùng
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || cardItem.repetitions > 0) )) { 
                 const srsInfoDiv = document.createElement('div');
-                srsInfoDiv.className = 'text-xs text-slate-500 dark:text-slate-400 mb-3 p-2 border-b border-slate-200 dark:border-slate-700';
-                let srsInfoHtml = '<strong>Trạng thái SRS:</strong><ul class="list-disc list-inside ml-2 mt-1">';
+                srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
+                let srsInfoHtml = '<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập:</h4><ul class="list-inside space-y-0.5">';
                 
                 if (cardItem.nextReviewDate) {
                     const nextReview = new Date(cardItem.nextReviewDate);
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    const reviewDay = new Date(nextReview.getTime());
-                    reviewDay.setHours(0,0,0,0);
-
-                    let reviewText = `Ôn lại: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
-                    if (reviewDay <= today) {
-                        reviewText += ' (Hôm nay hoặc đã qua)';
-                    }
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    const reviewDay = new Date(nextReview.getTime()); reviewDay.setHours(0,0,0,0);
+                    let reviewText = `Lần ôn tiếp theo: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                    if (reviewDay <= today) reviewText += ' <span class="font-semibold text-amber-600 dark:text-amber-400">(Đến hạn)</span>';
                     srsInfoHtml += `<li>${reviewText}</li>`;
                 } else {
-                    srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có</li>`;
+                    srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có (thẻ mới)</li>`;
                 }
                 srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
                 srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
-                srsInfoHtml += `<li>Lần ôn đúng: ${cardItem.repetitions || 0}</li>`;
+                srsInfoHtml += `<li>Ôn đúng liên tiếp: ${cardItem.repetitions || 0}</li>`;
                 if (cardItem.isSuspended) {
-                    srsInfoHtml += `<li class="text-orange-500">Trạng thái: Đang tạm ngưng</li>`;
+                    srsInfoHtml += `<li class="text-orange-500 font-semibold">Trạng thái: Đang tạm ngưng</li>`;
                 }
                 srsInfoHtml += '</ul>';
                 srsInfoDiv.innerHTML = srsInfoHtml;
                 bottomSheetContent.appendChild(srsInfoDiv);
-                hasActions = true; // Coi như có action nếu có thông tin SRS
+                hasActions = true; 
             }
 
 
@@ -1937,9 +1953,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetContent.appendChild(editBtnEl);
                 hasActions = true;
             }
-
+            
             // Nút Đặt lại Tiến độ Học
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { // Chỉ hiện nếu đã có dữ liệu SRS
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
                 const resetSrsBtn = document.createElement('button');
                 resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
                 resetSrsBtn.onclick = async () => {
@@ -1947,12 +1963,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const srsResetData = {
                             status: 'new',
                             lastReviewed: serverTimestamp(),
-                            reviewCount: 0, // Reset review count
-                            nextReviewDate: serverTimestamp(), // Sẵn sàng học ngay
+                            reviewCount: 0, 
+                            nextReviewDate: serverTimestamp(), 
                             interval: 0,
                             easeFactor: 2.5,
                             repetitions: 0,
-                            isSuspended: false
+                            isSuspended: false 
                         };
                         
                         let updateSuccess = false;
@@ -1966,14 +1982,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
 
                         if (updateSuccess) {
-                            // Cập nhật client-side
                             Object.assign(cardItem, {
                                 ...srsResetData,
-                                nextReviewDate: Date.now(), // Ước lượng ở client
+                                nextReviewDate: Date.now(), 
                                 lastReviewed: Date.now()
                             });
                             alert("Đã đặt lại tiến độ học cho thẻ.");
-                            updateFlashcard(); // Cập nhật lại thẻ hiện tại
+                            updateFlashcard(); 
+                            applyAllFilters(); // Áp dụng lại bộ lọc
                         }
                         closeBottomSheet();
                     }
@@ -1983,7 +1999,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             // Nút Tạm ngưng/Tiếp tục Ôn tập
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { // Chỉ hiện nếu đã có dữ liệu SRS
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
                 const suspendBtn = document.createElement('button');
                 suspendBtn.innerHTML = cardItem.isSuspended 
                     ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
@@ -1999,22 +2015,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else {
                         const webCardGlobalId = getWebCardGlobalId(cardItem);
                         if (webCardGlobalId) {
-                             // Khi cập nhật webCardStatus, cần đảm bảo các trường gốc không bị mất
                             const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
                             const fullDataToSet = {
-                                ...existingWebStatus, // Giữ lại các trường SRS đã có
+                                ...existingWebStatus, 
                                 originalCategory: cardItem.category,
                                 originalWordOrPhrase: cardItem.category === 'phrasalVerbs' ? cardItem.phrasalVerb : (cardItem.category === 'collocations' ? cardItem.collocation : cardItem.word),
                                 isSuspended: newSuspendedState,
-                                updatedAt: serverTimestamp() // Cập nhật thời gian
+                                updatedAt: serverTimestamp() 
                             };
-                            // Xóa các trường không cần thiết nếu chúng là null từ existingWebStatus
                             for (const key in fullDataToSet) {
                                 if (fullDataToSet[key] === undefined) {
                                     delete fullDataToSet[key];
                                 }
                             }
-
                             updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
                         }
                     }
@@ -2023,8 +2036,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         cardItem.isSuspended = newSuspendedState;
                         cardItem.updatedAt = Date.now();
                         alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
-                        updateFlashcard(); // Cập nhật lại thẻ để có thể ẩn/hiện nút menu
-                        applyAllFilters(); // Áp dụng lại bộ lọc để loại/thêm thẻ khỏi danh sách review
+                        updateFlashcard(); 
+                        applyAllFilters(); 
                     }
                     closeBottomSheet();
                 };
@@ -2032,10 +2045,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hasActions = true;
             }
 
-
-            // Nút Xóa thẻ (đã có ở trên, đảm bảo nó vẫn ở cuối nếu cần)
             if (cardItem.isUserCard && loggedIn) {
-                // Nút xóa đã được thêm ở trên
+                const deleteBtnEl = document.createElement('button');
+                deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
+                deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
+                deleteBtnEl.onclick = async () => {
+                    await handleDeleteCard(); 
+                    closeBottomSheet();
+                };
+                bottomSheetContent.appendChild(deleteBtnEl);
+                hasActions = true;
             }
             
             if (!hasActions) {
