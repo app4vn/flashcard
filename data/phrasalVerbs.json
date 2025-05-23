@@ -3,13 +3,32 @@
     {
       "phrasalVerb": "Get up to",
       "baseVerb": "Get",
-      "meaning": "làm (điều gì đó, thường là nghịch ngợm hoặc không mong muốn)",
-      "example": "What have the children been getting up to while we were out?",
-      "exampleVie": "Bọn trẻ đã làm những trò gì trong khi chúng ta đi vắng vậy?",
       "pronunciation": "/ɡɛt ʌp tuː/",
-      "notes": "Thường dùng với ý tò mò hoặc nghi ngờ về hành động của ai đó, đặc biệt là trẻ con.",
-      "tags": ["activity", "behavior"]
-    },
+      "category": "phrasalVerbs",
+      "meanings": [
+        {
+          "id": "get_up_to_m1",
+          "text": "làm (điều gì đó, thường là nghịch ngợm, bí mật hoặc không mong muốn)",
+          "notes": "Thường dùng với ý tò mò...",
+          "examples": [
+            { "id": "get_up_to_e1_1", "eng": "...", "vie": "..." },
+            { "id": "get_up_to_e1_2", "eng": "...", "vie": "..." }
+          ]
+        },
+        {
+          "id": "get_up_to_m2",
+          "text": "đạt đến một mức độ, một điểm nào đó",
+          "notes": "Thường dùng trong công việc...",
+          "examples": [
+            { "id": "get_up_to_e2_1", "eng": "...", "vie": "..." }
+          ]
+        }
+      ],
+      "tags": ["activity", "behavior", "progress"],
+      "generalNotes": "Cẩn thận với ngữ cảnh..."
+    }
+  ]
+},
     {
       "phrasalVerb": "Get on with (someone)",
       "baseVerb": "Get",
