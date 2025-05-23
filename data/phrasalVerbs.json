@@ -53,6 +53,62 @@
       ],
       "tags": ["activity", "behavior", "progress"],
       "generalNotes": "Một cụm động từ phổ biến, có thể mang nghĩa tiêu cực (nghịch ngợm) hoặc trung tính (tiến độ)."
+    },
+    {
+      "phrasalVerb": "Get at (someone)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt æt/",
+      "meanings": [
+        {
+          "id": "m_pv_002_1",
+          "text": "Chỉ trích, công kích ai đó",
+          "notes": "Thường mang ý nghĩa tiêu cực, diễn tả sự công kích hoặc phàn nàn lặp đi lặp lại một cách khó chịu.",
+          "examples": [
+            {
+              "id": "ex_pv_002_1_1",
+              "eng": "He's always getting at his younger brother.",
+              "vie": "Anh ta luôn chỉ trích em trai mình."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_002_2",
+          "text": "Cố gắng diễn đạt, ám chỉ điều gì",
+          "notes": "Dùng khi muốn diễn đạt một ý một cách không trực tiếp, hoặc dò hỏi, tìm hiểu xem người khác đang muốn nói gì.",
+          "examples": [
+            {
+              "id": "ex_pv_002_2_1",
+              "eng": "What are you getting at? Just say it clearly.",
+              "vie": "Bạn đang cố ám chỉ điều gì vậy? Cứ nói rõ ràng đi."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "criticism"],
+      "generalNotes": "Có thể có hai nghĩa chính: một là chỉ trích, công kích ai đó; hai là cố gắng diễn đạt hoặc ám chỉ điều gì đó một cách không trực tiếp."
+    },
+    {
+      "phrasalVerb": "Get rid of (something)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt rɪd əv/",
+      "meanings": [
+        {
+          "id": "m_pv_003_1",
+          "text": "Loại bỏ, vứt bỏ, tống khứ",
+          "notes": "Hành động chủ động loại bỏ một vật, một người hoặc một tình huống không mong muốn, làm cho nó không còn tồn tại hoặc ảnh hưởng đến mình nữa.",
+          "examples": [
+            {
+              "id": "ex_pv_003_1_1",
+              "eng": "We need to get rid of all this old furniture.",
+              "vie": "Chúng ta cần loại bỏ hết đống đồ đạc cũ này."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "objects_things"],
+      "generalNotes": ""
     }
   ]
 }
