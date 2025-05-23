@@ -205,6 +205,192 @@
       ],
       "tags": ["problems_solutions", "behavior"],
       "generalNotes": "Nghĩa chính là thoát khỏi sự trừng phạt."
+    },
+    {
+      "phrasalVerb": "Get out of (doing something)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt aʊt əv/",
+      "meanings": [
+        {
+          "id": "m_pv_007_1",
+          "text": "Tránh né làm việc gì (thường là việc không muốn làm)",
+          "notes": "Nghĩa là tìm cách không phải thực hiện một nhiệm vụ hoặc trách nhiệm nào đó mà bản thân không thích.",
+          "examples": [
+            {
+              "id": "ex_pv_007_1_1",
+              "eng": "She tried to get out of attending the boring meeting.",
+              "vie": "Cô ấy đã cố gắng tránh tham dự cuộc họp nhàm chán đó."
+            },
+            {
+              "id": "ex_pv_007_1_2",
+              "eng": "He's always trying to get out of washing the dishes.",
+              "vie": "Anh ấy luôn cố gắng trốn việc rửa bát."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "avoidance"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get through to (someone)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt θruː tuː/",
+      "meanings": [
+        {
+          "id": "m_pv_008_1",
+          "text": "Làm cho ai đó hiểu điều mình nói",
+          "notes": "Nỗ lực làm cho người khác tiếp nhận và hiểu được thông điệp hoặc quan điểm của mình.",
+          "examples": [
+            {
+              "id": "ex_pv_008_1_1",
+              "eng": "It's hard to get through to him when he's in a bad mood.",
+              "vie": "Rất khó để làm anh ấy hiểu khi anh ấy đang bực mình."
+            },
+            {
+              "id": "ex_pv_008_1_2",
+              "eng": "I've tried explaining it to her, but I just can't get through to her.",
+              "vie": "Tôi đã cố giải thích cho cô ấy, nhưng tôi không thể làm cô ấy hiểu được."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_008_2",
+          "text": "Liên lạc được (qua điện thoại)",
+          "notes": "Thành công trong việc kết nối liên lạc với ai đó, đặc biệt là qua điện thoại sau nhiều nỗ lực.",
+          "examples": [
+            {
+              "id": "ex_pv_008_2_1",
+              "eng": "I finally got through to him on his mobile after several tries.",
+              "vie": "Cuối cùng tôi cũng liên lạc được với anh ấy qua điện thoại di động sau nhiều lần thử."
+            },
+            {
+              "id": "ex_pv_008_2_2",
+              "eng": "After being on hold for an hour, I finally got through to a customer service representative.",
+              "vie": "Sau khi phải chờ máy một tiếng, cuối cùng tôi cũng kết nối được với một nhân viên dịch vụ khách hàng."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "understanding"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get wound up (about something)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt waʊnd ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_009_1",
+          "text": "Trở nên tức giận, lo lắng hoặc bực bội",
+          "notes": "Diễn tả trạng thái cảm xúc tiêu cực, căng thẳng quá mức về một vấn đề nào đó.",
+          "examples": [
+            {
+              "id": "ex_pv_009_1_1",
+              "eng": "Don't get so wound up about it; it's not a big deal.",
+              "vie": "Đừng quá bực bội về chuyện đó; không có gì to tát đâu."
+            },
+            {
+              "id": "ex_pv_009_1_2",
+              "eng": "She gets wound up very easily when things don't go her way.",
+              "vie": "Cô ấy rất dễ bực bội khi mọi việc không theo ý mình."
+            }
+          ]
+        }
+      ],
+      "tags": ["emotions_feelings"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get along (with someone)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt əˈlɔŋ/",
+      "meanings": [
+        {
+          "id": "m_pv_010_1",
+          "text": "Hòa thuận, có mối quan hệ tốt với ai đó",
+          "notes": "Tương tự như 'get on with someone', chỉ mối quan hệ hòa hợp, thân thiện.",
+          "examples": [
+            {
+              "id": "ex_pv_010_1_1",
+              "eng": "My cat and dog get along surprisingly well.",
+              "vie": "Con mèo và con chó của tôi hòa thuận với nhau một cách đáng ngạc nhiên."
+            },
+            {
+              "id": "ex_pv_010_1_2",
+              "eng": "Despite their differences, the two leaders seem to get along.",
+              "vie": "Bất chấp những khác biệt, hai nhà lãnh đạo dường như hòa thuận với nhau."
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social"],
+      "generalNotes": "Thường đi kèm 'with someone'."
+    },
+    {
+      "phrasalVerb": "Get around",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt əˈraʊnd/",
+      "meanings": [
+        {
+          "id": "m_pv_011_1",
+          "text": "Đi lại nhiều nơi",
+          "notes": "Di chuyển từ nơi này đến nơi khác, thường là trong một khu vực nhất định.",
+          "examples": [
+            {
+              "id": "ex_pv_011_1_1",
+              "eng": "It's quite easy to get around this city by bike.",
+              "vie": "Khá dễ dàng để đi lại trong thành phố này bằng xe đạp."
+            },
+            {
+              "id": "ex_pv_011_1_2",
+              "eng": "She doesn't have a car, so she gets around by bus.",
+              "vie": "Cô ấy không có ô tô nên cô ấy đi lại bằng xe buýt."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_011_2",
+          "text": "Lan truyền (tin tức)",
+          "notes": "Chỉ thông tin, tin đồn được truyền đi, phổ biến rộng rãi.",
+          "examples": [
+            {
+              "id": "ex_pv_011_2_1",
+              "eng": "News of their secret wedding quickly got around.",
+              "vie": "Tin tức về đám cưới bí mật của họ nhanh chóng lan truyền."
+            },
+            {
+              "id": "ex_pv_011_2_2",
+              "eng": "It didn't take long for word to get around that he had resigned.",
+              "vie": "Không mất nhiều thời gian để tin tức anh ấy từ chức lan truyền đi."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_011_3",
+          "text": "Tìm cách giải quyết (vấn đề), lách (luật)",
+          "notes": "Tìm ra cách để đối phó hoặc vượt qua một khó khăn, quy định mà không vi phạm trực tiếp hoặc bằng cách khôn khéo.",
+          "examples": [
+            {
+              "id": "ex_pv_011_3_1",
+              "eng": "She knows how to get around the rules.",
+              "vie": "Cô ấy biết cách lách luật."
+            },
+            {
+              "id": "ex_pv_011_3_2",
+              "eng": "We need to find a way to get around these technical difficulties.",
+              "vie": "Chúng ta cần tìm cách để giải quyết những khó khăn kỹ thuật này."
+            }
+          ]
+        }
+      ],
+      "tags": ["travel_movement", "information", "problems_solutions"],
+      "generalNotes": "Có nhiều nghĩa khác nhau."
     }
   ]
 }
