@@ -1,8 +1,15 @@
-// Firebase App and Auth imports
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"; 
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"; 
-// Firestore specific imports, serverTimestamp and Timestamp might be needed for data preparation
-import { getFirestore, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+  getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, getDoc, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
@@ -176,7 +183,7 @@ async function loadAppState() {
 
 async function saveAppState(){ 
     if (!categorySelect || !filterCardStatusSelect || !userDeckSelect || !baseVerbSelect || !tagSelect) {
-        console.warn("saveAppState: DOM elements for select not ready yet. Skipping save or using potentially old appState values.");
+        // console.warn("saveAppState: DOM elements for select not ready yet. Skipping save or using potentially old appState values.");
     } else {
         const currentCategoryValue = categorySelect.value; 
         const stateForCategory = getCategoryState(currentDatasetSource, currentCategoryValue);
@@ -222,15 +229,11 @@ function getCategoryState(src, cat) {
 }
 
 async function handleAuthStateChangedInApp(user) {
-    // authActionButtonMain và userEmailDisplayMain đã được gán trong DOMContentLoaded
-    // currentUserId (biến cục bộ của auth.js) đã được cập nhật bởi auth.js
-    // Chúng ta sẽ dùng getCurrentUserId() để lấy giá trị đó.
+    const userIdFromAuth = getCurrentUserId(); 
 
-    const userIdFromAuth = getCurrentUserId(); // Lấy userId từ auth.js
+    await loadAppState(); 
 
-    await loadAppState(); // Tải AppState trước, currentUserId đã được auth.js cập nhật
-
-    if (user) { // user object từ Firebase Auth
+    if (user) { 
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email ? user.email : (userIdFromAuth && !user.isAnonymous ? "Người dùng" : "Khách");
         if(userEmailDisplayMain) userEmailDisplayMain.classList.remove('hidden'); 
         
@@ -256,11 +259,9 @@ async function handleAuthStateChangedInApp(user) {
             `;
             authActionButtonMain.title = "Đăng nhập";
         }
-        // appState được reset và localStorage được xóa trong loadAppState khi userId là null và không có gì trong localStorage
         console.log("User logged out. AppState reset to defaults if not found in localStorage.");
     }
     
-    // Sau khi appState được load (hoặc reset), cập nhật UI và tải dữ liệu
     if (typeof setupInitialCategoryAndSource === 'function') {
         await setupInitialCategoryAndSource(); 
     }
@@ -382,7 +383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({ 
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getWebCardGlobalId,
+        utilGetWebCardGlobalIdFunc: getWebCardGlobalId, // Hàm này vẫn ở script.js
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
@@ -920,9 +921,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     }
-
-    // Hàm updateStatusButtonsUI sẽ được gọi từ srs.js sau khi SRS được xử lý
-    function updateStatusButtonsUI(){ 
+    
+    async function updateStatusButtonsUI(){ 
         const srsButtons = [btnSrsAgain, btnSrsHard, btnSrsGood, btnSrsEasy];
         const currentCardItem = window.currentData.length > 0 ? window.currentData[window.currentIndex] : null;
 
@@ -1041,7 +1041,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             interval: 0,          
             easeFactor: 2.5,      
             repetitions: 0,       
-            updatedAt: serverTimestamp() 
+            updatedAt: serverTimestamp(),
+            isSuspended: false // Thêm trường isSuspended
         }; 
         
         if (cardCategory === 'phrasalVerbs' || cardCategory === 'collocations') { 
@@ -1128,6 +1129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             today.setHours(0, 0, 0, 0); 
             const reviewTodayCards = [];
             for (const item of lTP) {
+                if (item.isSuspended) continue; // Bỏ qua thẻ bị tạm ngưng
+
                 if (item.nextReviewDate && typeof item.nextReviewDate === 'number') {
                     const reviewDate = new Date(item.nextReviewDate);
                     reviewDate.setHours(0,0,0,0); 
@@ -1143,6 +1146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (sFV !== 'all_visible') { 
             const filteredByStatus = [];
             for (const item of lTP) {
+                if (item.isSuspended && sFV !== 'all_visible') continue; // Bỏ qua thẻ tạm ngưng trừ khi xem tất cả
                 const sV = item.status || 'new'; 
                 if(sFV==='all_study' && (sV==='new'||sV==='learning')) filteredByStatus.push(item);
                 else if(sFV==='new' && sV==='new') filteredByStatus.push(item);
@@ -1233,7 +1237,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             nextReviewDate: null,
                             interval: 0,
                             easeFactor: 2.5,
-                            repetitions: 0
+                            repetitions: 0,
+                            isSuspended: false // Thêm trường isSuspended
                         };
                     }); 
 
@@ -1250,6 +1255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     card.interval = firestoreStatus.interval || 0;
                                     card.easeFactor = firestoreStatus.easeFactor || 2.5;
                                     card.repetitions = firestoreStatus.repetitions || 0;
+                                    card.isSuspended = firestoreStatus.isSuspended || false; // Tải isSuspended
                                 }
                             }
                             return card;
@@ -1276,7 +1282,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         nextReviewDate: null,
                         interval: 0,
                         easeFactor: 2.5,
-                        repetitions: 0
+                        repetitions: 0,
+                        isSuspended: false
                     })); 
                     console.log(`Đã tải dữ liệu mẫu cho '${category}'.`); 
                 } else { 
@@ -1707,7 +1714,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     repetitions: 0,  
                     isUserCard: true,
                     createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
+                    updatedAt: serverTimestamp(),
+                    isSuspended: false 
                 };
 
                 if (cardJson.category === 'phrasalVerbs') {
@@ -1837,6 +1845,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardToCopy.interval = 0;          
             cardToCopy.easeFactor = 2.5;      
             cardToCopy.repetitions = 0;  
+            cardToCopy.isSuspended = false; // Thêm trường isSuspended
             cardToCopy.createdAt = serverTimestamp();
             cardToCopy.updatedAt = serverTimestamp();
 
@@ -1872,6 +1881,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loggedIn = getCurrentUserId();
             let hasActions = false;
 
+            // --- Hiển thị thông tin SRS ---
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || cardItem.repetitions > 0) )) { // Chỉ hiển thị nếu đã có dữ liệu SRS hoặc là thẻ người dùng
+                const srsInfoDiv = document.createElement('div');
+                srsInfoDiv.className = 'text-xs text-slate-500 dark:text-slate-400 mb-3 p-2 border-b border-slate-200 dark:border-slate-700';
+                let srsInfoHtml = '<strong>Trạng thái SRS:</strong><ul class="list-disc list-inside ml-2 mt-1">';
+                
+                if (cardItem.nextReviewDate) {
+                    const nextReview = new Date(cardItem.nextReviewDate);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    const reviewDay = new Date(nextReview.getTime());
+                    reviewDay.setHours(0,0,0,0);
+
+                    let reviewText = `Ôn lại: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                    if (reviewDay <= today) {
+                        reviewText += ' (Hôm nay hoặc đã qua)';
+                    }
+                    srsInfoHtml += `<li>${reviewText}</li>`;
+                } else {
+                    srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có</li>`;
+                }
+                srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
+                srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
+                srsInfoHtml += `<li>Lần ôn đúng: ${cardItem.repetitions || 0}</li>`;
+                if (cardItem.isSuspended) {
+                    srsInfoHtml += `<li class="text-orange-500">Trạng thái: Đang tạm ngưng</li>`;
+                }
+                srsInfoHtml += '</ul>';
+                srsInfoDiv.innerHTML = srsInfoHtml;
+                bottomSheetContent.appendChild(srsInfoDiv);
+                hasActions = true; // Coi như có action nếu có thông tin SRS
+            }
+
+
+            // --- Các nút hành động ---
             if (!cardItem.isUserCard && loggedIn) {
                 const copyBtnEl = document.createElement('button');
                 copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
@@ -1891,16 +1935,107 @@ document.addEventListener('DOMContentLoaded', async () => {
                     closeBottomSheet();
                 };
                 bottomSheetContent.appendChild(editBtnEl);
+                hasActions = true;
+            }
 
-                const deleteBtnEl = document.createElement('button');
-                deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
-                deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
-                deleteBtnEl.onclick = async () => {
-                    await handleDeleteCard(); 
+            // Nút Đặt lại Tiến độ Học
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { // Chỉ hiện nếu đã có dữ liệu SRS
+                const resetSrsBtn = document.createElement('button');
+                resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
+                resetSrsBtn.onclick = async () => {
+                    if (confirm("Bạn có chắc muốn đặt lại tiến độ học cho thẻ này? Thẻ sẽ được coi như mới học.")) {
+                        const srsResetData = {
+                            status: 'new',
+                            lastReviewed: serverTimestamp(),
+                            reviewCount: 0, // Reset review count
+                            nextReviewDate: serverTimestamp(), // Sẵn sàng học ngay
+                            interval: 0,
+                            easeFactor: 2.5,
+                            repetitions: 0,
+                            isSuspended: false
+                        };
+                        
+                        let updateSuccess = false;
+                        if (cardItem.isUserCard) {
+                            updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
+                        } else {
+                            const webCardGlobalId = getWebCardGlobalId(cardItem);
+                            if (webCardGlobalId) {
+                                updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, srsResetData);
+                            }
+                        }
+
+                        if (updateSuccess) {
+                            // Cập nhật client-side
+                            Object.assign(cardItem, {
+                                ...srsResetData,
+                                nextReviewDate: Date.now(), // Ước lượng ở client
+                                lastReviewed: Date.now()
+                            });
+                            alert("Đã đặt lại tiến độ học cho thẻ.");
+                            updateFlashcard(); // Cập nhật lại thẻ hiện tại
+                        }
+                        closeBottomSheet();
+                    }
+                };
+                bottomSheetContent.appendChild(resetSrsBtn);
+                hasActions = true;
+            }
+            
+            // Nút Tạm ngưng/Tiếp tục Ôn tập
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { // Chỉ hiện nếu đã có dữ liệu SRS
+                const suspendBtn = document.createElement('button');
+                suspendBtn.innerHTML = cardItem.isSuspended 
+                    ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
+                    : `<i class="fas fa-pause-circle w-5 mr-3 text-yellow-500"></i> Tạm ngưng Ôn tập`;
+                
+                suspendBtn.onclick = async () => {
+                    const newSuspendedState = !cardItem.isSuspended;
+                    const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
+                    let updateSuccess = false;
+
+                    if (cardItem.isUserCard) {
+                        updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
+                    } else {
+                        const webCardGlobalId = getWebCardGlobalId(cardItem);
+                        if (webCardGlobalId) {
+                             // Khi cập nhật webCardStatus, cần đảm bảo các trường gốc không bị mất
+                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
+                            const fullDataToSet = {
+                                ...existingWebStatus, // Giữ lại các trường SRS đã có
+                                originalCategory: cardItem.category,
+                                originalWordOrPhrase: cardItem.category === 'phrasalVerbs' ? cardItem.phrasalVerb : (cardItem.category === 'collocations' ? cardItem.collocation : cardItem.word),
+                                isSuspended: newSuspendedState,
+                                updatedAt: serverTimestamp() // Cập nhật thời gian
+                            };
+                            // Xóa các trường không cần thiết nếu chúng là null từ existingWebStatus
+                            for (const key in fullDataToSet) {
+                                if (fullDataToSet[key] === undefined) {
+                                    delete fullDataToSet[key];
+                                }
+                            }
+
+                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
+                        }
+                    }
+
+                    if (updateSuccess) {
+                        cardItem.isSuspended = newSuspendedState;
+                        cardItem.updatedAt = Date.now();
+                        alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
+                        updateFlashcard(); // Cập nhật lại thẻ để có thể ẩn/hiện nút menu
+                        applyAllFilters(); // Áp dụng lại bộ lọc để loại/thêm thẻ khỏi danh sách review
+                    }
                     closeBottomSheet();
                 };
-                bottomSheetContent.appendChild(deleteBtnEl);
+                bottomSheetContent.appendChild(suspendBtn);
                 hasActions = true;
+            }
+
+
+            // Nút Xóa thẻ (đã có ở trên, đảm bảo nó vẫn ở cuối nếu cần)
+            if (cardItem.isUserCard && loggedIn) {
+                // Nút xóa đã được thêm ở trên
             }
             
             if (!hasActions) {
