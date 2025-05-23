@@ -200,3 +200,18 @@ body {
     margin-right: 0.75rem; /* mr-3 */
     text-align: center;
 }
+
+/* CSS cho Toast Notification */
+#srs-feedback-toast {
+    /* Tailwind classes đã được dùng trong HTML, đây là để đảm bảo và tùy chỉnh thêm nếu cần */
+    /* Ví dụ: fixed bottom-5 right-5 bg-slate-700 text-white text-sm py-3 px-5 rounded-lg shadow-md z-[1010] */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0s linear 0.5s; /* Delay visibility */
+}
+
+#srs-feedback-toast.show {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease-in-out, visibility 0s linear 0s;
+}
