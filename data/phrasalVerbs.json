@@ -2745,6 +2745,509 @@
       ],
       "tags": ["actions_tasks", "money_finance", "documents"],
       "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make (someone/something) over",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ˈoʊvər/",
+      "meanings": [
+        {
+          "id": "m_pv_074_1",
+          "text": "Thay đổi hoàn toàn diện mạo, cải tạo (một người, một nơi)",
+          "notes": "Cải thiện hoặc thay đổi đáng kể vẻ ngoài, phong cách hoặc cấu trúc của ai đó hoặc nơi nào đó.",
+          "examples": [
+            {
+              "id": "ex_pv_074_1_1",
+              "eng": "They made over the old house into a beautiful guesthouse.",
+              "vie": "Họ đã cải tạo ngôi nhà cũ thành một nhà khách xinh đẹp."
+            },
+            {
+              "id": "ex_pv_074_1_2",
+              "eng": "She was made over by a team of stylists for the TV show.",
+              "vie": "Cô ấy đã được một đội ngũ stylist thay đổi hoàn toàn diện mạo cho chương trình truyền hình."
+            }
+          ]
+        }
+      ],
+      "tags": ["transformation", "appearance", "home_living"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make over (property/money)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ˈoʊvər/",
+      "meanings": [
+        {
+          "id": "m_pv_075_1",
+          "text": "Chuyển nhượng hợp pháp (tài sản, tiền bạc cho ai đó)",
+          "notes": "Chuyển quyền sở hữu tài sản hoặc tiền bạc cho người khác một cách chính thức theo pháp luật.",
+          "examples": [
+            {
+              "id": "ex_pv_075_1_1",
+              "eng": "He made over his entire fortune to his children before he died.",
+              "vie": "Ông ấy đã chuyển nhượng toàn bộ tài sản của mình cho các con trước khi qua đời."
+            },
+            {
+              "id": "ex_pv_075_1_2",
+              "eng": "She decided to make over the property to her niece in her will.",
+              "vie": "Bà ấy đã quyết định chuyển nhượng tài sản đó cho cháu gái mình trong di chúc."
+            }
+          ]
+        }
+      ],
+      "tags": ["money_finance", "legal", "family"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make up (a story/excuse)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_076_1",
+          "text": "Bịa đặt, sáng tạo ra (một câu chuyện, lời bào chữa, kế hoạch)",
+          "notes": "Sáng chế hoặc tạo ra một điều gì đó không có thật hoặc không dựa trên sự thật.",
+          "examples": [
+            {
+              "id": "ex_pv_076_1_1",
+              "eng": "He made up an excuse for being late.",
+              "vie": "Anh ấy đã bịa ra một lý do để giải thích cho việc đi muộn."
+            },
+            {
+              "id": "ex_pv_076_1_2",
+              "eng": "Children often make up imaginary friends to play with.",
+              "vie": "Trẻ con thường bịa ra những người bạn tưởng tượng để chơi cùng."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "creation", "deception"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make up (constitute/form)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_077_1",
+          "text": "Cấu thành, chiếm phần, tạo thành (một tổng thể)",
+          "notes": "Là các bộ phận hoặc thành phần tạo nên một cái gì đó lớn hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_077_1_1",
+              "eng": "Women make up 40% of the workforce in this company.",
+              "vie": "Phụ nữ chiếm 40% lực lượng lao động trong công ty này."
+            },
+            {
+              "id": "ex_pv_077_1_2",
+              "eng": "Foreign students make up a large proportion of the university's enrollment.",
+              "vie": "Sinh viên nước ngoài chiếm một tỷ lệ lớn trong số lượng tuyển sinh của trường đại học."
+            }
+          ]
+        }
+      ],
+      "tags": ["composition", "statistics", "information"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make up (with someone)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_078_1",
+          "text": "Làm hòa, giảng hòa (sau một cuộc cãi vã)",
+          "notes": "Kết thúc một sự bất đồng và trở lại mối quan hệ thân thiện.",
+          "examples": [
+            {
+              "id": "ex_pv_078_1_1",
+              "eng": "They argued last night, but they made up this morning.",
+              "vie": "Họ đã cãi nhau tối qua, nhưng sáng nay họ đã làm hòa."
+            },
+            {
+              "id": "ex_pv_078_1_2",
+              "eng": "Why don't you two kiss and make up?",
+              "vie": "Tại sao hai bạn không hôn nhau và làm hòa đi?"
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social", "problems_solutions", "emotions_feelings"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make up (cosmetics)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_079_1",
+          "text": "Trang điểm (cho bản thân hoặc người khác)",
+          "notes": "Sử dụng mỹ phẩm để cải thiện hoặc thay đổi diện mạo.",
+          "examples": [
+            {
+              "id": "ex_pv_079_1_1",
+              "eng": "She spends a lot of time making herself up before going out.",
+              "vie": "Cô ấy dành nhiều thời gian để trang điểm trước khi ra ngoài."
+            },
+            {
+              "id": "ex_pv_079_1_2",
+              "eng": "The artist made up the actors for the play.",
+              "vie": "Nghệ sĩ đã trang điểm cho các diễn viên trong vở kịch."
+            }
+          ]
+        }
+      ],
+      "tags": ["appearance", "actions_tasks", "daily_routine"],
+      "generalNotes": "Thường dùng 'put on makeup', nhưng 'make up' (động từ) hoặc 'makeup' (danh từ) cũng phổ biến."
+    },
+    {
+      "phrasalVerb": "Make up for (something)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ʌp fɔːr/",
+      "meanings": [
+        {
+          "id": "m_pv_080_1",
+          "text": "Bù đắp, đền bù cho (một lỗi lầm, sự thiếu sót, thời gian đã mất)",
+          "notes": "Làm điều gì đó tốt để thay thế cho một điều gì đó xấu hoặc đã mất.",
+          "examples": [
+            {
+              "id": "ex_pv_080_1_1",
+              "eng": "He bought her flowers to make up for forgetting her birthday.",
+              "vie": "Anh ấy mua hoa cho cô ấy để bù đắp cho việc quên sinh nhật cô."
+            },
+            {
+              "id": "ex_pv_080_1_2",
+              "eng": "I'm trying to make up for the time I lost while I was sick.",
+              "vie": "Tôi đang cố gắng bù đắp thời gian đã mất trong khi tôi bị ốm."
+            }
+          ]
+        }
+      ],
+      "tags": ["compensation", "relationships_social", "actions_tasks"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break down (machine/vehicle)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk daʊn/",
+      "meanings": [
+        {
+          "id": "m_pv_081_1",
+          "text": "Hỏng, ngừng hoạt động (máy móc, xe cộ)",
+          "notes": "Khi một máy móc hoặc phương tiện ngừng hoạt động do sự cố kỹ thuật.",
+          "examples": [
+            {
+              "id": "ex_pv_081_1_1",
+              "eng": "Our car broke down on the way to the airport.",
+              "vie": "Xe của chúng tôi bị hỏng trên đường ra sân bay."
+            },
+            {
+              "id": "ex_pv_081_1_2",
+              "eng": "The washing machine broke down again this morning.",
+              "vie": "Máy giặt lại bị hỏng sáng nay."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "objects_things", "vehicles", "failure"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break down (negotiations/relationship)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk daʊn/",
+      "meanings": [
+        {
+          "id": "m_pv_082_1",
+          "text": "Thất bại, đổ vỡ (đàm phán, mối quan hệ, hệ thống)",
+          "notes": "Khi một quá trình, cuộc thảo luận hoặc mối quan hệ không thành công và kết thúc.",
+          "examples": [
+            {
+              "id": "ex_pv_082_1_1",
+              "eng": "The peace talks broke down after just a few days.",
+              "vie": "Các cuộc đàm phán hòa bình đã thất bại chỉ sau vài ngày."
+            },
+            {
+              "id": "ex_pv_082_1_2",
+              "eng": "Communication between them broke down, and they stopped talking.",
+              "vie": "Giao tiếp giữa họ đổ vỡ, và họ ngừng nói chuyện với nhau."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "relationships_social", "communication", "failure"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break down (emotionally)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk daʊn/",
+      "meanings": [
+        {
+          "id": "m_pv_083_1",
+          "text": "Suy sụp tinh thần, không kìm được cảm xúc (bật khóc)",
+          "notes": "Mất kiểm soát cảm xúc và bắt đầu khóc, thường do căng thẳng, buồn bã hoặc áp lực.",
+          "examples": [
+            {
+              "id": "ex_pv_083_1_1",
+              "eng": "She broke down in tears when she heard the news.",
+              "vie": "Cô ấy đã bật khóc khi nghe tin."
+            },
+            {
+              "id": "ex_pv_083_1_2",
+              "eng": "He broke down and confessed everything to the police.",
+              "vie": "Anh ấy suy sụp và thú nhận mọi thứ với cảnh sát."
+            }
+          ]
+        }
+      ],
+      "tags": ["emotions_feelings", "health_wellbeing"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break down (analyze)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk daʊn/",
+      "meanings": [
+        {
+          "id": "m_pv_084_1",
+          "text": "Phân tích chi tiết, chia nhỏ (thông tin, vấn đề, chi phí)",
+          "notes": "Chia một cái gì đó phức tạp thành các phần nhỏ hơn để dễ hiểu hoặc dễ quản lý hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_084_1_1",
+              "eng": "Let's break down the problem into smaller, manageable parts.",
+              "vie": "Hãy chia nhỏ vấn đề thành các phần nhỏ hơn, dễ quản lý hơn."
+            },
+            {
+              "id": "ex_pv_084_1_2",
+              "eng": "Can you break down the sales figures by region for me?",
+              "vie": "Bạn có thể phân tích chi tiết số liệu bán hàng theo từng khu vực cho tôi được không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["learning_information", "analysis", "problems_solutions"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break in / Break into (a place)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk ɪn / breɪk ˈɪntuː/",
+      "meanings": [
+        {
+          "id": "m_pv_085_1",
+          "text": "Đột nhập, xông vào (một tòa nhà, xe hơi một cách bất hợp pháp)",
+          "notes": "Vào một nơi nào đó bằng vũ lực và không được phép, thường là để trộm cắp.",
+          "examples": [
+            {
+              "id": "ex_pv_085_1_1",
+              "eng": "Someone tried to break into our house last night.",
+              "vie": "Ai đó đã cố gắng đột nhập vào nhà chúng tôi đêm qua."
+            },
+            {
+              "id": "ex_pv_085_1_2",
+              "eng": "The thieves broke in through the back window.",
+              "vie": "Bọn trộm đã đột nhập qua cửa sổ phía sau."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "crime", "safety"],
+      "generalNotes": "'Break into' thường theo sau bởi địa điểm cụ thể. 'Break in' có thể đứng một mình."
+    },
+    {
+      "phrasalVerb": "Break in (interrupt)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk ɪn/",
+      "meanings": [
+        {
+          "id": "m_pv_086_1",
+          "text": "Cắt ngang, xen vào (cuộc trò chuyện)",
+          "notes": "Làm gián đoạn ai đó đang nói chuyện.",
+          "examples": [
+            {
+              "id": "ex_pv_086_1_1",
+              "eng": "I was talking to him, but she kept breaking in.",
+              "vie": "Tôi đang nói chuyện với anh ấy, nhưng cô ấy cứ xen vào."
+            },
+            {
+              "id": "ex_pv_086_1_2",
+              "eng": "He tried to explain, but his boss broke in with another question.",
+              "vie": "Anh ấy cố gắng giải thích, nhưng sếp của anh ấy đã xen vào bằng một câu hỏi khác."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "behavior", "interruption"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break in (new shoes/equipment)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk ɪn/",
+      "meanings": [
+        {
+          "id": "m_pv_087_1",
+          "text": "Làm cho (giày mới, thiết bị mới, động cơ mới) quen và thoải mái hơn khi sử dụng bằng cách dùng từ từ",
+          "notes": "Sử dụng một thứ gì đó mới trong một thời gian để nó trở nên mềm hơn, thoải mái hơn hoặc hoạt động trơn tru hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_087_1_1",
+              "eng": "I need to break in these new hiking boots before the long trek.",
+              "vie": "Tôi cần đi thử đôi giày leo núi mới này cho quen chân trước chuyến đi dài."
+            },
+            {
+              "id": "ex_pv_087_1_2",
+              "eng": "The engine needs to be broken in gently for the first few hundred miles.",
+              "vie": "Động cơ cần được chạy rà một cách nhẹ nhàng trong vài trăm dặm đầu tiên."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "objects_things", "clothing", "preparation"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break into (start suddenly)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk ˈɪntuː/",
+      "meanings": [
+        {
+          "id": "m_pv_088_1",
+          "text": "Đột nhiên bắt đầu (chạy, hát, cười, khóc, v.v.)",
+          "notes": "Bắt đầu làm điều gì đó một cách đột ngột và không mong đợi.",
+          "examples": [
+            {
+              "id": "ex_pv_088_1_1",
+              "eng": "Suddenly, he broke into a run.",
+              "vie": "Đột nhiên, anh ấy bắt đầu chạy."
+            },
+            {
+              "id": "ex_pv_088_1_2",
+              "eng": "She broke into tears when she heard the sad news.",
+              "vie": "Cô ấy bật khóc khi nghe tin buồn."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_movement", "emotions_feelings", "events", "sudden_action"],
+      "generalNotes": "Ví dụ: break into a song, break into laughter, break into a sweat."
+    },
+    {
+      "phrasalVerb": "Break off (something)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk ɔːf/",
+      "meanings": [
+        {
+          "id": "m_pv_089_1",
+          "text": "Bẻ gãy một mảnh từ cái gì đó",
+          "notes": "Tách một phần của một vật ra khỏi phần còn lại bằng cách bẻ hoặc làm gãy.",
+          "examples": [
+            {
+              "id": "ex_pv_089_1_1",
+              "eng": "He broke off a piece of chocolate.",
+              "vie": "Anh ấy bẻ một miếng sô cô la."
+            },
+            {
+              "id": "ex_pv_089_1_2",
+              "eng": "A branch had broken off the tree in the storm.",
+              "vie": "Một cành cây đã bị gãy lìa trong cơn bão."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_089_2",
+          "text": "Đột ngột chấm dứt (một mối quan hệ, cuộc đàm phán, cuộc nói chuyện)",
+          "notes": "Kết thúc một cái gì đó một cách đột ngột, thường là trước khi nó hoàn thành tự nhiên.",
+          "examples": [
+            {
+              "id": "ex_pv_089_2_1",
+              "eng": "They decided to break off their engagement.",
+              "vie": "Họ quyết định hủy hôn ước."
+            },
+            {
+              "id": "ex_pv_089_2_2",
+              "eng": "She broke off in the middle of a sentence.",
+              "vie": "Cô ấy đột ngột dừng lại giữa chừng câu nói."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "objects_things", "relationships_social", "communication", "decision"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break out (war/fire/disease)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_090_1",
+          "text": "Bùng nổ, nổ ra (chiến tranh, hỏa hoạn, dịch bệnh, bạo lực)",
+          "notes": "Khi một điều gì đó nguy hiểm hoặc khó chịu bắt đầu một cách đột ngột.",
+          "examples": [
+            {
+              "id": "ex_pv_090_1_1",
+              "eng": "The war broke out unexpectedly.",
+              "vie": "Chiến tranh nổ ra một cách bất ngờ."
+            },
+            {
+              "id": "ex_pv_090_1_2",
+              "eng": "A fire broke out in the kitchen.",
+              "vie": "Một đám cháy đã bùng phát trong nhà bếp."
+            }
+          ]
+        }
+      ],
+      "tags": ["events", "safety", "health_wellbeing", "disaster"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Break out (rash/sweat)",
+      "baseVerb": "Break",
+      "category": "phrasal_verbs",
+      "pronunciation": "/breɪk aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_091_1",
+          "text": "Nổi lên, phát ra (mẩn ngứa, mồ hôi) trên da",
+          "notes": "Khi mẩn đỏ, mụn hoặc mồ hôi đột nhiên xuất hiện trên da.",
+          "examples": [
+            {
+              "id": "ex_pv_091_1_1",
+              "eng": "She broke out in a rash after eating seafood.",
+              "vie": "Cô ấy bị nổi mẩn sau khi ăn hải sản."
+            },
+            {
+              "id": "ex_pv_091_1_2",
+              "eng": "He broke out in a cold sweat when he realized his mistake.",
+              "vie": "Anh ấy vã mồ hôi lạnh khi nhận ra lỗi của mình."
+            }
+          ]
+        }
+      ],
+      "tags": ["health_wellbeing", "body_reactions"],
+      "generalNotes": ""
     }
   ]
 }
