@@ -124,6 +124,87 @@
       ],
       "tags": ["actions_tasks", "objects_things"],
       "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get on with (someone)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt ɒn wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_004_1",
+          "text": "Có mối quan hệ tốt, hòa hợp với ai đó",
+          "notes": "Diễn tả mối quan hệ thân thiện, không xung đột giữa hai hay nhiều người.",
+          "examples": [
+            {
+              "id": "ex_pv_004_1_1",
+              "eng": "I get on well with most of my colleagues.",
+              "vie": "Tôi hòa hợp tốt với hầu hết các đồng nghiệp của mình."
+            },
+            {
+              "id": "ex_pv_004_1_2",
+              "eng": "They seem to get on well with each other.",
+              "vie": "Họ có vẻ rất hòa hợp với nhau."
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social"],
+      "generalNotes": "Cũng có thể dùng 'get along with'."
+    },
+    {
+      "phrasalVerb": "Get over (something/someone)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt ˈoʊvər/",
+      "meanings": [
+        {
+          "id": "m_pv_005_1",
+          "text": "Vượt qua, bình phục (sau cú sốc, bệnh tật, thất tình)",
+          "notes": "Chỉ sự phục hồi về thể chất hoặc tinh thần sau một trải nghiệm khó khăn hoặc một mất mát.",
+          "examples": [
+            {
+              "id": "ex_pv_005_1_1",
+              "eng": "It can take a long time to get over a serious illness.",
+              "vie": "Có thể mất một thời gian dài để bình phục sau một căn bệnh nghiêm trọng."
+            },
+            {
+              "id": "ex_pv_005_1_2",
+              "eng": "It took her months to get over the shock of her father's death.",
+              "vie": "Cô ấy phải mất nhiều tháng để vượt qua cú sốc sau cái chết của cha mình."
+            }
+          ]
+        }
+      ],
+      "tags": ["health_wellbeing", "emotions_feelings"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get away with (something)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt əˈweɪ wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_006_1",
+          "text": "Thoát tội, không bị trừng phạt cho việc làm sai trái",
+          "notes": "Hành động làm điều gì đó sai trái nhưng không bị phát hiện hoặc không phải chịu hậu quả.",
+          "examples": [
+            {
+              "id": "ex_pv_006_1_1",
+              "eng": "He thought he could get away with cheating on the test, but he got caught.",
+              "vie": "Cậu ta nghĩ mình có thể thoát tội gian lận trong bài kiểm tra, nhưng đã bị bắt."
+            },
+            {
+              "id": "ex_pv_006_1_2",
+              "eng": "No one should get away with breaking the law.",
+              "vie": "Không ai được phép thoát tội khi vi phạm pháp luật."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "behavior"],
+      "generalNotes": "Nghĩa chính là thoát khỏi sự trừng phạt."
     }
   ]
 }
