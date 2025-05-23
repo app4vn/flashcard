@@ -54,6 +54,5 @@
       "tags": ["activity", "behavior", "progress"],
       "generalNotes": "Một cụm động từ phổ biến, có thể mang nghĩa tiêu cực (nghịch ngợm) hoặc trung tính (tiến độ)."
     }
-    // Bạn có thể thêm các phrasal verbs khác vào đây, mỗi cái là một đối tượng trong mảng "phrasalVerbs"
   ]
 }
