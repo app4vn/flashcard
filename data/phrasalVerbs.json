@@ -2208,6 +2208,543 @@
       ],
       "tags": ["actions_tasks", "removal", "rules_systems"],
       "generalNotes": "Cũng có một nghĩa cũ hoặc không trang trọng là giết ai đó."
+    },
+    {
+      "phrasalVerb": "Do over (something)",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː ˈoʊvər/",
+      "meanings": [
+        {
+          "id": "m_pv_056_1",
+          "text": "Làm lại từ đầu (thường vì lần trước làm không tốt)",
+          "notes": "Thực hiện lại một công việc hoặc nhiệm vụ từ đầu, thường do kết quả trước đó không đạt yêu cầu hoặc có lỗi.",
+          "examples": [
+            {
+              "id": "ex_pv_056_1_1",
+              "eng": "The first attempt was a failure, so we have to do it over.",
+              "vie": "Lần thử đầu tiên đã thất bại, vì vậy chúng tôi phải làm lại."
+            },
+            {
+              "id": "ex_pv_056_1_2",
+              "eng": "My teacher said my essay wasn't good enough and I had to do it over.",
+              "vie": "Giáo viên của tôi nói bài luận của tôi chưa đủ tốt và tôi phải làm lại nó."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_056_2",
+          "text": "Trang hoàng, sửa sang lại (một căn phòng, ngôi nhà)",
+          "notes": "Cải tạo hoặc trang trí lại một không gian để làm cho nó mới hơn, đẹp hơn hoặc phù hợp hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_056_2_1",
+              "eng": "They plan to do over their living room.",
+              "vie": "Họ dự định sửa sang lại phòng khách của mình."
+            },
+            {
+              "id": "ex_pv_056_2_2",
+              "eng": "We're going to do over the kitchen next year and install new cabinets.",
+              "vie": "Chúng tôi sẽ sửa sang lại nhà bếp vào năm tới và lắp đặt tủ mới."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "improvement", "home_living"],
+      "generalNotes": "Trong tiếng Anh-Anh không trang trọng, còn có nghĩa là tấn công ai đó."
+    },
+    {
+      "phrasalVerb": "Do up (something)",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_057_1",
+          "text": "Cài, thắt, buộc (quần áo, dây giày, tóc)",
+          "notes": "Buộc chặt hoặc cố định quần áo, dây giày, hoặc tạo kiểu tóc.",
+          "examples": [
+            {
+              "id": "ex_pv_057_1_1",
+              "eng": "Can you help me do up the buttons on this shirt?",
+              "vie": "Bạn có thể giúp tôi cài cúc áo sơ mi này được không?"
+            },
+            {
+              "id": "ex_pv_057_1_2",
+              "eng": "She did up her hair in a ponytail.",
+              "vie": "Cô ấy buộc tóc đuôi ngựa."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_057_2",
+          "text": "Sửa sang, trang trí lại (nhà cửa, tòa nhà)",
+          "notes": "Cải tạo hoặc trang trí một tòa nhà để làm cho nó ở trong tình trạng tốt hơn hoặc hấp dẫn hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_057_2_1",
+              "eng": "They bought an old house and are doing it up.",
+              "vie": "Họ đã mua một ngôi nhà cũ và đang sửa sang lại nó."
+            },
+            {
+              "id": "ex_pv_057_2_2",
+              "eng": "It took them months to do up the derelict cottage.",
+              "vie": "Họ mất nhiều tháng để sửa sang lại ngôi nhà tranh đổ nát."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_057_3",
+          "text": "Gói (quà)",
+          "notes": "Bọc một món quà bằng giấy và thường trang trí bằng ruy băng.",
+          "examples": [
+            {
+              "id": "ex_pv_057_3_1",
+              "eng": "She did up the present with a beautiful ribbon.",
+              "vie": "Cô ấy đã gói món quà bằng một dải ruy băng tuyệt đẹp."
+            },
+            {
+              "id": "ex_pv_057_3_2",
+              "eng": "He carefully did up the package before sending it.",
+              "vie": "Anh ấy cẩn thận gói bưu kiện trước khi gửi đi."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "clothing", "home_living", "decoration"],
+      "generalNotes": "Nghĩa 'kéo lên' (khóa quần) là một phần của 'cài, buộc'."
+    },
+    {
+      "phrasalVerb": "Do without (something/someone)",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː wɪˈðaʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_058_1",
+          "text": "Xoay sở, sống hoặc làm việc mà không có thứ gì đó hoặc ai đó (thường là cần thiết)",
+          "notes": "Đối phó với tình huống thiếu thốn một thứ gì đó quan trọng hoặc quen thuộc.",
+          "examples": [
+            {
+              "id": "ex_pv_058_1_1",
+              "eng": "We ran out of coffee, so we'll have to do without this morning.",
+              "vie": "Chúng ta hết cà phê rồi, nên sáng nay đành phải không có nó vậy."
+            },
+            {
+              "id": "ex_pv_058_1_2",
+              "eng": "There's no sugar, so you'll have to do without.",
+              "vie": "Không có đường, vì vậy bạn sẽ phải dùng tạm mà không có nó."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "survival", "necessities"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Do (someone) in",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː ɪn/",
+      "meanings": [
+        {
+          "id": "m_pv_059_1",
+          "text": "Làm ai đó vô cùng mệt mỏi, kiệt sức",
+          "notes": "Khiến ai đó cảm thấy cực kỳ mệt mỏi.",
+          "examples": [
+            {
+              "id": "ex_pv_059_1_1",
+              "eng": "Working two jobs is really doing him in.",
+              "vie": "Làm hai công việc cùng lúc thực sự đang làm anh ấy kiệt sức."
+            },
+            {
+              "id": "ex_pv_059_1_2",
+              "eng": "That long hike completely did me in; I need to rest.",
+              "vie": "Chuyến đi bộ đường dài đó hoàn toàn làm tôi kiệt sức; tôi cần nghỉ ngơi."
+            }
+          ]
+        }
+      ],
+      "tags": ["health_wellbeing", "effort", "state"],
+      "generalNotes": "Trong tiếng Anh-Anh không trang trọng, còn có nghĩa là giết ai đó hoặc làm hỏng nặng thứ gì đó."
+    },
+    {
+      "phrasalVerb": "Do with (something)",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_060_1",
+          "text": "Cần hoặc muốn có cái gì đó (thường dùng trong cấu trúc 'could do with')",
+          "notes": "Diễn tả nhu cầu hoặc mong muốn về một thứ gì đó có thể cải thiện tình hình hiện tại.",
+          "examples": [
+            {
+              "id": "ex_pv_060_1_1",
+              "eng": "After that long walk, I could really do with a cold drink.",
+              "vie": "Sau chuyến đi bộ dài đó, tôi thực sự cần một ly nước lạnh."
+            },
+            {
+              "id": "ex_pv_060_1_2",
+              "eng": "This room could do with a new coat of paint.",
+              "vie": "Căn phòng này cần được sơn một lớp sơn mới."
+            }
+          ]
+        }
+      ],
+      "tags": ["desires_needs", "refreshment", "improvement"],
+      "generalNotes": "Phổ biến trong tiếng Anh-Anh."
+    },
+    {
+      "phrasalVerb": "Do (someone) out of (something)",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː aʊt əv/",
+      "meanings": [
+        {
+          "id": "m_pv_061_1",
+          "text": "Lừa gạt ai đó để họ mất thứ gì (thường là tiền bạc hoặc quyền lợi)",
+          "notes": "Ngăn cản ai đó có được thứ gì đó một cách không công bằng hoặc bằng cách lừa dối.",
+          "examples": [
+            {
+              "id": "ex_pv_061_1_1",
+              "eng": "The dishonest salesman did her out of a lot of money.",
+              "vie": "Người bán hàng không trung thực đó đã lừa cô ấy mất rất nhiều tiền."
+            },
+            {
+              "id": "ex_pv_061_1_2",
+              "eng": "He felt he had been done out of his rightful inheritance.",
+              "vie": "Anh ấy cảm thấy mình đã bị lừa mất quyền thừa kế hợp pháp."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "money_finance", "behavior", "deception"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Do (something) out",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_062_1",
+          "text": "Dọn dẹp, lau chùi một cách kỹ lưỡng (một căn phòng, tủ chén, v.v.)",
+          "notes": "Làm sạch và sắp xếp gọn gàng một không gian.",
+          "examples": [
+            {
+              "id": "ex_pv_062_1_1",
+              "eng": "She spends Saturday mornings doing out the kitchen.",
+              "vie": "Cô ấy dành các buổi sáng thứ Bảy để dọn dẹp kỹ nhà bếp."
+            },
+            {
+              "id": "ex_pv_062_1_2",
+              "eng": "It's time to do out the garage; it's full of junk.",
+              "vie": "Đã đến lúc dọn dẹp gara rồi; nó đầy đồ cũ."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "home_living", "cleaning"],
+      "generalNotes": "Phổ biến hơn trong tiếng Anh-Anh."
+    },
+    {
+      "phrasalVerb": "Make do with (something)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk duː wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_063_1",
+          "text": "Xoay sở, dùng tạm (thứ gì đó kém hơn vì không có cái tốt hơn)",
+          "notes": "Chấp nhận sử dụng một thứ gì đó không hoàn toàn lý tưởng vì không có lựa chọn nào khác tốt hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_063_1_1",
+              "eng": "We didn't have all the ingredients, so we had to make do with what we had.",
+              "vie": "Chúng tôi không có đủ nguyên liệu, nên đành phải dùng tạm những gì sẵn có."
+            },
+            {
+              "id": "ex_pv_063_1_2",
+              "eng": "There's no coffee, so we'll have to make do with tea.",
+              "vie": "Không có cà phê, nên chúng ta sẽ phải dùng tạm trà vậy."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "resourcefulness"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make for (a place)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk fɔːr/",
+      "meanings": [
+        {
+          "id": "m_pv_064_1",
+          "text": "Đi về hướng, tiến về (một nơi nào đó)",
+          "notes": "Di chuyển theo một hướng cụ thể, thường là với một điểm đến nhất định.",
+          "examples": [
+            {
+              "id": "ex_pv_064_1_1",
+              "eng": "After the storm, the ship made for the nearest port.",
+              "vie": "Sau cơn bão, con tàu tiến về cảng gần nhất."
+            },
+            {
+              "id": "ex_pv_064_1_2",
+              "eng": "When it started to rain, we made for shelter.",
+              "vie": "Khi trời bắt đầu mưa, chúng tôi tiến về chỗ trú."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_movement", "travel_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make for (a result/situation)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk fɔːr/",
+      "meanings": [
+        {
+          "id": "m_pv_065_1",
+          "text": "Góp phần tạo nên, dẫn đến (một kết quả hoặc tình huống)",
+          "notes": "Là một yếu tố gây ra hoặc đóng góp vào một kết quả hay tình huống cụ thể.",
+          "examples": [
+            {
+              "id": "ex_pv_065_1_1",
+              "eng": "Constant interruptions don't make for a productive work environment.",
+              "vie": "Sự gián đoạn liên tục không tạo nên một môi trường làm việc hiệu quả."
+            },
+            {
+              "id": "ex_pv_065_1_2",
+              "eng": "Good communication makes for a strong relationship.",
+              "vie": "Giao tiếp tốt góp phần tạo nên một mối quan hệ bền chặt."
+            }
+          ]
+        }
+      ],
+      "tags": ["causation", "situations"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make fun of (someone/something)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk fʌn əv/",
+      "meanings": [
+        {
+          "id": "m_pv_066_1",
+          "text": "Chế nhạo, trêu chọc, đùa cợt (ai đó/cái gì đó)",
+          "notes": "Cười nhạo hoặc nói những điều không hay về ai đó/cái gì đó một cách thiếu tôn trọng.",
+          "examples": [
+            {
+              "id": "ex_pv_066_1_1",
+              "eng": "It's not kind to make fun of other people's mistakes.",
+              "vie": "Chế nhạo lỗi lầm của người khác là không tốt."
+            },
+            {
+              "id": "ex_pv_066_1_2",
+              "eng": "The children were making fun of the new boy's accent.",
+              "vie": "Lũ trẻ đang chế nhạo giọng nói của cậu bé mới đến."
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social", "behavior", "communication"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make (something) into (something else)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ˈɪntuː/",
+      "meanings": [
+        {
+          "id": "m_pv_067_1",
+          "text": "Biến đổi, chuyển đổi (cái gì thành một cái khác)",
+          "notes": "Thay đổi một thứ gì đó để nó trở thành một thứ khác có hình dạng hoặc mục đích sử dụng mới.",
+          "examples": [
+            {
+              "id": "ex_pv_067_1_1",
+              "eng": "They made the old factory into a modern art gallery.",
+              "vie": "Họ đã biến nhà máy cũ thành một phòng trưng bày nghệ thuật hiện đại."
+            },
+            {
+              "id": "ex_pv_067_1_2",
+              "eng": "Can you make these old curtains into cushion covers?",
+              "vie": "Bạn có thể biến những chiếc rèm cũ này thành vỏ gối được không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "transformation", "objects_things"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make of (someone/something)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk əv/",
+      "meanings": [
+        {
+          "id": "m_pv_068_1",
+          "text": "Hiểu, nghĩ gì về (ai đó/cái gì đó, thường dùng trong câu hỏi)",
+          "notes": "Có một ý kiến hoặc sự hiểu biết về ai đó hoặc điều gì đó.",
+          "examples": [
+            {
+              "id": "ex_pv_068_1_1",
+              "eng": "What do you make of the new manager?",
+              "vie": "Bạn nghĩ gì về người quản lý mới?"
+            },
+            {
+              "id": "ex_pv_068_1_2",
+              "eng": "I don't know what to make of his strange behavior.",
+              "vie": "Tôi không biết phải nghĩ sao về hành vi kỳ lạ của anh ấy."
+            }
+          ]
+        }
+      ],
+      "tags": ["understanding", "opinion", "relationships_social"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make off with (something)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk ɔːf wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_069_1",
+          "text": "Ăn trộm thứ gì đó và tẩu thoát nhanh chóng",
+          "notes": "Lấy trộm một thứ gì đó và rời đi một cách vội vàng để tránh bị bắt.",
+          "examples": [
+            {
+              "id": "ex_pv_069_1_1",
+              "eng": "The thieves made off with jewelry worth thousands of dollars.",
+              "vie": "Những tên trộm đã cuỗm đi số trang sức trị giá hàng ngàn đô la và tẩu thoát."
+            },
+            {
+              "id": "ex_pv_069_1_2",
+              "eng": "Someone made off with my bicycle while I was in the shop.",
+              "vie": "Ai đó đã lấy trộm chiếc xe đạp của tôi trong khi tôi ở trong cửa hàng."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "crime", "objects_things"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make out (see/hear)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_070_1",
+          "text": "Nhìn thấy, nghe thấy, đọc được (một cách khó khăn)",
+          "notes": "Có thể nhìn, nghe hoặc hiểu điều gì đó nhưng với sự khó khăn.",
+          "examples": [
+            {
+              "id": "ex_pv_070_1_1",
+              "eng": "It was so foggy, I could barely make out the road ahead.",
+              "vie": "Trời sương mù đến nỗi tôi gần như không thể nhìn rõ con đường phía trước."
+            },
+            {
+              "id": "ex_pv_070_1_2",
+              "eng": "Can you make out what that sign says from here?",
+              "vie": "Từ đây bạn có đọc được biển báo đó viết gì không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["perception", "senses"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Make out (understand)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_071_1",
+          "text": "Hiểu được (bản chất, ý nghĩa của điều gì đó)",
+          "notes": "Nắm bắt được ý nghĩa hoặc bản chất của một điều gì đó, thường là phức tạp hoặc không rõ ràng.",
+          "examples": [
+            {
+              "id": "ex_pv_071_1_1",
+              "eng": "I couldn't make out what she was trying to say.",
+              "vie": "Tôi không thể hiểu được cô ấy đang cố nói điều gì."
+            },
+            {
+              "id": "ex_pv_071_1_2",
+              "eng": "It's hard to make out his reasons for leaving so suddenly.",
+              "vie": "Thật khó để hiểu được lý do anh ấy rời đi đột ngột như vậy."
+            }
+          ]
+        }
+      ],
+      "tags": ["understanding", "communication"],
+      "generalNotes": "Tương tự 'figure out' hoặc 'understand'."
+    },
+    {
+      "phrasalVerb": "Make out (kiss)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_072_1",
+          "text": "Hôn nhau (một cách say đắm, thường là thân mật)",
+          "notes": "Hôn ai đó một cách nồng nhiệt và kéo dài.",
+          "examples": [
+            {
+              "id": "ex_pv_072_1_1",
+              "eng": "They were making out in the back of the cinema.",
+              "vie": "Họ đang hôn nhau ở phía sau rạp chiếu phim."
+            },
+            {
+              "id": "ex_pv_072_1_2",
+              "eng": "I saw them making out at the party.",
+              "vie": "Tôi thấy họ hôn nhau ở bữa tiệc."
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social", "actions_intimate"],
+      "generalNotes": "Cách dùng không trang trọng."
+    },
+    {
+      "phrasalVerb": "Make out (a check/form)",
+      "baseVerb": "Make",
+      "category": "phrasal_verbs",
+      "pronunciation": "/meɪk aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_073_1",
+          "text": "Viết, điền thông tin vào (séc, hóa đơn, đơn từ)",
+          "notes": "Hoàn thành một văn bản chính thức bằng cách viết các thông tin cần thiết.",
+          "examples": [
+            {
+              "id": "ex_pv_073_1_1",
+              "eng": "Please make the check out to 'Global Corp'.",
+              "vie": "Làm ơn hãy viết séc cho 'Global Corp'."
+            },
+            {
+              "id": "ex_pv_073_1_2",
+              "eng": "She made out an application form for the job.",
+              "vie": "Cô ấy đã điền vào đơn xin việc cho công việc đó."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "money_finance", "documents"],
+      "generalNotes": ""
     }
   ]
 }
