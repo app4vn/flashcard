@@ -391,6 +391,363 @@
       ],
       "tags": ["travel_movement", "information", "problems_solutions"],
       "generalNotes": "Có nhiều nghĩa khác nhau."
+    },
+	{
+  "phrasalVerbs": [
+    {
+      "phrasalVerb": "Get away (from)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt əˈweɪ/",
+      "meanings": [
+        {
+          "id": "m_pv_012_1",
+          "text": "Trốn thoát",
+          "notes": "Thoát khỏi một nơi hoặc một tình huống nguy hiểm, khó chịu, hoặc sự kiểm soát.",
+          "examples": [
+            {
+              "id": "ex_pv_012_1_1",
+              "eng": "The suspect got away from the police.",
+              "vie": "Nghi phạm đã trốn thoát khỏi cảnh sát."
+            },
+            {
+              "id": "ex_pv_012_1_2",
+              "eng": "He was lucky to get away from the burning building unharmed.",
+              "vie": "Anh ấy đã may mắn trốn thoát khỏi tòa nhà đang cháy mà không bị thương."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_012_2",
+          "text": "Đi nghỉ ngắn ngày",
+          "notes": "Rời khỏi nhà hoặc nơi làm việc thường lệ để đi nghỉ ngơi trong một thời gian ngắn.",
+          "examples": [
+            {
+              "id": "ex_pv_012_2_1",
+              "eng": "We plan to get away for the weekend.",
+              "vie": "Chúng tôi dự định đi chơi xa vào cuối tuần."
+            },
+            {
+              "id": "ex_pv_012_2_2",
+              "eng": "She needed to get away from the stress of work for a few days.",
+              "vie": "Cô ấy cần phải đi đâu đó vài ngày để thoát khỏi căng thẳng công việc."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_movement", "travel_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get behind (with something)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt bɪˈhaɪnd/",
+      "meanings": [
+        {
+          "id": "m_pv_013_1",
+          "text": "Bị chậm trễ, tụt lại phía sau (trong công việc, thanh toán)",
+          "notes": "Không hoàn thành công việc hoặc thanh toán đúng hạn, dẫn đến việc bị dồn lại hoặc chậm tiến độ.",
+          "examples": [
+            {
+              "id": "ex_pv_013_1_1",
+              "eng": "If you don't start now, you'll get behind with your project.",
+              "vie": "Nếu bạn không bắt đầu ngay bây giờ, bạn sẽ bị chậm tiến độ dự án."
+            },
+            {
+              "id": "ex_pv_013_1_2",
+              "eng": "He got behind with his rent payments after losing his job.",
+              "vie": "Anh ấy đã bị chậm thanh toán tiền thuê nhà sau khi mất việc."
+            }
+          ]
+        }
+      ],
+      "tags": ["work_business_tasks", "money_finance"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get by",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt baɪ/",
+      "meanings": [
+        {
+          "id": "m_pv_014_1",
+          "text": "Xoay sở để sống/làm việc với những gì có (thường là ít)",
+          "notes": "Có đủ tiền hoặc nguồn lực tối thiểu để đáp ứng nhu cầu cơ bản, dù không dư dả.",
+          "examples": [
+            {
+              "id": "ex_pv_014_1_1",
+              "eng": "They have very little money, but they always manage to get by.",
+              "vie": "Họ có rất ít tiền, nhưng họ luôn xoay sở để sống qua ngày."
+            },
+            {
+              "id": "ex_pv_014_1_2",
+              "eng": "With his current salary, he can just about get by.",
+              "vie": "Với mức lương hiện tại, anh ấy chỉ vừa đủ sống."
+            }
+          ]
+        }
+      ],
+      "tags": ["money_finance", "problems_solutions"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get on (with something)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt ɒn/",
+      "meanings": [
+        {
+          "id": "m_pv_015_1",
+          "text": "Tiếp tục làm gì đó",
+          "notes": "Tiếp tục một công việc hoặc hoạt động, thường là sau khi bị gián đoạn hoặc sau khi đã dành thời gian cho việc khác.",
+          "examples": [
+            {
+              "id": "ex_pv_015_1_1",
+              "eng": "Please stop interrupting and let me get on with my story.",
+              "vie": "Làm ơn đừng ngắt lời và để tôi tiếp tục câu chuyện của mình."
+            },
+            {
+              "id": "ex_pv_015_1_2",
+              "eng": "I need to get on with my homework now.",
+              "vie": "Bây giờ tôi cần phải tiếp tục làm bài tập về nhà."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_015_2",
+          "text": "Lên (xe buýt, tàu, máy bay, ngựa)",
+          "notes": "Di chuyển vào bên trong hoặc lên trên một phương tiện giao thông hoặc một con vật để di chuyển.",
+          "examples": [
+            {
+              "id": "ex_pv_015_2_1",
+              "eng": "We need to get on the train now!",
+              "vie": "Chúng ta cần lên tàu ngay bây giờ!"
+            },
+            {
+              "id": "ex_pv_015_2_2",
+              "eng": "Be careful when you get on the horse.",
+              "vie": "Hãy cẩn thận khi bạn lên ngựa."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "travel_movement"],
+      "generalNotes": "Phân biệt với 'get on with someone' (hòa hợp)."
+    },
+    {
+      "phrasalVerb": "Get over (a difficulty)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt ˈoʊvər/",
+      "meanings": [
+        {
+          "id": "m_pv_016_1",
+          "text": "Vượt qua, giải quyết xong một khó khăn, trở ngại",
+          "notes": "Thành công trong việc đối phó và giải quyết một vấn đề, tình huống khó khăn hoặc một cảm xúc tiêu cực.",
+          "examples": [
+            {
+              "id": "ex_pv_016_1_1",
+              "eng": "It took them a while to get over the initial technical problems.",
+              "vie": "Họ phải mất một thời gian để vượt qua những vấn đề kỹ thuật ban đầu."
+            },
+            {
+              "id": "ex_pv_016_1_2",
+              "eng": "She's trying to get over her fear of flying.",
+              "vie": "Cô ấy đang cố gắng vượt qua nỗi sợ đi máy bay."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "challenge"],
+      "generalNotes": "Nhấn mạnh việc giải quyết khó khăn hơn là cảm xúc/bệnh tật (mặc dù cũng có thể dùng cho cảm xúc như trong 'get over someone/something')."
+    },
+    {
+      "phrasalVerb": "Get (people/things) together",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt təˈɡɛðər/",
+      "meanings": [
+        {
+          "id": "m_pv_017_1",
+          "text": "Tập hợp, tụ họp (người)",
+          "notes": "Làm cho một nhóm người gặp nhau hoặc tập trung lại một chỗ vì một mục đích chung.",
+          "examples": [
+            {
+              "id": "ex_pv_017_1_1",
+              "eng": "She's trying to get all her old school friends together for a reunion.",
+              "vie": "Cô ấy đang cố gắng tập hợp tất cả bạn học cũ lại cho một buổi họp mặt."
+            },
+            {
+              "id": "ex_pv_017_1_2",
+              "eng": "The coach got the team together for a pep talk before the game.",
+              "vie": "Huấn luyện viên đã tập hợp đội lại để nói chuyện động viên trước trận đấu."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_017_2",
+          "text": "Gom góp, thu thập (đồ vật)",
+          "notes": "Thu thập hoặc tập hợp các đồ vật lại với nhau từ nhiều nơi hoặc nhiều nguồn.",
+          "examples": [
+            {
+              "id": "ex_pv_017_2_1",
+              "eng": "I need to get all my documents together before the interview.",
+              "vie": "Tôi cần gom góp tất cả tài liệu của mình lại trước buổi phỏng vấn."
+            },
+            {
+              "id": "ex_pv_017_2_2",
+              "eng": "Can you help me get these books together to return to the library?",
+              "vie": "Bạn có thể giúp tôi gom những cuốn sách này lại để trả thư viện không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social", "actions_tasks"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Get together (with someone)",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt təˈɡɛðər/",
+      "meanings": [
+        {
+          "id": "m_pv_018_1",
+          "text": "Tụ họp, gặp gỡ (mang tính xã giao)",
+          "notes": "Gặp gỡ bạn bè hoặc người thân để dành thời gian cùng nhau một cách không trang trọng, thường là để giải trí.",
+          "examples": [
+            {
+              "id": "ex_pv_018_1_1",
+              "eng": "We usually get together once a month for dinner.",
+              "vie": "Chúng tôi thường tụ họp ăn tối mỗi tháng một lần."
+            },
+            {
+              "id": "ex_pv_018_1_2",
+              "eng": "Let's get together for coffee next week.",
+              "vie": "Tuần tới chúng ta hẹn gặp cà phê nhé."
+            }
+          ]
+        }
+      ],
+      "tags": ["relationships_social", "social_activities"],
+      "generalNotes": "Thường không có tân ngữ trực tiếp theo sau 'get together', nhưng có thể dùng 'with someone'."
+    },
+    {
+      "phrasalVerb": "Get up",
+      "baseVerb": "Get",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡɛt ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_019_1",
+          "text": "Thức dậy, ra khỏi giường",
+          "notes": "Ngừng ngủ và rời khỏi giường, thường là vào buổi sáng.",
+          "examples": [
+            {
+              "id": "ex_pv_019_1_1",
+              "eng": "He gets up early every day to go jogging.",
+              "vie": "Anh ấy thức dậy sớm mỗi ngày để đi chạy bộ."
+            },
+            {
+              "id": "ex_pv_019_1_2",
+              "eng": "What time do you usually get up on weekends?",
+              "vie": "Bạn thường thức dậy lúc mấy giờ vào cuối tuần?"
+            }
+          ]
+        },
+        {
+          "id": "m_pv_019_2",
+          "text": "Đứng dậy",
+          "notes": "Chuyển từ tư thế ngồi hoặc nằm sang tư thế đứng.",
+          "examples": [
+            {
+              "id": "ex_pv_019_2_1",
+              "eng": "Please get up when the teacher enters the room.",
+              "vie": "Vui lòng đứng dậy khi giáo viên vào lớp."
+            },
+            {
+              "id": "ex_pv_019_2_2",
+              "eng": "He got up from his chair to greet the guests.",
+              "vie": "Anh ấy đứng dậy khỏi ghế để chào khách."
+            }
+          ]
+        }
+      ],
+      "tags": ["daily_routine", "actions_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put off",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ɔːf/",
+      "meanings": [
+        {
+          "id": "m_pv_020_1",
+          "text": "Hoãn lại, trì hoãn (một sự kiện, công việc)",
+          "notes": "Quyết định làm điều gì đó vào một thời điểm muộn hơn dự định ban đầu.",
+          "examples": [
+            {
+              "id": "ex_pv_020_1_1",
+              "eng": "They had to put off their wedding until next year due to the circumstances.",
+              "vie": "Họ đã phải hoãn đám cưới của mình sang năm sau do hoàn cảnh."
+            },
+            {
+              "id": "ex_pv_020_1_2",
+              "eng": "Never put off until tomorrow what you can do today.",
+              "vie": "Đừng bao giờ trì hoãn đến ngày mai những gì bạn có thể làm hôm nay."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_020_2",
+          "text": "Làm ai đó mất hứng thú hoặc không thích điều gì đó (put someone off something)",
+          "notes": "Gây ra cảm giác không thích, không muốn làm hoặc không muốn tiếp xúc với ai đó/điều gì đó.",
+          "examples": [
+            {
+              "id": "ex_pv_020_2_1",
+              "eng": "The bad smell of the food really put me off.",
+              "vie": "Mùi khó chịu của thức ăn thực sự làm tôi mất hứng."
+            },
+            {
+              "id": "ex_pv_020_2_2",
+              "eng": "His rude attitude put her off him completely.",
+              "vie": "Thái độ thô lỗ của anh ta khiến cô ấy hoàn toàn không còn thích anh ta nữa."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "planning", "delay", "emotions_feelings"],
+      "generalNotes": "Nghĩa 'làm mất hứng thú' thường có cấu trúc 'put [someone] off [something/someone]'."
+    },
+    {
+      "phrasalVerb": "Put up with",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ʌp wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_021_1",
+          "text": "Chịu đựng, chấp nhận (điều gì đó khó chịu mà không phàn nàn)",
+          "notes": "Kiên nhẫn chấp nhận một tình huống, hành vi hoặc người nào đó gây khó chịu mà không phản đối hoặc phàn nàn.",
+          "examples": [
+            {
+              "id": "ex_pv_021_1_1",
+              "eng": "I don't know how she puts up with his constant complaining.",
+              "vie": "Tôi không biết làm sao cô ấy có thể chịu đựng được sự phàn nàn liên tục của anh ta."
+            },
+            {
+              "id": "ex_pv_021_1_2",
+              "eng": "We had to put up with a lot of noise from the neighbors last night.",
+              "vie": "Chúng tôi đã phải chịu đựng rất nhiều tiếng ồn từ hàng xóm đêm qua."
+            }
+          ]
+        }
+      ],
+      "tags": ["emotions_feelings", "relationships_social", "problems_solutions"],
+      "generalNotes": ""
     }
   ]
 }
