@@ -1423,6 +1423,791 @@
       ],
       "tags": ["communication", "decision", "agreement"],
       "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go away",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ əˈweɪ/",
+      "meanings": [
+        {
+          "id": "m_pv_037_1",
+          "text": "Rời đi, đi khỏi một nơi nào đó",
+          "notes": "Di chuyển khỏi một vị trí hoặc một người.",
+          "examples": [
+            {
+              "id": "ex_pv_037_1_1",
+              "eng": "Please go away and leave me alone!",
+              "vie": "Làm ơn đi đi và để tôi yên!"
+            },
+            {
+              "id": "ex_pv_037_1_2",
+              "eng": "The dog wouldn't go away until I gave it some food.",
+              "vie": "Con chó không chịu đi cho đến khi tôi cho nó ít thức ăn."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_037_2",
+          "text": "Đi nghỉ",
+          "notes": "Rời khỏi nhà để đi du lịch hoặc nghỉ ngơi trong một khoảng thời gian.",
+          "examples": [
+            {
+              "id": "ex_pv_037_2_1",
+              "eng": "They've gone away for the weekend.",
+              "vie": "Họ đã đi nghỉ cuối tuần rồi."
+            },
+            {
+              "id": "ex_pv_037_2_2",
+              "eng": "We usually go away somewhere warm in the winter.",
+              "vie": "Chúng tôi thường đi nghỉ ở một nơi nào đó ấm áp vào mùa đông."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_movement", "travel_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go back (to a place/time)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ bæk/",
+      "meanings": [
+        {
+          "id": "m_pv_038_1",
+          "text": "Trở lại, quay lại (một địa điểm hoặc thời điểm trước đó)",
+          "notes": "Di chuyển về lại một nơi đã từng ở hoặc quay về một tình huống/thời điểm trong quá khứ.",
+          "examples": [
+            {
+              "id": "ex_pv_038_1_1",
+              "eng": "I'd love to go back to Paris someday.",
+              "vie": "Tôi rất muốn một ngày nào đó quay trở lại Paris."
+            },
+            {
+              "id": "ex_pv_038_1_2",
+              "eng": "It's time to go back to work after the lunch break.",
+              "vie": "Đã đến lúc quay lại làm việc sau giờ nghỉ trưa."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_movement", "time_schedule"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go by",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ baɪ/",
+      "meanings": [
+        {
+          "id": "m_pv_039_1",
+          "text": "Trôi qua (thời gian)",
+          "notes": "Chỉ sự trôi chảy, kết thúc của một khoảng thời gian.",
+          "examples": [
+            {
+              "id": "ex_pv_039_1_1",
+              "eng": "Time goes by so quickly.",
+              "vie": "Thời gian trôi qua nhanh quá."
+            },
+            {
+              "id": "ex_pv_039_1_2",
+              "eng": "As the years went by, they saw each other less and less.",
+              "vie": "Năm tháng trôi qua, họ ngày càng ít gặp nhau hơn."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_039_2",
+          "text": "Đi qua (một địa điểm)",
+          "notes": "Di chuyển ngang qua một nơi nào đó mà không dừng lại.",
+          "examples": [
+            {
+              "id": "ex_pv_039_2_1",
+              "eng": "We went by your house earlier.",
+              "vie": "Chúng tôi đã đi ngang qua nhà bạn lúc nãy."
+            },
+            {
+              "id": "ex_pv_039_2_2",
+              "eng": "A bus goes by here every ten minutes.",
+              "vie": "Cứ mười phút lại có một chuyến xe buýt đi qua đây."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_039_3",
+          "text": "Dựa theo, được biết đến bởi (tên gọi, quy tắc, bằng chứng)",
+          "notes": "Sử dụng một cái tên cụ thể; tuân theo một quy tắc; đánh giá dựa trên bằng chứng.",
+          "examples": [
+            {
+              "id": "ex_pv_039_3_1",
+              "eng": "He goes by the nickname 'Shorty'.",
+              "vie": "Anh ấy được gọi bằng biệt danh 'Shorty'."
+            },
+            {
+              "id": "ex_pv_039_3_2",
+              "eng": "If we go by the evidence, he is clearly guilty.",
+              "vie": "Nếu chúng ta dựa theo bằng chứng, anh ta rõ ràng là có tội."
+            }
+          ]
+        }
+      ],
+      "tags": ["time_schedule", "actions_movement", "information"],
+      "generalNotes": "Có nhiều nghĩa."
+    },
+    {
+      "phrasalVerb": "Go down",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ daʊn/",
+      "meanings": [
+        {
+          "id": "m_pv_040_1",
+          "text": "Giảm xuống (giá cả, nhiệt độ, mức độ)",
+          "notes": "Trở nên thấp hơn về số lượng, giá trị, hoặc cường độ.",
+          "examples": [
+            {
+              "id": "ex_pv_040_1_1",
+              "eng": "The price of oil has gone down recently.",
+              "vie": "Giá dầu đã giảm xuống gần đây."
+            },
+            {
+              "id": "ex_pv_040_1_2",
+              "eng": "The temperature went down to freezing last night.",
+              "vie": "Nhiệt độ đã giảm xuống mức đóng băng vào đêm qua."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_040_2",
+          "text": "Đi xuống (cầu thang, dốc)",
+          "notes": "Di chuyển từ một vị trí cao hơn xuống một vị trí thấp hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_040_2_1",
+              "eng": "He went down the stairs.",
+              "vie": "Anh ấy đi xuống cầu thang."
+            },
+            {
+              "id": "ex_pv_040_2_2",
+              "eng": "Be careful when you go down that steep hill.",
+              "vie": "Hãy cẩn thận khi bạn đi xuống ngọn đồi dốc đó."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_040_3",
+          "text": "Được ghi nhớ, đi vào (lịch sử)",
+          "notes": "Trở thành một sự kiện hoặc nhân vật được ghi lại và nhớ đến trong lịch sử.",
+          "examples": [
+            {
+              "id": "ex_pv_040_3_1",
+              "eng": "This day will go down in history.",
+              "vie": "Ngày này sẽ đi vào lịch sử."
+            },
+            {
+              "id": "ex_pv_040_3_2",
+              "eng": "He will go down as one of the greatest players of all time.",
+              "vie": "Anh ấy sẽ được ghi danh là một trong những cầu thủ vĩ đại nhất mọi thời đại."
+            }
+          ]
+        }
+      ],
+      "tags": ["money_finance", "actions_movement", "information", "history"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go in (to a place)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ɪn/",
+      "meanings": [
+        {
+          "id": "m_pv_041_1",
+          "text": "Đi vào, vào trong (một nơi nào đó)",
+          "notes": "Di chuyển từ bên ngoài vào bên trong một không gian kín hoặc một tòa nhà.",
+          "examples": [
+            {
+              "id": "ex_pv_041_1_1",
+              "eng": "Let's go in; it's starting to rain.",
+              "vie": "Chúng ta vào trong đi; trời bắt đầu mưa rồi."
+            },
+            {
+              "id": "ex_pv_041_1_2",
+              "eng": "She opened the door and went in.",
+              "vie": "Cô ấy mở cửa và đi vào."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go over (something)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ˈoʊvər/",
+      "meanings": [
+        {
+          "id": "m_pv_042_1",
+          "text": "Xem xét kỹ lưỡng, kiểm tra lại, ôn lại",
+          "notes": "Kiểm tra hoặc xem xét điều gì đó một cách cẩn thận, thường là để đảm bảo tính chính xác hoặc để ghi nhớ.",
+          "examples": [
+            {
+              "id": "ex_pv_042_1_1",
+              "eng": "We need to go over the details of the contract carefully.",
+              "vie": "Chúng ta cần xem xét kỹ lưỡng các chi tiết của hợp đồng."
+            },
+            {
+              "id": "ex_pv_042_1_2",
+              "eng": "Could you go over my essay for any mistakes?",
+              "vie": "Bạn có thể xem lại bài luận của tôi để tìm lỗi không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "learning_information", "review"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go about (doing something / a place)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ əˈbaʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_043_1",
+          "text": "Bắt đầu làm gì đó, xử lý một công việc",
+          "notes": "Bắt tay vào thực hiện một nhiệm vụ hoặc giải quyết một vấn đề theo một cách cụ thể.",
+          "examples": [
+            {
+              "id": "ex_pv_043_1_1",
+              "eng": "How should we go about solving this problem?",
+              "vie": "Chúng ta nên bắt đầu giải quyết vấn đề này như thế nào?"
+            },
+            {
+              "id": "ex_pv_043_1_2",
+              "eng": "She went about her work with quiet determination.",
+              "vie": "Cô ấy thực hiện công việc của mình với sự quyết tâm thầm lặng."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_043_2",
+          "text": "Đi khắp nơi, di chuyển (trong một khu vực)",
+          "notes": "Di chuyển từ nơi này sang nơi khác trong một khu vực nhất định.",
+          "examples": [
+            {
+              "id": "ex_pv_043_2_1",
+              "eng": "He was cheerfully going about his tasks.",
+              "vie": "Anh ấy vui vẻ thực hiện các nhiệm vụ của mình. (Context này có thể hiểu là đi lại để làm nhiệm vụ)"
+            },
+            {
+              "id": "ex_pv_043_2_2",
+              "eng": "She loves going about the town and exploring new shops.",
+              "vie": "Cô ấy thích đi dạo quanh thị trấn và khám phá các cửa hàng mới."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "problems_solutions", "actions_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go off (alarm/bomb)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ɔːf/",
+      "meanings": [
+        {
+          "id": "m_pv_044_1",
+          "text": "Reo (chuông báo), nổ (bom, súng)",
+          "notes": "Phát ra tiếng động lớn đột ngột như chuông báo thức, hoặc phát nổ.",
+          "examples": [
+            {
+              "id": "ex_pv_044_1_1",
+              "eng": "My alarm clock didn't go off this morning.",
+              "vie": "Đồng hồ báo thức của tôi không reo sáng nay."
+            },
+            {
+              "id": "ex_pv_044_1_2",
+              "eng": "The bomb went off in a crowded street.",
+              "vie": "Quả bom đã nổ trên một con phố đông đúc."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_044_2",
+          "text": "Rời đi, khởi hành",
+          "notes": "Di chuyển khỏi một nơi nào đó, bắt đầu một chuyến đi. Nghĩa này ít phổ biến hơn cho 'go off' so với nghĩa reo/nổ.",
+          "examples": [
+            {
+              "id": "ex_pv_044_2_1",
+              "eng": "He went off to work early this morning.",
+              "vie": "Anh ấy đã đi làm sớm sáng nay."
+            },
+            {
+              "id": "ex_pv_044_2_2",
+              "eng": "She suddenly went off without saying goodbye.",
+              "vie": "Cô ấy đột nhiên bỏ đi mà không nói lời tạm biệt."
+            }
+          ]
+        }
+      ],
+      "tags": ["events", "safety", "actions_movement"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go off (food/drink)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ɔːf/",
+      "meanings": [
+        {
+          "id": "m_pv_045_1",
+          "text": "Bị hỏng, ôi thiu (thức ăn, đồ uống)",
+          "notes": "Trở nên không còn tươi ngon hoặc an toàn để ăn/uống.",
+          "examples": [
+            {
+              "id": "ex_pv_045_1_1",
+              "eng": "The milk has gone off; you shouldn't drink it.",
+              "vie": "Sữa bị hỏng rồi; bạn không nên uống nó."
+            },
+            {
+              "id": "ex_pv_045_1_2",
+              "eng": "This meat smells a bit funny; I think it's gone off.",
+              "vie": "Thịt này có mùi hơi lạ; tôi nghĩ nó bị ôi rồi."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_045_2",
+          "text": "Không còn thích nữa (ai đó/cái gì đó)",
+          "notes": "Mất đi sự yêu thích hoặc hứng thú đối với ai đó hoặc điều gì đó.",
+          "examples": [
+            {
+              "id": "ex_pv_045_2_1",
+              "eng": "I've gone off coffee recently.",
+              "vie": "Gần đây tôi không còn thích cà phê nữa."
+            },
+            {
+              "id": "ex_pv_045_2_2",
+              "eng": "She seems to have gone off her boyfriend.",
+              "vie": "Cô ấy dường như đã không còn thích bạn trai của mình nữa."
+            }
+          ]
+        }
+      ],
+      "tags": ["food_drink", "preferences", "problems_solutions"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go on (doing something)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ɒn/",
+      "meanings": [
+        {
+          "id": "m_pv_046_1",
+          "text": "Tiếp tục (làm một việc gì đó)",
+          "notes": "Tiếp tục một hành động hoặc tình trạng mà không dừng lại.",
+          "examples": [
+            {
+              "id": "ex_pv_046_1_1",
+              "eng": "Please go on with your story; it's very interesting.",
+              "vie": "Làm ơn tiếp tục câu chuyện của bạn đi; nó rất thú vị."
+            },
+            {
+              "id": "ex_pv_046_1_2",
+              "eng": "He went on talking even though nobody was listening.",
+              "vie": "Anh ấy vẫn tiếp tục nói mặc dù không có ai lắng nghe."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "continuation"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go on (event)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ɒn/",
+      "meanings": [
+        {
+          "id": "m_pv_047_1",
+          "text": "Xảy ra, diễn ra (một sự kiện, tình huống)",
+          "notes": "Được dùng để hỏi hoặc nói về điều gì đó đang xảy ra.",
+          "examples": [
+            {
+              "id": "ex_pv_047_1_1",
+              "eng": "What's going on here? Why is everyone shouting?",
+              "vie": "Chuyện gì đang xảy ra ở đây vậy? Tại sao mọi người lại la hét?"
+            },
+            {
+              "id": "ex_pv_047_1_2",
+              "eng": "There's a big festival going on in the town square.",
+              "vie": "Có một lễ hội lớn đang diễn ra ở quảng trường thị trấn."
+            }
+          ]
+        }
+      ],
+      "tags": ["events", "situations"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go through with (something)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ θruː wɪθ/",
+      "meanings": [
+        {
+          "id": "m_pv_048_1",
+          "text": "Hoàn thành một việc gì đó đã quyết định hoặc hứa, dù khó khăn hoặc không dễ chịu",
+          "notes": "Thực hiện một hành động đã được lên kế hoạch hoặc đồng ý, bất chấp những khó khăn hoặc sự không thoải mái.",
+          "examples": [
+            {
+              "id": "ex_pv_048_1_1",
+              "eng": "Despite her fears, she decided to go through with the surgery.",
+              "vie": "Bất chấp nỗi sợ hãi, cô ấy đã quyết định thực hiện ca phẫu thuật."
+            },
+            {
+              "id": "ex_pv_048_1_2",
+              "eng": "He promised to help, and I trust he'll go through with it.",
+              "vie": "Anh ấy đã hứa sẽ giúp, và tôi tin anh ấy sẽ thực hiện lời hứa đó."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "decision", "challenge"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go together",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ təˈɡeðər/",
+      "meanings": [
+        {
+          "id": "m_pv_049_1",
+          "text": "Phù hợp, hòa hợp với nhau (thường nói về đồ vật, màu sắc, hương vị)",
+          "notes": "Khi hai hoặc nhiều thứ trông đẹp, có vị ngon, hoặc hoạt động tốt khi kết hợp với nhau.",
+          "examples": [
+            {
+              "id": "ex_pv_049_1_1",
+              "eng": "Do you think these shoes go together with this dress?",
+              "vie": "Bạn có nghĩ đôi giày này hợp với chiếc váy này không?"
+            },
+            {
+              "id": "ex_pv_049_1_2",
+              "eng": "Peanut butter and jelly go together perfectly.",
+              "vie": "Bơ đậu phộng và mứt rất hợp với nhau."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_049_2",
+          "text": "Đi cùng nhau, tồn tại cùng nhau",
+          "notes": "Thường xuyên được tìm thấy hoặc xảy ra cùng lúc.",
+          "examples": [
+            {
+              "id": "ex_pv_049_2_1",
+              "eng": "Success and hard work often go together.",
+              "vie": "Thành công và sự chăm chỉ thường đi đôi với nhau."
+            },
+            {
+              "id": "ex_pv_049_2_2",
+              "eng": "Those two symptoms often go together, indicating a particular illness.",
+              "vie": "Hai triệu chứng đó thường xuất hiện cùng nhau, cho thấy một căn bệnh cụ thể."
+            }
+          ]
+        }
+      ],
+      "tags": ["objects_things", "appearance", "relationships_social"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go out",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_050_1",
+          "text": "Đi ra ngoài (để giải trí, gặp gỡ)",
+          "notes": "Rời khỏi nhà để tham gia các hoạt động xã hội hoặc giải trí.",
+          "examples": [
+            {
+              "id": "ex_pv_050_1_1",
+              "eng": "They often go out for dinner on Fridays.",
+              "vie": "Họ thường đi ăn tối bên ngoài vào thứ Sáu."
+            },
+            {
+              "id": "ex_pv_050_1_2",
+              "eng": "Are you going out tonight?",
+              "vie": "Tối nay bạn có đi chơi không?"
+            }
+          ]
+        },
+        {
+          "id": "m_pv_050_2",
+          "text": "Tắt (lửa, đèn)",
+          "notes": "Ngừng cháy hoặc ngừng phát sáng.",
+          "examples": [
+            {
+              "id": "ex_pv_050_2_1",
+              "eng": "Suddenly, all the lights went out.",
+              "vie": "Đột nhiên, tất cả đèn đều tắt."
+            },
+            {
+              "id": "ex_pv_050_2_2",
+              "eng": "The campfire went out after a few hours.",
+              "vie": "Đống lửa trại đã tắt sau vài giờ."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_050_3",
+          "text": "Hẹn hò (go out with someone)",
+          "notes": "Có một mối quan hệ lãng mạn và thường xuyên gặp gỡ ai đó.",
+          "examples": [
+            {
+              "id": "ex_pv_050_3_1",
+              "eng": "They've been going out for six months now.",
+              "vie": "Họ đã hẹn hò được sáu tháng rồi."
+            },
+            {
+              "id": "ex_pv_050_3_2",
+              "eng": "Is she going out with anyone at the moment?",
+              "vie": "Hiện tại cô ấy có đang hẹn hò với ai không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["social_activities", "home_living", "events", "relationships_social"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go up",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_051_1",
+          "text": "Tăng lên (giá cả, số lượng, nhiệt độ)",
+          "notes": "Trở nên cao hơn về số lượng, giá trị hoặc cường độ.",
+          "examples": [
+            {
+              "id": "ex_pv_051_1_1",
+              "eng": "The price of petrol has gone up again.",
+              "vie": "Giá xăng lại tăng nữa rồi."
+            },
+            {
+              "id": "ex_pv_051_1_2",
+              "eng": "The number of students attending the course has gone up significantly.",
+              "vie": "Số lượng sinh viên tham gia khóa học đã tăng lên đáng kể."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_051_2",
+          "text": "Đi lên (cầu thang, dốc)",
+          "notes": "Di chuyển từ một vị trí thấp hơn lên một vị trí cao hơn.",
+          "examples": [
+            {
+              "id": "ex_pv_051_2_1",
+              "eng": "She went up the stairs to her room.",
+              "vie": "Cô ấy đi lên cầu thang về phòng mình."
+            },
+            {
+              "id": "ex_pv_051_2_2",
+              "eng": "The balloon slowly went up into the sky.",
+              "vie": "Quả bóng bay từ từ bay lên trời."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_051_3",
+          "text": "Được xây dựng, được dựng lên",
+          "notes": "Khi một tòa nhà hoặc cấu trúc được xây dựng.",
+          "examples": [
+            {
+              "id": "ex_pv_051_3_1",
+              "eng": "A new office building is going up downtown.",
+              "vie": "Một tòa nhà văn phòng mới đang được xây dựng ở trung tâm thành phố."
+            },
+            {
+              "id": "ex_pv_051_3_2",
+              "eng": "New houses are going up all over the area.",
+              "vie": "Nhà mới đang được xây dựng khắp khu vực."
+            }
+          ]
+        }
+      ],
+      "tags": ["money_finance", "actions_movement", "construction"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go for (something)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ fɔːr/",
+      "meanings": [
+        {
+          "id": "m_pv_052_1",
+          "text": "Chọn lựa (một món ăn, đồ uống, lựa chọn)",
+          "notes": "Quyết định chọn một thứ gì đó từ nhiều khả năng.",
+          "examples": [
+            {
+              "id": "ex_pv_052_1_1",
+              "eng": "I think I'll go for the chicken salad.",
+              "vie": "Tôi nghĩ tôi sẽ chọn món salad gà."
+            },
+            {
+              "id": "ex_pv_052_1_2",
+              "eng": "Which option are you going to go for?",
+              "vie": "Bạn sẽ chọn phương án nào?"
+            }
+          ]
+        },
+        {
+          "id": "m_pv_052_2",
+          "text": "Cố gắng đạt được điều gì, theo đuổi mục tiêu",
+          "notes": "Nỗ lực để đạt được một mục tiêu hoặc thành tựu.",
+          "examples": [
+            {
+              "id": "ex_pv_052_2_1",
+              "eng": "He's going for the gold medal in the Olympics.",
+              "vie": "Anh ấy đang cố gắng giành huy chương vàng ở Olympics."
+            },
+            {
+              "id": "ex_pv_052_2_2",
+              "eng": "She's really going for that promotion.",
+              "vie": "Cô ấy thực sự đang nỗ lực để được thăng chức đó."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_052_3",
+          "text": "Áp dụng cho, đúng với (một quy tắc, tình huống)",
+          "notes": "Khi một quy tắc, nhận xét hoặc tình huống cũng đúng hoặc liên quan đến một người hoặc vật khác.",
+          "examples": [
+            {
+              "id": "ex_pv_052_3_1",
+              "eng": "The same rules go for everyone.",
+              "vie": "Những quy tắc tương tự áp dụng cho tất cả mọi người."
+            },
+            {
+              "id": "ex_pv_052_3_2",
+              "eng": "What I said about John goes for you too.",
+              "vie": "Những gì tôi nói về John cũng đúng với bạn."
+            }
+          ]
+        }
+      ],
+      "tags": ["decision", "goals", "rules"],
+      "generalNotes": "Cũng có thể có nghĩa là thích hoặc bị thu hút bởi ai đó/cái gì đó."
+    },
+    {
+      "phrasalVerb": "Go into (a topic/profession)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ˈɪntuː/",
+      "meanings": [
+        {
+          "id": "m_pv_053_1",
+          "text": "Đi sâu vào, thảo luận chi tiết (một chủ đề, vấn đề)",
+          "notes": "Thảo luận hoặc xem xét một chủ đề một cách kỹ lưỡng và chi tiết.",
+          "examples": [
+            {
+              "id": "ex_pv_053_1_1",
+              "eng": "The report goes into the causes of the accident in great detail.",
+              "vie": "Bản báo cáo đi sâu vào các nguyên nhân của vụ tai nạn một cách rất chi tiết."
+            },
+            {
+              "id": "ex_pv_053_1_2",
+              "eng": "I don't want to go into all the reasons now, but I can't come.",
+              "vie": "Bây giờ tôi không muốn đi sâu vào tất cả các lý do, nhưng tôi không thể đến."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_053_2",
+          "text": "Bắt đầu làm (một nghề nghiệp, lĩnh vực)",
+          "notes": "Bắt đầu một công việc hoặc sự nghiệp trong một lĩnh vực cụ thể.",
+          "examples": [
+            {
+              "id": "ex_pv_053_2_1",
+              "eng": "She decided to go into teaching.",
+              "vie": "Cô ấy quyết định theo nghề dạy học."
+            },
+            {
+              "id": "ex_pv_053_2_2",
+              "eng": "After college, he went into business with his father.",
+              "vie": "Sau khi tốt nghiệp đại học, anh ấy cùng cha kinh doanh."
+            }
+          ]
+        }
+      ],
+      "tags": ["learning_information", "communication", "work_business_tasks"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go without (something)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ wɪˈðaʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_054_1",
+          "text": "Xoay sở sống mà không có thứ gì đó (thường là cần thiết)",
+          "notes": "Sống hoặc đối phó với một tình huống mà không có thứ gì đó bạn thường có hoặc cần.",
+          "examples": [
+            {
+              "id": "ex_pv_054_1_1",
+              "eng": "Many people in that region have to go without clean water.",
+              "vie": "Nhiều người ở vùng đó phải sống thiếu nước sạch."
+            },
+            {
+              "id": "ex_pv_054_1_2",
+              "eng": "We had to go without electricity for a few hours during the storm.",
+              "vie": "Chúng tôi đã phải sống không có điện trong vài giờ trong cơn bão."
+            }
+          ]
+        }
+      ],
+      "tags": ["problems_solutions", "survival", "necessities"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Do away with (something)",
+      "baseVerb": "Do",
+      "category": "phrasal_verbs",
+      "pronunciation": "/duː əˈweɪ wɪð/",
+      "meanings": [
+        {
+          "id": "m_pv_055_1",
+          "text": "Loại bỏ, bãi bỏ, chấm dứt (một luật lệ, hệ thống, thói quen)",
+          "notes": "Ngừng sử dụng, loại bỏ hoặc kết thúc một cái gì đó hoàn toàn.",
+          "examples": [
+            {
+              "id": "ex_pv_055_1_1",
+              "eng": "Many companies are doing away with traditional office spaces.",
+              "vie": "Nhiều công ty đang loại bỏ không gian văn phòng truyền thống."
+            },
+            {
+              "id": "ex_pv_055_1_2",
+              "eng": "It's time to do away with these outdated regulations.",
+              "vie": "Đã đến lúc bãi bỏ những quy định lỗi thời này."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "removal", "rules_systems"],
+      "generalNotes": "Cũng có một nghĩa cũ hoặc không trang trọng là giết ai đó."
     }
   ]
 }
