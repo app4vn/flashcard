@@ -6,7 +6,8 @@ import { getFirestore, serverTimestamp, Timestamp } from "https://www.gstatic.co
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
-import * as FirestoreService from './firestoreService.js'; // Import tất cả các hàm từ firestoreService
+import * as FirestoreService from './firestoreService.js'; 
+import { initializeSrsModule, processSrsRatingWrapper } from './srs.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBcBpsCGt-eWyAvtNaqxG0QncqzYDJwG70", 
@@ -20,7 +21,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const fbApp = initializeApp(firebaseConfig); 
 const fbAuth = getAuth(fbApp); 
-const db = getFirestore(fbApp); // db vẫn được khởi tạo ở đây để truyền vào service
+const db = getFirestore(fbApp); 
 
 // KHAI BÁO CÁC BIẾN DOM SẼ ĐƯỢC SỬ DỤNG Ở PHẠM VI MODULE
 let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDisplay, 
@@ -111,7 +112,6 @@ async function loadAppState() {
     const userId = getCurrentUserId(); 
     console.log("Attempting to load AppState. Current user ID:", userId);
     if (userId) {
-        // *** SỬ DỤNG FirestoreService ***
         const firestoreState = await FirestoreService.loadAppStateFromFirestore(userId);
         if (firestoreState) {
             appState = { 
@@ -154,14 +154,12 @@ async function loadAppState() {
             });
             console.log("AppState loaded from localStorage and merged with defaults:", JSON.parse(JSON.stringify(appState)));
             if (userId) { 
-                // *** SỬ DỤNG FirestoreService ***
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState); 
             }
         } else {
             console.log("No AppState in localStorage, using defaults.");
             appState = JSON.parse(JSON.stringify(defaultAppState)); 
              if (userId) {
-                // *** SỬ DỤNG FirestoreService ***
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
             } else {
                 localStorage.setItem(appStateStorageKey, JSON.stringify(appState));
@@ -171,7 +169,6 @@ async function loadAppState() {
         console.error("Lỗi load appState từ localStorage, using defaults:", e);
         appState = JSON.parse(JSON.stringify(defaultAppState)); 
         if (userId) {
-            // *** SỬ DỤNG FirestoreService ***
             await FirestoreService.saveAppStateToFirestoreService(userId, appState);
         }
     }
@@ -206,7 +203,6 @@ async function saveAppState(){
     }
     const userId = getCurrentUserId();
     if (userId) { 
-        // *** SỬ DỤNG FirestoreService ***
         await FirestoreService.saveAppStateToFirestoreService(userId, appState);
     }
 }
@@ -225,15 +221,17 @@ function getCategoryState(src, cat) {
     return appState.categoryStates[key];
 }
 
-// *** HÀM CALLBACK ĐỂ XỬ LÝ THAY ĐỔI TRẠNG THÁI AUTH TỪ AUTH.JS ***
 async function handleAuthStateChangedInApp(user) {
     // authActionButtonMain và userEmailDisplayMain đã được gán trong DOMContentLoaded
-    // currentUserId và isUserAnonymous được cập nhật bởi auth.js
+    // currentUserId (biến cục bộ của auth.js) đã được cập nhật bởi auth.js
+    // Chúng ta sẽ dùng getCurrentUserId() để lấy giá trị đó.
 
-    if (user) {
-        await loadAppState(); // Tải AppState trước
+    const userIdFromAuth = getCurrentUserId(); // Lấy userId từ auth.js
 
-        if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email ? user.email : (getCurrentUserId() && !user.isAnonymous ? "Người dùng" : "Khách");
+    await loadAppState(); // Tải AppState trước, currentUserId đã được auth.js cập nhật
+
+    if (user) { // user object từ Firebase Auth
+        if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email ? user.email : (userIdFromAuth && !user.isAnonymous ? "Người dùng" : "Khách");
         if(userEmailDisplayMain) userEmailDisplayMain.classList.remove('hidden'); 
         
         if(authActionButtonMain) {
@@ -245,35 +243,6 @@ async function handleAuthStateChangedInApp(user) {
             `;
             authActionButtonMain.title = "Đăng xuất";
         }
-        
-        if (typeof window.updateSidebarFilterVisibility === 'function') {
-            window.updateSidebarFilterVisibility(); 
-        }
-
-        if (cardSourceSelect && cardSourceSelect.value === 'user') {
-            console.log("User logged in, source is 'user'. Reloading user data after appState load.");
-            if (window.currentData && window.currentData.length === 0 && wordDisplay) { 
-               wordDisplay.classList.add('word-display-empty-state');
-               wordDisplay.innerHTML = `<p>Chào mừng ${user.email || 'bạn'}! Hãy bắt đầu tạo bộ thẻ của riêng mình.</p><button id="empty-state-add-card-btn-on-card" class="mt-2"><i class="fas fa-plus mr-2"></i>Tạo Thẻ Đầu Tiên</button>`;
-               const btn = document.getElementById('empty-state-add-card-btn-on-card');
-               if(btn) btn.onclick = async () => { 
-                   const mainOpenBtn = document.getElementById('open-add-card-modal-btn');
-                   if (mainOpenBtn) await openAddEditModal('add'); 
-               }
-            }
-            if (typeof window.loadVocabularyData === 'function' && categorySelect) {
-                if (typeof loadUserDecks === 'function') { // loadUserDecks giờ sẽ gọi hàm từ service
-                    await loadUserDecks(); 
-                }
-                window.loadVocabularyData(categorySelect.value);
-            }
-        } else if (cardSourceSelect && cardSourceSelect.value === 'web') {
-             if (typeof window.loadVocabularyData === 'function' && categorySelect) {
-                window.loadVocabularyData(categorySelect.value);
-            }
-        }
-
-
     } else {
         if(userEmailDisplayMain) userEmailDisplayMain.classList.add('hidden'); 
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = '';
@@ -287,41 +256,21 @@ async function handleAuthStateChangedInApp(user) {
             `;
             authActionButtonMain.title = "Đăng nhập";
         }
-        
-        appState = JSON.parse(JSON.stringify(defaultAppState)); 
-        localStorage.removeItem(appStateStorageKey);
-        console.log("User logged out. AppState reset and removed from localStorage.");
-
-
-        if (typeof window.updateSidebarFilterVisibility === 'function') {
-            window.updateSidebarFilterVisibility(); 
-        }
-
-        if (cardSourceSelect && cardSourceSelect.value === 'user') {
-            console.log("User logged out or not logged in, source is 'user'. Clearing user data and prompting login.");
-            if(window.currentData) window.currentData = []; 
-            if(window.hasOwnProperty('currentIndex')) window.currentIndex = 0; 
-            
-            if (typeof window.updateFlashcard === 'function') {
-                window.updateFlashcard(); 
-            }
-            if (wordDisplay) { 
-              wordDisplay.classList.add('word-display-empty-state');
-              wordDisplay.innerHTML = `<p>Vui lòng đăng nhập để xem hoặc tạo thẻ của bạn.</p><button id="login-prompt-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md mt-2">Đăng nhập ngay</button>`;
-              const loginPromptBtn = document.getElementById('login-prompt-btn');
-              if(loginPromptBtn) loginPromptBtn.onclick = () => openAuthModalFromAuth('login'); 
-            }
-        } else if (cardSourceSelect && cardSourceSelect.value === 'web') {
-             if (typeof window.loadVocabularyData === 'function' && categorySelect) {
-                window.loadVocabularyData(categorySelect.value);
-            }
-        }
+        // appState được reset và localStorage được xóa trong loadAppState khi userId là null và không có gì trong localStorage
+        console.log("User logged out. AppState reset to defaults if not found in localStorage.");
     }
-    if (typeof window.updateMainHeaderTitle === 'function') {
-       window.updateMainHeaderTitle(); 
+    
+    // Sau khi appState được load (hoặc reset), cập nhật UI và tải dữ liệu
+    if (typeof setupInitialCategoryAndSource === 'function') {
+        await setupInitialCategoryAndSource(); 
+    }
+    if (typeof updateSidebarFilterVisibility === 'function') {
+        updateSidebarFilterVisibility(); 
+    }
+    if (typeof updateMainHeaderTitle === 'function') {
+       updateMainHeaderTitle(); 
     }
 }
-// *** KẾT THÚC HÀM CALLBACK ***
 
 
 // Logic chính của ứng dụng
@@ -428,10 +377,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.loadVocabularyData = loadVocabularyData;
     window.updateFlashcard = updateFlashcard; 
 
-    // *** KHỞI TẠO CÁC MODULE ***
     initializeAuthModule(fbAuth, handleAuthStateChangedInApp);
-    FirestoreService.initializeFirestoreService(db); // Truyền db instance cho service
-    // *** KẾT THÚC KHỞI TẠO MODULE ***
+    FirestoreService.initializeFirestoreService(db); 
+    initializeSrsModule({ 
+        firestoreServiceModule: FirestoreService,
+        authGetCurrentUserIdFunc: getCurrentUserId,
+        utilGetWebCardGlobalIdFunc: getWebCardGlobalId,
+        uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
+        uiUpdateFlashcardFunc: updateFlashcard,
+        uiNextBtnElement: nextBtn,
+        dataGetCurrentCardFunc: () => window.currentData[window.currentIndex],
+        dataGetWindowCurrentDataFunc: () => window.currentData,
+        dataGetCurrentIndexFunc: () => window.currentIndex
+    });
     
     if (!getCurrentUserId()) { 
         await loadAppState();
@@ -439,9 +397,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     setupInitialCategoryAndSource(); 
     setupEventListeners(); 
-
-    // Các hàm còn lại của ứng dụng
-    // ... (generateUniqueId, displayFieldError, ..., updateFlashcard, ...) ...
     
     function generateUniqueId(prefix = 'id') {
         return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`;
@@ -922,7 +877,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userId = getCurrentUserId();
 
         if (cardItem.isUserCard) { 
-            // Đối với thẻ người dùng, thông tin SRS đã được tải cùng thẻ từ Firestore
             return {
                 status: cardItem.status || 'new',
                 lastReviewed: cardItem.lastReviewed || null, 
@@ -932,19 +886,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 easeFactor: cardItem.easeFactor || 2.5,
                 repetitions: cardItem.repetitions || 0
             };
-        } else { // Thẻ của Web
+        } else { 
             if (userId) { 
-                // Nếu người dùng đã đăng nhập, thử lấy trạng thái từ FirestoreService
                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getWebCardGlobalId(cardItem));
                 if (firestoreStatus) {
-                    return { // Gộp với giá trị mặc định để đảm bảo tất cả các trường đều có
-                        ...defaultCategoryState, // Có thể không cần thiết nếu firestoreStatus đã đủ
+                    return { 
+                        ...defaultCategoryState, 
                         ...firestoreStatus,
-                        status: firestoreStatus.status || 'new' // Đảm bảo status có giá trị
+                        status: firestoreStatus.status || 'new' 
                     };
                 }
             }
-            // Fallback cho thẻ web chưa có trạng thái hoặc người dùng chưa đăng nhập (dùng localStorage hoặc default)
             const webCardGlobalId = getWebCardGlobalId(cardItem);
             const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0};
             if (!webCardGlobalId) return defaultStatus;
@@ -969,154 +921,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function updateCardSrsData(cardItem, ratingQuality) {
-        if (!cardItem) return;
-        const userId = getCurrentUserId();
-        if (!userId && !cardItem.isUserCard) { 
-            console.log("Người dùng chưa đăng nhập, không cập nhật SRS cho thẻ web.");
-            return;
-        }
-
-        let { interval, easeFactor, repetitions, status } = cardItem;
-        interval = typeof interval === 'number' ? interval : 0;
-        easeFactor = typeof easeFactor === 'number' ? easeFactor : 2.5;
-        repetitions = typeof repetitions === 'number' ? repetitions : 0;
-        status = status || 'new'; 
-
-        const srsParams = calculateSrsParameters(cardItem, ratingQuality);
-        
-        let newStatus = 'learning'; 
-        if (srsParams.newInterval >= 21) { 
-            newStatus = 'learned';
-        }
-        if (ratingQuality < 2) { 
-             newStatus = 'learning'; 
-        }
-
-        const srsDataToUpdate = {
-            status: newStatus, 
-            lastReviewed: serverTimestamp(),
-            reviewCount: (cardItem.reviewCount || 0) + 1,
-            nextReviewDate: srsParams.nextReviewDate, 
-            interval: srsParams.newInterval,
-            easeFactor: parseFloat(srsParams.newEaseFactor.toFixed(2)),
-            repetitions: srsParams.newRepetitions
-        };
-
-        let success = false;
-        if (cardItem.isUserCard) {
-            if (!userId || !cardItem.deckId || !cardItem.id) {
-                console.error("Thiếu thông tin để cập nhật SRS cho thẻ người dùng.");
-                alert("Lỗi: Không tìm thấy thông tin thẻ để cập nhật SRS.");
-                return;
-            }
-            // *** SỬ DỤNG FirestoreService ***
-            const cardId = await FirestoreService.saveCardToFirestore(userId, cardItem.deckId, srsDataToUpdate, cardItem.id);
-            success = !!cardId;
-
-        } else if (userId) { 
-            const webCardGlobalId = getWebCardGlobalId(cardItem);
-            if (!webCardGlobalId) {
-                console.error("Không thể tạo ID cho thẻ web để cập nhật SRS.");
-                alert("Lỗi: Không thể xác định thẻ web để cập nhật SRS.");
-                return;
-            }
-            // *** SỬ DỤNG FirestoreService ***
-            success = await FirestoreService.updateWebCardStatusInFirestore(userId, webCardGlobalId, cardItem, srsDataToUpdate);
-        }
-
-        if (success) {
-            cardItem.status = srsDataToUpdate.status;
-            cardItem.lastReviewed = Date.now(); 
-            cardItem.reviewCount = srsDataToUpdate.reviewCount;
-            cardItem.nextReviewDate = srsDataToUpdate.nextReviewDate.toDate().getTime(); 
-            cardItem.interval = srsDataToUpdate.interval;
-            cardItem.easeFactor = srsDataToUpdate.easeFactor;
-            cardItem.repetitions = srsDataToUpdate.repetitions;
-            console.log("SRS data updated successfully for card:", cardItem.id || getWebCardGlobalId(cardItem));
-        } else {
-             console.error("Failed to update SRS data in Firestore for card:", cardItem.id || getWebCardGlobalId(cardItem));
-        }
-        updateStatusButtonsUI(); 
-    }
-
-    function calculateSrsParameters(card, ratingQuality) {
-        let interval = card.interval || 0;
-        let easeFactor = card.easeFactor || 2.5;
-        let repetitions = card.repetitions || 0;
-
-        if (ratingQuality < 2) { 
-            repetitions = 0;
-            interval = 1; 
-            if (ratingQuality === 1) { // Hard
-                easeFactor = Math.max(1.3, easeFactor - 0.15);
-            }
-        } else { 
-            repetitions++;
-            if (repetitions === 1) {
-                interval = 1;
-            } else if (repetitions === 2) {
-                interval = 6;
-            } else {
-                interval = Math.ceil(interval * easeFactor);
-            }
-            let q_sm2;
-            if (ratingQuality === 0) q_sm2 = 0; 
-            else if (ratingQuality === 1) q_sm2 = 2; 
-            else if (ratingQuality === 2) q_sm2 = 4; 
-            else q_sm2 = 5; 
-
-            if (q_sm2 >= 3) { 
-                 easeFactor = easeFactor + (0.1 - (5 - q_sm2) * (0.08 + (5 - q_sm2) * 0.02));
-                 if (easeFactor < 1.3) easeFactor = 1.3;
-            }
-        }
-        
-        const MAX_INTERVAL_DAYS = 365 * 2; 
-        interval = Math.min(interval, MAX_INTERVAL_DAYS);
-        interval = Math.max(1, interval); 
-
-        const now = new Date();
-        const nextReviewDateObj = new Date(now.setDate(now.getDate() + interval));
-        
-        return {
-            newInterval: interval,
-            newEaseFactor: parseFloat(easeFactor.toFixed(2)),
-            newRepetitions: repetitions,
-            nextReviewDate: Timestamp.fromDate(nextReviewDateObj) 
-        };
-    }
-
-
-    async function processSrsRating(ratingString) {
-        if (window.currentData.length === 0) return;
-        const cardItem = window.currentData[window.currentIndex];
-        if (!cardItem) return;
-
-        console.log(`SRS Rating selected: ${ratingString} for card:`, cardItem.word || cardItem.phrasalVerb || cardItem.collocation);
-
-        let ratingQuality;
-        switch (ratingString) {
-            case 'again': ratingQuality = 0; break;
-            case 'hard': ratingQuality = 1; break; 
-            case 'good': ratingQuality = 2; break; 
-            case 'easy': ratingQuality = 3; break; 
-            default: 
-                console.error("Invalid SRS rating:", ratingString);
-                return;
-        }
-        
-        await updateCardSrsData(cardItem, ratingQuality);
-
-        if (window.currentIndex < window.currentData.length - 1) {
-            if(nextBtn) nextBtn.click(); 
-        } else {
-            console.log("Đã hoàn thành tất cả các thẻ trong danh sách hiện tại.");
-            updateFlashcard(); 
-        }
-    }
-    
-    async function updateStatusButtonsUI(){ 
+    // Hàm updateStatusButtonsUI sẽ được gọi từ srs.js sau khi SRS được xử lý
+    function updateStatusButtonsUI(){ 
         const srsButtons = [btnSrsAgain, btnSrsHard, btnSrsGood, btnSrsEasy];
         const currentCardItem = window.currentData.length > 0 ? window.currentData[window.currentIndex] : null;
 
@@ -1135,18 +941,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log("loadUserCards: No user logged in.");
             return []; 
         } 
-        // *** SỬ DỤNG FirestoreService ***
+        
         let cards = [];
-        if (deckIdToLoad && deckIdToLoad !== 'all_user_cards' && deckIdToLoad !== 'unassigned_cards') {
-            cards = await FirestoreService.loadUserCardsFromFirestore(userId, deckIdToLoad);
-        } else if (deckIdToLoad === 'all_user_cards') {
+        const selectedDeckId = deckIdToLoad || (userDeckSelect ? userDeckSelect.value : 'all_user_cards'); 
+
+        if (selectedDeckId && selectedDeckId !== 'all_user_cards' && selectedDeckId !== 'unassigned_cards') {
+            cards = await FirestoreService.loadUserCardsFromFirestore(userId, selectedDeckId);
+        } else if (selectedDeckId === 'all_user_cards') {
             if (Array.isArray(userDecks)) {
                 for (const deck of userDecks) {
                     const deckCards = await FirestoreService.loadUserCardsFromFirestore(userId, deck.id);
                     cards.push(...deckCards);
                 }
             }
-        } // 'unassigned_cards' sẽ được xử lý trong applyAllFilters
+             console.log(`All cards loaded for user ${userId}:`, cards);
+        } 
         return cards;
     }
     
@@ -1245,7 +1054,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const editingCardId = cardIdInput.value; 
-        // *** SỬ DỤNG FirestoreService ***
         const savedCardId = await FirestoreService.saveCardToFirestore(userId, assignedDeckId, cardDataToSave, editingCardId);
 
         if (savedCardId) {
@@ -1280,7 +1088,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if(!confirm(`Bạn có chắc chắn muốn xóa thẻ "${getCardIdentifier(cardToDelete,cardToDelete.category)}"? Hành động này không thể hoàn tác.`))return;
         
-        // *** SỬ DỤNG FirestoreService ***
         const success = await FirestoreService.deleteCardFromFirestore(userId, deckIdOfCard, cardIdToDelete);
         
         if (success) {
@@ -1372,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             await loadUserDecks(); 
             userDeckSelect.value = stateForCurrentSourceCategory.deckId || appState.lastSelectedDeckId || 'all_user_cards';
-            activeMasterList = await loadUserCards(); 
+            activeMasterList = await loadUserCards(userDeckSelect.value); 
         } else { 
             try {
                 const response = await fetch(`data/${category}.json?v=${new Date().getTime()}`);
@@ -1434,13 +1241,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const statusPromises = webCards.map(async (card) => {
                             const webId = card.id; 
                             if (webId) {
-                                // *** SỬ DỤNG FirestoreService ***
                                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
                                 if (firestoreStatus) {
                                     card.status = firestoreStatus.status || 'new';
-                                    card.lastReviewed = firestoreStatus.lastReviewed; // Đã là number hoặc null
+                                    card.lastReviewed = firestoreStatus.lastReviewed;
                                     card.reviewCount = firestoreStatus.reviewCount || 0;
-                                    card.nextReviewDate = firestoreStatus.nextReviewDate; // Đã là number hoặc null
+                                    card.nextReviewDate = firestoreStatus.nextReviewDate;
                                     card.interval = firestoreStatus.interval || 0;
                                     card.easeFactor = firestoreStatus.easeFactor || 2.5;
                                     card.repetitions = firestoreStatus.repetitions || 0;
@@ -1771,8 +1577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             flashcardElement.classList.remove('practice-mode-front-only');
             flashcardElement.classList.add('flipped'); 
             
-            const cardItem = window.currentData[window.currentIndex];
-            processSrsRating(isCorrect ? 'easy' : 'again'); 
+            processSrsRatingWrapper(isCorrect ? 'easy' : 'again'); 
             updateCardInfo(); 
         }
         
@@ -1918,7 +1723,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                      cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
                 }
                 
-                // *** SỬ DỤNG FirestoreService ***
                 const savedCardId = await FirestoreService.saveCardToFirestore(userId, selectedDeckId, cardDataToSave);
                 if (savedCardId) {
                     successCount++;
@@ -2038,7 +1842,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             delete cardToCopy.webCardGlobalId; 
 
-            // *** SỬ DỤNG FirestoreService ***
             const newCardId = await FirestoreService.saveCardToFirestore(userId, targetDeckId, cardToCopy);
 
             if (newCardId) {
@@ -2298,12 +2101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(speakerBtn) speakerBtn.addEventListener('click', (e)=>{e.stopPropagation();if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}const txt=wordDisplay.dataset.ttsText;if(txt&&!speakerBtn.disabled)speakText(txt,currentWordSpansMeta);});
             if(speakerExampleBtn) speakerExampleBtn.addEventListener('click', (e)=>{e.stopPropagation();window.speechSynthesis.cancel();isSpeakingExampleQueue=false;currentExampleSpeechIndex=0;exampleSpeechQueue=[];const item=window.currentData[window.currentIndex];if(item&&item.meanings&&!speakerExampleBtn.disabled){item.meanings.forEach(m=>{if(m.examples){m.examples.forEach(ex=>{if(ex.eng&&ex.eng.trim())exampleSpeechQueue.push({text:ex.eng.trim(),spansMeta:[]});});}});if(exampleSpeechQueue.length>0){isSpeakingExampleQueue=true;speakerExampleBtn.disabled=true;playNextExampleInQueue();}}});
             
-            if(btnSrsAgain) btnSrsAgain.addEventListener('click', () => processSrsRating('again')); 
-            if(btnSrsHard) btnSrsHard.addEventListener('click', () => processSrsRating('hard')); 
-            if(btnSrsGood) btnSrsGood.addEventListener('click', () => processSrsRating('good')); 
-            if(btnSrsEasy) btnSrsEasy.addEventListener('click', () => processSrsRating('easy'));
+            if(btnSrsAgain) btnSrsAgain.addEventListener('click', () => processSrsRatingWrapper('again')); 
+            if(btnSrsHard) btnSrsHard.addEventListener('click', () => processSrsRatingWrapper('hard')); 
+            if(btnSrsGood) btnSrsGood.addEventListener('click', () => processSrsRatingWrapper('good')); 
+            if(btnSrsEasy) btnSrsEasy.addEventListener('click', () => processSrsRatingWrapper('easy'));
             
-            function checkTypingAnswer(){if(window.currentData.length===0||!currentCorrectAnswerForPractice)return;currentAnswerChecked=true;feedbackMessage.classList.remove('hidden');typingInput.disabled=true;submitTypingAnswerBtn.disabled=true;const uA=typingInput.value.trim().toLowerCase();const cA=currentCorrectAnswerForPractice.trim().toLowerCase();const iC=uA===cA;if(iC){feedbackMessage.textContent='Đúng!';feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-green-100 text-green-700 border border-green-300';}else{feedbackMessage.textContent=`Sai! Đáp án đúng: ${currentCorrectAnswerForPractice}`;feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-red-100 text-red-700 border border-red-300';}flashcardElement.classList.remove('practice-mode-front-only');flashcardElement.classList.add('flipped');const i=window.currentData[window.currentIndex];const iCV=i.category;const id=getCardIdentifier(i,iCV);if(id)processSrsRating(iC?'easy':'again');updateCardInfo();} 
+            function checkTypingAnswer(){if(window.currentData.length===0||!currentCorrectAnswerForPractice)return;currentAnswerChecked=true;feedbackMessage.classList.remove('hidden');typingInput.disabled=true;submitTypingAnswerBtn.disabled=true;const uA=typingInput.value.trim().toLowerCase();const cA=currentCorrectAnswerForPractice.trim().toLowerCase();const iC=uA===cA;if(iC){feedbackMessage.textContent='Đúng!';feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-green-100 text-green-700 border border-green-300';}else{feedbackMessage.textContent=`Sai! Đáp án đúng: ${currentCorrectAnswerForPractice}`;feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-red-100 text-red-700 border border-red-300';}flashcardElement.classList.remove('practice-mode-front-only');flashcardElement.classList.add('flipped');const i=window.currentData[window.currentIndex];const iCV=i.category;const id=getCardIdentifier(i,iCV);if(id)processSrsRatingWrapper(iC?'easy':'again');updateCardInfo();} 
             
             if(submitTypingAnswerBtn) submitTypingAnswerBtn.addEventListener('click', checkTypingAnswer);
             if(typingInput) typingInput.addEventListener('keypress', (e)=>{if(e.key==='Enter'&&practiceType==='typing_practice'&&!submitTypingAnswerBtn.disabled)checkTypingAnswer();});
