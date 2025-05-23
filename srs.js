@@ -1,74 +1,69 @@
+// Firebase Firestore imports
 import { Timestamp, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
 
-let FS; // FirestoreService
-let AuthGetCurrentUserId;
-let UtilGetWebCardGlobalId;
-let UtilGetCardIdentifier;
-let AppGetContext; // Hàm để lấy { currentData, currentIndex }
-let UICallbacks; // { updateStatusButtons, triggerNextCard, updateMainFlashcard }
-
-const DEFAULT_EASE_FACTOR = 2.5;
-const MIN_EASE_FACTOR = 1.3;
-const MAX_INTERVAL_DAYS = 365 * 2; // Max interval 2 năm
+let fsService; 
+let authGetCurrentUserId;
+let utilGetWebCardGlobalId;
+let uiUpdateStatusButtons;
+let uiUpdateFlashcard;
+let uiNextBtn;
+let dataGetCurrentCard; 
+let dataGetCurrentDataArray; 
+let dataGetCurrentIndex; 
 
 export function initializeSrsModule(dependencies) {
-    FS = dependencies.firestoreService;
-    AuthGetCurrentUserId = dependencies.getCurrentUserIdFunc;
-    UtilGetWebCardGlobalId = dependencies.getWebCardGlobalIdFunc;
-    UtilGetCardIdentifier = dependencies.getCardIdentifierFunc;
-    AppGetContext = dependencies.getAppContextFunc;
-    UICallbacks = dependencies.uiCallbacks;
-    console.log("SRS Module initialized with dependencies.");
+    fsService = dependencies.firestoreServiceModule;
+    authGetCurrentUserId = dependencies.authGetCurrentUserIdFunc;
+    utilGetWebCardGlobalId = dependencies.utilGetWebCardGlobalIdFunc;
+    uiUpdateStatusButtons = dependencies.uiUpdateStatusButtonsFunc;
+    uiUpdateFlashcard = dependencies.uiUpdateFlashcardFunc;
+    uiNextBtn = dependencies.uiNextBtnElement;
+    dataGetCurrentCard = dependencies.dataGetCurrentCardFunc;
+    dataGetCurrentDataArray = dependencies.dataGetWindowCurrentDataFunc;
+    dataGetCurrentIndex = dependencies.dataGetCurrentIndexFunc;
 }
 
 function calculateSrsParameters(card, ratingQuality) {
-    let interval = card.interval || 0;
-    let easeFactor = card.easeFactor || DEFAULT_EASE_FACTOR;
-    let repetitions = card.repetitions || 0;
+    let interval = Number(card.interval) || 0;
+    let easeFactor = Number(card.easeFactor) || 2.5;
+    let repetitions = Number(card.repetitions) || 0;
 
-    // ratingQuality: 0 (Again), 1 (Hard), 2 (Good), 3 (Easy)
-    if (ratingQuality < 2) { // Again (0) or Hard (1) 
+    if (ratingQuality < 2) { 
         repetitions = 0;
-        interval = 1; // Reset interval về 1 ngày
-        if (ratingQuality === 1) { // Hard
-            easeFactor = Math.max(MIN_EASE_FACTOR, easeFactor - 0.15);
-        } else { // Again
-             easeFactor = Math.max(MIN_EASE_FACTOR, easeFactor - 0.20);
+        interval = 1; 
+        if (ratingQuality === 1) { 
+            easeFactor = Math.max(1.3, easeFactor - 0.15);
         }
-    } else { // Good (2) or Easy (3)
+    } else { 
         repetitions++;
         if (repetitions === 1) {
-            interval = 1; // Lần đầu trả lời đúng (Good/Easy)
+            interval = 1;
         } else if (repetitions === 2) {
-            interval = 6; // Lần thứ hai trả lời đúng
+            interval = 6;
         } else {
-            // Đảm bảo interval không quá nhỏ nếu easeFactor rất thấp
-            interval = Math.ceil(Math.max(interval, 1) * easeFactor);
+            interval = Math.ceil((interval > 0 ? interval : 1) * easeFactor);
         }
         
-        // Điều chỉnh easeFactor dựa trên chất lượng đánh giá (q)
-        // Ánh xạ ratingQuality (0-3) sang q_sm2 (0-5) cho công thức SM-2
         let q_sm2;
-        if (ratingQuality === 0) q_sm2 = 0;      // Again
-        else if (ratingQuality === 1) q_sm2 = 2; // Hard -> tương đương mức thấp của Good trong SM2
-        else if (ratingQuality === 2) q_sm2 = 4; // Good
-        else q_sm2 = 5;      // Easy
+        if (ratingQuality === 0) q_sm2 = 0; 
+        else if (ratingQuality === 1) q_sm2 = 2; 
+        else if (ratingQuality === 2) q_sm2 = 4; 
+        else q_sm2 = 5; 
 
-        // Chỉ cập nhật EF nếu nhớ (q_sm2 >=3, tương đương ratingQuality >= 2)
-        // Và không giảm EF quá nhiều nếu chỉ là "Good"
         if (q_sm2 >= 3) { 
              easeFactor = easeFactor + (0.1 - (5 - q_sm2) * (0.08 + (5 - q_sm2) * 0.02));
-             if (easeFactor < MIN_EASE_FACTOR) easeFactor = MIN_EASE_FACTOR;
+             if (easeFactor < 1.3) easeFactor = 1.3;
         }
     }
     
+    const MAX_INTERVAL_DAYS = 365 * 2; 
     interval = Math.min(interval, MAX_INTERVAL_DAYS);
-    interval = Math.max(1, interval); // Đảm bảo interval ít nhất là 1 ngày (trừ khi là thẻ mới học lần đầu và đánh giá là Again)
+    interval = Math.max(1, interval); 
 
     const now = new Date();
-    const nextReviewDateObj = new Date(now.setDate(now.getDate() + interval));
-    nextReviewDateObj.setHours(5, 0, 0, 0); // Đặt giờ ôn tập cố định, ví dụ 5 giờ sáng
-
+    const nextReviewDateObj = new Date(now.getTime()); 
+    nextReviewDateObj.setDate(now.getDate() + interval);
+    
     return {
         newInterval: interval,
         newEaseFactor: parseFloat(easeFactor.toFixed(2)),
@@ -77,14 +72,11 @@ function calculateSrsParameters(card, ratingQuality) {
     };
 }
 
-async function updateCardSrsData(cardItem, ratingQuality) {
-    if (!cardItem) {
-        console.error("SRS: cardItem is undefined in updateCardSrsData");
-        return;
-    }
-    const currentUserId = AuthGetCurrentUserId();
+async function updateCardSrsDataInternal(cardItem, ratingQuality) {
+    if (!cardItem) return;
+    const currentUserId = authGetCurrentUserId();
     if (!currentUserId && !cardItem.isUserCard) { 
-        console.log("SRS: Người dùng chưa đăng nhập, không cập nhật SRS cho thẻ web.");
+        console.log("SRS Module: User not logged in, cannot update SRS for web card.");
         return;
     }
 
@@ -94,7 +86,7 @@ async function updateCardSrsData(cardItem, ratingQuality) {
     if (srsParams.newInterval >= 21) { 
         newStatus = 'learned';
     }
-    if (ratingQuality < 2 && srsParams.newInterval < 21) { // Again or Hard mà interval chưa đủ lớn
+    if (ratingQuality < 2) { 
          newStatus = 'learning'; 
     }
 
@@ -112,26 +104,25 @@ async function updateCardSrsData(cardItem, ratingQuality) {
     try {
         if (cardItem.isUserCard) {
             if (!currentUserId || !cardItem.deckId || !cardItem.id) {
-                console.error("SRS: Thiếu thông tin để cập nhật SRS cho thẻ người dùng.");
+                console.error("SRS Module: Missing info to update user card SRS.");
                 alert("Lỗi: Không tìm thấy thông tin thẻ để cập nhật SRS.");
                 return;
             }
-            // Sử dụng FirestoreService để cập nhật
-            const cardId = await FS.saveCardToFirestore(currentUserId, cardItem.deckId, srsDataToUpdate, cardItem.id);
-            success = !!cardId;
+            success = await fsService.saveCardToFirestore(currentUserId, cardItem.deckId, srsDataToUpdate, cardItem.id);
+             if (success) console.log(`SRS Module: User card SRS updated: ${cardItem.id}`, srsDataToUpdate);
 
         } else if (currentUserId) { 
-            const webCardGlobalId = UtilGetWebCardGlobalId(cardItem);
+            const webCardGlobalId = utilGetWebCardGlobalId(cardItem);
             if (!webCardGlobalId) {
-                console.error("SRS: Không thể tạo ID cho thẻ web để cập nhật SRS.");
+                console.error("SRS Module: Cannot create ID for web card to update SRS.");
                 alert("Lỗi: Không thể xác định thẻ web để cập nhật SRS.");
                 return;
             }
-            success = await FS.updateWebCardStatusInFirestore(currentUserId, webCardGlobalId, cardItem, srsDataToUpdate);
+            success = await fsService.updateWebCardStatusInFirestore(currentUserId, webCardGlobalId, cardItem, srsDataToUpdate);
+            if (success) console.log(`SRS Module: Web card status SRS updated: ${webCardGlobalId}`, srsDataToUpdate);
         }
 
         if (success) {
-            // Cập nhật đối tượng cardItem ở client
             cardItem.status = srsDataToUpdate.status;
             cardItem.lastReviewed = Date.now(); 
             cardItem.reviewCount = srsDataToUpdate.reviewCount;
@@ -139,37 +130,27 @@ async function updateCardSrsData(cardItem, ratingQuality) {
             cardItem.interval = srsDataToUpdate.interval;
             cardItem.easeFactor = srsDataToUpdate.easeFactor;
             cardItem.repetitions = srsDataToUpdate.repetitions;
-            console.log("SRS: Dữ liệu SRS đã được cập nhật cho thẻ:", cardItem.id || UtilGetWebCardGlobalId(cardItem));
         } else {
-             console.error("SRS: Không thể cập nhật dữ liệu SRS lên Firestore cho thẻ:", cardItem.id || UtilGetWebCardGlobalId(cardItem));
+            console.error("SRS Module: Failed to update SRS data in Firestore for card:", cardItem.id || utilGetWebCardGlobalId(cardItem));
         }
+
     } catch (error) {
-        console.error("SRS: Lỗi khi cập nhật dữ liệu SRS lên Firestore:", error);
+        console.error("SRS Module: Error updating SRS data to Firestore:", error);
         alert("Lỗi cập nhật dữ liệu ôn tập. Vui lòng thử lại.");
     }
-    if (UICallbacks && typeof UICallbacks.updateStatusButtons === 'function') {
-        UICallbacks.updateStatusButtons(); 
-    }
+    if(uiUpdateStatusButtons) uiUpdateStatusButtons(); 
 }
 
-export async function processSrsRating(ratingString) {
-    if (!AppGetContext || !UICallbacks) {
-        console.error("SRS Module not properly initialized or app context/UI callbacks missing.");
-        return;
-    }
-    const { currentData, currentIndex } = AppGetContext();
+// Đảm bảo hàm này được export
+export async function processSrsRatingWrapper(ratingString) {
+    const currentDataArray = dataGetCurrentDataArray();
+    const currentIndex = dataGetCurrentIndex();
 
-    if (currentData.length === 0 || currentIndex < 0 || currentIndex >= currentData.length) {
-        console.warn("SRS: No current card to process rating.");
-        return;
-    }
-    const cardItem = currentData[currentIndex];
-    if (!cardItem) {
-        console.warn("SRS: cardItem is undefined at current index.");
-        return;
-    }
+    if (!currentDataArray || currentDataArray.length === 0) return;
+    const cardItem = currentDataArray[currentIndex];
+    if (!cardItem) return;
 
-    console.log(`SRS: Rating selected: ${ratingString} for card:`, cardItem.word || cardItem.phrasalVerb || cardItem.collocation);
+    console.log(`SRS Module: Rating selected: ${ratingString} for card:`, cardItem.word || cardItem.phrasalVerb || cardItem.collocation);
 
     let ratingQuality;
     switch (ratingString) {
@@ -178,20 +159,16 @@ export async function processSrsRating(ratingString) {
         case 'good': ratingQuality = 2; break; 
         case 'easy': ratingQuality = 3; break; 
         default: 
-            console.error("SRS: Invalid SRS rating string:", ratingString);
+            console.error("SRS Module: Invalid SRS rating:", ratingString);
             return;
     }
     
-    await updateCardSrsData(cardItem, ratingQuality);
+    await updateCardSrsDataInternal(cardItem, ratingQuality);
 
-    if (currentIndex < currentData.length - 1) {
-        if (UICallbacks && typeof UICallbacks.triggerNextCard === 'function') {
-            UICallbacks.triggerNextCard(); 
-        }
+    if (currentIndex < currentDataArray.length - 1) {
+        if(uiNextBtn && typeof uiNextBtn.click === 'function') uiNextBtn.click(); 
     } else {
-        console.log("SRS: Đã hoàn thành tất cả các thẻ trong danh sách hiện tại.");
-        if (UICallbacks && typeof UICallbacks.updateMainFlashcardUI === 'function') {
-            UICallbacks.updateMainFlashcardUI(); 
-        }
+        console.log("SRS Module: All cards in the current list have been reviewed.");
+        if(uiUpdateFlashcard) uiUpdateFlashcard(); 
     }
 }
