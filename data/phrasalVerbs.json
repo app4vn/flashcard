@@ -69,6 +69,11 @@
               "id": "ex_pv_002_1_1",
               "eng": "He's always getting at his younger brother.",
               "vie": "Anh ta luôn chỉ trích em trai mình."
+            },
+            {
+              "id": "ex_pv_002_1_2",
+              "eng": "Why are you always getting at me? I haven't done anything wrong.",
+              "vie": "Tại sao bạn cứ chỉ trích tôi hoài vậy? Tôi đâu có làm gì sai."
             }
           ]
         },
@@ -81,6 +86,11 @@
               "id": "ex_pv_002_2_1",
               "eng": "What are you getting at? Just say it clearly.",
               "vie": "Bạn đang cố ám chỉ điều gì vậy? Cứ nói rõ ràng đi."
+            },
+            {
+              "id": "ex_pv_002_2_2",
+              "eng": "I think I see what you're getting at, but could you explain further?",
+              "vie": "Tôi nghĩ tôi hiểu bạn đang ám chỉ điều gì, nhưng bạn có thể giải thích thêm được không?"
             }
           ]
         }
@@ -103,6 +113,11 @@
               "id": "ex_pv_003_1_1",
               "eng": "We need to get rid of all this old furniture.",
               "vie": "Chúng ta cần loại bỏ hết đống đồ đạc cũ này."
+            },
+            {
+              "id": "ex_pv_003_1_2",
+              "eng": "She finally got rid of her old car and bought a new one.",
+              "vie": "Cuối cùng cô ấy cũng đã tống khứ được chiếc xe cũ và mua một chiếc mới."
             }
           ]
         }
