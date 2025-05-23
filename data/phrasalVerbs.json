@@ -746,6 +746,683 @@
       ],
       "tags": ["emotions_feelings", "relationships_social", "problems_solutions"],
       "generalNotes": ""
-    }
+    },
+    {
+      "phrasalVerb": "Put down",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt daʊn/",
+      "meanings": [
+        {
+          "id": "m_pv_022_1",
+          "text": "Đặt xuống (một vật gì đó)",
+          "notes": "Hạ một vật từ trên cao xuống hoặc đặt nó lên một bề mặt.",
+          "examples": [
+            {
+              "id": "ex_pv_022_1_1",
+              "eng": "Please put your bags down over there.",
+              "vie": "Làm ơn hãy đặt túi của bạn xuống đằng kia."
+            },
+            {
+              "id": "ex_pv_022_1_2",
+              "eng": "She put down her book and looked up.",
+              "vie": "Cô ấy đặt cuốn sách xuống và ngước nhìn lên."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_022_2",
+          "text": "Viết xuống (thông tin, ghi chú)",
+          "notes": "Ghi lại thông tin bằng cách viết, thường là để ghi nhớ hoặc tham khảo.",
+          "examples": [
+            {
+              "id": "ex_pv_022_2_1",
+              "eng": "Can you put down your phone number for me?",
+              "vie": "Bạn có thể viết số điện thoại của bạn cho tôi được không?"
+            },
+            {
+              "id": "ex_pv_022_2_2",
+              "eng": "The reporter put down every word the witness said.",
+              "vie": "Phóng viên đã ghi lại từng lời của nhân chứng."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_022_3",
+          "text": "Chỉ trích, làm bẽ mặt ai đó",
+          "notes": "Nói những điều tiêu cực về ai đó để làm họ cảm thấy tồi tệ hoặc mất giá trị trong mắt người khác.",
+          "examples": [
+            {
+              "id": "ex_pv_022_3_1",
+              "eng": "He hates it when people put him down.",
+              "vie": "Anh ấy ghét khi bị người khác hạ thấp."
+            },
+            {
+              "id": "ex_pv_022_3_2",
+              "eng": "Don't put yourself down so much; you're very talented.",
+              "vie": "Đừng tự hạ thấp mình nhiều như vậy; bạn rất tài năng."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "objects_things", "communication", "criticism"],
+      "generalNotes": "Có nhiều nghĩa. Nghĩa 'ngăn chặn, hạn chế' (như dập tắt một cuộc nổi dậy) ít phổ biến hơn các nghĩa này trong giao tiếp hàng ngày."
+    },
+    {
+      "phrasalVerb": "Put on",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ɒn/",
+      "meanings": [
+        {
+          "id": "m_pv_023_1",
+          "text": "Mặc vào (quần áo, giày dép, trang sức)",
+          "notes": "Đeo, mặc hoặc đội một thứ gì đó lên người.",
+          "examples": [
+            {
+              "id": "ex_pv_023_1_1",
+              "eng": "It's cold, you should put on a sweater.",
+              "vie": "Trời lạnh đấy, bạn nên mặc áo len vào."
+            },
+            {
+              "id": "ex_pv_023_1_2",
+              "eng": "She put on her favorite necklace for the party.",
+              "vie": "Cô ấy đã đeo chiếc vòng cổ yêu thích của mình đến bữa tiệc."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_023_2",
+          "text": "Tăng cân",
+          "notes": "Trở nên nặng hơn về trọng lượng cơ thể.",
+          "examples": [
+            {
+              "id": "ex_pv_023_2_1",
+              "eng": "He's put on five kilos since Christmas.",
+              "vie": "Anh ấy đã tăng năm ký từ Giáng sinh."
+            },
+            {
+              "id": "ex_pv_023_2_2",
+              "eng": "I need to be careful not to put on too much weight during the holidays.",
+              "vie": "Tôi cần cẩn thận để không tăng quá nhiều cân trong kỳ nghỉ."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_023_3",
+          "text": "Tổ chức, trình diễn (một sự kiện, vở kịch)",
+          "notes": "Sắp xếp và thực hiện một buổi biểu diễn hoặc sự kiện cho công chúng.",
+          "examples": [
+            {
+              "id": "ex_pv_023_3_1",
+              "eng": "The school is putting on a play.",
+              "vie": "Trường đang tổ chức một vở kịch."
+            },
+            {
+              "id": "ex_pv_023_3_2",
+              "eng": "They put on a fantastic concert last night.",
+              "vie": "Họ đã trình diễn một buổi hòa nhạc tuyệt vời vào tối qua."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_023_4",
+          "text": "Bật (thiết bị điện)",
+          "notes": "Làm cho một thiết bị bắt đầu hoạt động.",
+          "examples": [
+            {
+              "id": "ex_pv_023_4_1",
+              "eng": "Could you put on the lights, please?",
+              "vie": "Bạn có thể bật đèn lên được không?"
+            },
+            {
+              "id": "ex_pv_023_4_2",
+              "eng": "He put on the radio to listen to the news.",
+              "vie": "Anh ấy đã bật đài để nghe tin tức."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "clothing", "health_wellbeing", "social_activities", "home_living"],
+      "generalNotes": "Nghĩa 'ăn mặc chỉnh chu' bạn cung cấp là một trường hợp cụ thể của 'mặc vào'."
+    },
+    {
+      "phrasalVerb": "Put up",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ʌp/",
+      "meanings": [
+        {
+          "id": "m_pv_024_1",
+          "text": "Dựng lên, xây dựng (lều, hàng rào, tòa nhà)",
+          "notes": "Xây dựng hoặc lắp đặt một cấu trúc nào đó.",
+          "examples": [
+            {
+              "id": "ex_pv_024_1_1",
+              "eng": "We need to put up a fence around the garden.",
+              "vie": "Chúng ta cần dựng một hàng rào quanh vườn."
+            },
+            {
+              "id": "ex_pv_024_1_2",
+              "eng": "They are putting up new office buildings downtown.",
+              "vie": "Họ đang xây dựng các tòa nhà văn phòng mới ở trung tâm thành phố."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_024_2",
+          "text": "Cho ai đó ở nhờ",
+          "notes": "Cung cấp chỗ ở tạm thời cho ai đó trong nhà của bạn.",
+          "examples": [
+            {
+              "id": "ex_pv_024_2_1",
+              "eng": "Can you put me up for a couple of nights?",
+              "vie": "Bạn có thể cho tôi ở nhờ vài đêm được không?"
+            },
+            {
+              "id": "ex_pv_024_2_2",
+              "eng": "My friend put me up when I visited London.",
+              "vie": "Bạn tôi đã cho tôi ở nhờ khi tôi đến thăm Luân Đôn."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_024_3",
+          "text": "Treo (tranh, thông báo, rèm cửa)",
+          "notes": "Gắn một thứ gì đó lên tường hoặc bề mặt thẳng đứng khác.",
+          "examples": [
+            {
+              "id": "ex_pv_024_3_1",
+              "eng": "They put up posters all over town.",
+              "vie": "Họ đã dán áp phích khắp thị trấn."
+            },
+            {
+              "id": "ex_pv_024_3_2",
+              "eng": "She helped me put up the new curtains.",
+              "vie": "Cô ấy đã giúp tôi treo rèm cửa mới."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "home_living", "social_relationships"],
+      "generalNotes": "Cũng có nghĩa là tăng giá (put up prices), hoặc đề cử ai đó (put someone up for an award)."
+    },
+    {
+      "phrasalVerb": "Put across (an idea/message)",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt əˈkrɒs/",
+      "meanings": [
+        {
+          "id": "m_pv_025_1",
+          "text": "Truyền đạt, giải thích (ý tưởng, thông điệp) một cách hiệu quả",
+          "notes": "Làm cho người khác hiểu rõ ý tưởng, quan điểm hoặc cảm xúc của bạn.",
+          "examples": [
+            {
+              "id": "ex_pv_025_1_1",
+              "eng": "She managed to put her ideas across very clearly in the presentation.",
+              "vie": "Cô ấy đã xoay sở để truyền đạt ý tưởng của mình một cách rất rõ ràng trong bài thuyết trình."
+            },
+            {
+              "id": "ex_pv_025_1_2",
+              "eng": "It's important to put across your point of view calmly and politely.",
+              "vie": "Điều quan trọng là phải truyền đạt quan điểm của bạn một cách bình tĩnh và lịch sự."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "understanding"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put out",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt aʊt/",
+      "meanings": [
+        {
+          "id": "m_pv_026_1",
+          "text": "Dập tắt (lửa, đèn, thuốc lá)",
+          "notes": "Làm cho một thứ gì đó ngừng cháy hoặc ngừng sáng.",
+          "examples": [
+            {
+              "id": "ex_pv_026_1_1",
+              "eng": "Please put out your cigarette before entering.",
+              "vie": "Xin vui lòng dập tắt thuốc lá trước khi vào."
+            },
+            {
+              "id": "ex_pv_026_1_2",
+              "eng": "The firefighters worked hard to put out the forest fire.",
+              "vie": "Lính cứu hỏa đã làm việc cật lực để dập tắt đám cháy rừng."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_026_2",
+          "text": "Gây phiền phức, làm bất tiện cho ai đó",
+          "notes": "Làm cho ai đó phải chịu sự bất tiện hoặc nỗ lực thêm.",
+          "examples": [
+            {
+              "id": "ex_pv_026_2_1",
+              "eng": "I don't want to put you out, but could you help me?",
+              "vie": "Tôi không muốn làm phiền bạn, nhưng bạn có thể giúp tôi được không?"
+            },
+            {
+              "id": "ex_pv_026_2_2",
+              "eng": "Would it put you out if I stayed an extra night?",
+              "vie": "Có làm phiền bạn không nếu tôi ở lại thêm một đêm?"
+            }
+          ]
+        },
+        {
+          "id": "m_pv_026_3",
+          "text": "Đặt (rác) ra ngoài để thu gom",
+          "notes": "Mang rác từ trong nhà ra để ở nơi quy định cho xe rác đến lấy.",
+          "examples": [
+            {
+              "id": "ex_pv_026_3_1",
+              "eng": "Remember to put the bins out on Tuesday.",
+              "vie": "Nhớ để thùng rác ra ngoài vào thứ Ba nhé."
+            },
+            {
+              "id": "ex_pv_026_3_2",
+              "eng": "Could you put out the recycling bins tonight?",
+              "vie": "Tối nay bạn có thể để thùng rác tái chế ra ngoài được không?"
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "safety", "problems_solutions", "home_living"],
+      "generalNotes": "Nghĩa 'xuất bản' (publish) ít phổ biến hơn 'bring out' hoặc động từ 'publish'."
+    },
+    {
+      "phrasalVerb": "Put back",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt bæk/",
+      "meanings": [
+        {
+          "id": "m_pv_027_1",
+          "text": "Đặt lại (vật gì đó) vào vị trí cũ",
+          "notes": "Trả một vật về nơi nó đã được lấy đi hoặc nơi nó thường được giữ.",
+          "examples": [
+            {
+              "id": "ex_pv_027_1_1",
+              "eng": "Could you put the milk back in the fridge?",
+              "vie": "Bạn có thể đặt sữa lại vào tủ lạnh được không?"
+            },
+            {
+              "id": "ex_pv_027_1_2",
+              "eng": "Please put the books back on the shelf when you're finished.",
+              "vie": "Làm ơn đặt sách lại lên kệ sau khi bạn đọc xong."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_027_2",
+          "text": "Lùi lại, hoãn lại (lịch trình, đồng hồ)",
+          "notes": "Thay đổi thời gian của một sự kiện hoặc lịch trình sang một thời điểm muộn hơn; chỉnh đồng hồ chạy chậm lại.",
+          "examples": [
+            {
+              "id": "ex_pv_027_2_1",
+              "eng": "We had to put the meeting back by an hour.",
+              "vie": "Chúng tôi đã phải lùi cuộc họp lại một tiếng."
+            },
+            {
+              "id": "ex_pv_027_2_2",
+              "eng": "Don't forget to put your clocks back an hour tonight for daylight saving.",
+              "vie": "Đừng quên chỉnh đồng hồ lùi lại một tiếng vào tối nay để đổi sang giờ mùa đông."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "objects_things", "planning"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put away",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt əˈweɪ/",
+      "meanings": [
+        {
+          "id": "m_pv_028_1",
+          "text": "Cất đi, dọn dẹp (đặt một vật về đúng vị trí của nó)",
+          "notes": "Đặt một thứ gì đó vào nơi nó thường được cất giữ, thường là sau khi sử dụng xong.",
+          "examples": [
+            {
+              "id": "ex_pv_028_1_1",
+              "eng": "Please put away your toys after you finish playing.",
+              "vie": "Làm ơn hãy cất đồ chơi của con đi sau khi chơi xong nhé."
+            },
+            {
+              "id": "ex_pv_028_1_2",
+              "eng": "She put away the clean dishes in the cupboard.",
+              "vie": "Cô ấy đã cất bát đĩa sạch vào tủ."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_028_2",
+          "text": "Ăn nhiều, tiêu thụ một lượng lớn (thức ăn, đồ uống)",
+          "notes": "Thường dùng không trang trọng để chỉ việc ăn hoặc uống rất nhiều.",
+          "examples": [
+            {
+              "id": "ex_pv_028_2_1",
+              "eng": "He can really put away a lot of pizza!",
+              "vie": "Anh ấy thực sự có thể ăn rất nhiều pizza!"
+            },
+            {
+              "id": "ex_pv_028_2_2",
+              "eng": "They put away three bottles of wine between them.",
+              "vie": "Họ đã uống hết ba chai rượu vang."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_028_3",
+          "text": "Bỏ tù ai đó",
+          "notes": "Gửi ai đó vào tù hoặc một cơ sở giam giữ.",
+          "examples": [
+            {
+              "id": "ex_pv_028_3_1",
+              "eng": "The judge put him away for ten years.",
+              "vie": "Quan tòa đã bỏ tù anh ta mười năm."
+            },
+            {
+              "id": "ex_pv_028_3_2",
+              "eng": "They finally managed to put away the notorious gangster.",
+              "vie": "Cuối cùng họ cũng đã tống giam được tên gangster khét tiếng."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "home_living", "objects_things", "food_drink", "crime_law"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put (someone) through (to someone)",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt θruː/",
+      "meanings": [
+        {
+          "id": "m_pv_029_1",
+          "text": "Nối máy (điện thoại) cho ai nói chuyện với người khác",
+          "notes": "Kết nối một cuộc gọi điện thoại để người gọi có thể nói chuyện với người họ muốn.",
+          "examples": [
+            {
+              "id": "ex_pv_029_1_1",
+              "eng": "Could you put me through to the manager, please?",
+              "vie": "Bạn có thể vui lòng nối máy cho tôi gặp quản lý được không?"
+            },
+            {
+              "id": "ex_pv_029_1_2",
+              "eng": "Hold the line, I'll put you through to Mr. Smith.",
+              "vie": "Xin vui lòng giữ máy, tôi sẽ nối máy cho bạn gặp ông Smith."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication"],
+      "generalNotes": "Thường dùng trong giao tiếp qua điện thoại."
+    },
+    {
+      "phrasalVerb": "Put forward (an idea/plan/suggestion)",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ˈfɔːrwərd/",
+      "meanings": [
+        {
+          "id": "m_pv_030_1",
+          "text": "Đề xuất, đưa ra (một ý tưởng, kế hoạch, gợi ý)",
+          "notes": "Trình bày một ý tưởng, kế hoạch hoặc tên của ai đó để người khác xem xét.",
+          "examples": [
+            {
+              "id": "ex_pv_030_1_1",
+              "eng": "She put forward an interesting proposal at the meeting.",
+              "vie": "Cô ấy đã đưa ra một đề xuất thú vị trong cuộc họp."
+            },
+            {
+              "id": "ex_pv_030_1_2",
+              "eng": "Several names were put forward for the new chairman position.",
+              "vie": "Một vài cái tên đã được đề xuất cho vị trí chủ tịch mới."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "planning", "work_business_tasks"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put in (effort/time/work)",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ɪn/",
+      "meanings": [
+        {
+          "id": "m_pv_031_1",
+          "text": "Bỏ vào, đầu tư (công sức, thời gian, công việc)",
+          "notes": "Dành thời gian, công sức, hoặc tiền bạc cho một hoạt động hoặc mục tiêu.",
+          "examples": [
+            {
+              "id": "ex_pv_031_1_1",
+              "eng": "You need to put in more effort if you want to succeed.",
+              "vie": "Bạn cần phải nỗ lực nhiều hơn nếu muốn thành công."
+            },
+            {
+              "id": "ex_pv_031_1_2",
+              "eng": "She puts in many hours at the office.",
+              "vie": "Cô ấy dành nhiều giờ làm việc tại văn phòng."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_031_2",
+          "text": "Lắp đặt (thiết bị)",
+          "notes": "Cài đặt hoặc sửa chữa một thiết bị hoặc hệ thống mới.",
+          "examples": [
+            {
+              "id": "ex_pv_031_2_1",
+              "eng": "We're having a new kitchen put in next week.",
+              "vie": "Chúng tôi sẽ lắp đặt nhà bếp mới vào tuần tới."
+            },
+            {
+              "id": "ex_pv_031_2_2",
+              "eng": "They decided to put in a new air conditioning system.",
+              "vie": "Họ quyết định lắp đặt một hệ thống điều hòa không khí mới."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_031_3",
+          "text": "Chính thức yêu cầu, đệ trình (một yêu cầu, đơn)",
+          "notes": "Nộp một yêu cầu, khiếu nại, hoặc đề nghị một cách chính thức.",
+          "examples": [
+            {
+              "id": "ex_pv_031_3_1",
+              "eng": "He put in a request for a transfer to another department.",
+              "vie": "Anh ấy đã đệ trình yêu cầu chuyển sang bộ phận khác."
+            },
+            {
+              "id": "ex_pv_031_3_2",
+              "eng": "I've put in an application for that job.",
+              "vie": "Tôi đã nộp đơn xin việc cho công việc đó."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "effort", "work_business_tasks", "home_living"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put aside / Put by",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt əˈsaɪd / pʊt baɪ/",
+      "meanings": [
+        {
+          "id": "m_pv_032_1",
+          "text": "Để dành, tiết kiệm (tiền, thời gian cho mục đích cụ thể)",
+          "notes": "Giữ lại tiền hoặc thời gian để sử dụng sau này cho một mục đích nhất định.",
+          "examples": [
+            {
+              "id": "ex_pv_032_1_1",
+              "eng": "I try to put aside some money each month for my vacation.",
+              "vie": "Tôi cố gắng để dành một ít tiền mỗi tháng cho kỳ nghỉ của mình."
+            },
+            {
+              "id": "ex_pv_032_1_2",
+              "eng": "She puts by a little every week for her retirement.",
+              "vie": "Cô ấy để dành một chút mỗi tuần cho việc nghỉ hưu của mình."
+            }
+          ]
+        }
+      ],
+      "tags": ["money_finance", "planning", "actions_tasks"],
+      "generalNotes": "'Put by' phổ biến hơn ở Anh. Cũng có thể có nghĩa là gạt bỏ (sự khác biệt, cảm xúc) sang một bên."
+    },
+    {
+      "phrasalVerb": "Put together",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt təˈɡɛðər/",
+      "meanings": [
+        {
+          "id": "m_pv_033_1",
+          "text": "Lắp ráp, ghép các bộ phận lại với nhau",
+          "notes": "Kết nối các bộ phận của một thứ gì đó để tạo thành một tổng thể hoàn chỉnh.",
+          "examples": [
+            {
+              "id": "ex_pv_033_1_1",
+              "eng": "It took me hours to put together that flat-pack wardrobe.",
+              "vie": "Tôi mất hàng giờ để lắp ráp cái tủ quần áo đóng sẵn đó."
+            },
+            {
+              "id": "ex_pv_033_1_2",
+              "eng": "Can you help me put this model airplane together?",
+              "vie": "Bạn có thể giúp tôi lắp ráp mô hình máy bay này không?"
+            }
+          ]
+        },
+        {
+          "id": "m_pv_033_2",
+          "text": "Tập hợp, chuẩn bị (một nhóm, kế hoạch, bữa ăn)",
+          "notes": "Tổ chức hoặc tạo ra một thứ gì đó bằng cách kết hợp các yếu tố hoặc con người khác nhau.",
+          "examples": [
+            {
+              "id": "ex_pv_033_2_1",
+              "eng": "She put together an amazing team for the project.",
+              "vie": "Cô ấy đã tập hợp được một đội tuyệt vời cho dự án."
+            },
+            {
+              "id": "ex_pv_033_2_2",
+              "eng": "He quickly put together a delicious meal from the leftovers.",
+              "vie": "Anh ấy đã nhanh chóng chuẩn bị một bữa ăn ngon từ thức ăn thừa."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "objects_things", "planning", "organization"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Put (someone) up to (something)",
+      "baseVerb": "Put",
+      "category": "phrasal_verbs",
+      "pronunciation": "/pʊt ʌp tuː/",
+      "meanings": [
+        {
+          "id": "m_pv_034_1",
+          "text": "Xúi giục, khuyến khích ai đó làm điều gì đó (thường là sai trái, nghịch ngợm)",
+          "notes": "Thuyết phục hoặc khuyến khích ai đó làm một điều gì đó ngốc nghếch hoặc không nên làm.",
+          "examples": [
+            {
+              "id": "ex_pv_034_1_1",
+              "eng": "His older brother put him up to drawing on the wall.",
+              "vie": "Anh trai đã xúi nó vẽ lên tường."
+            },
+            {
+              "id": "ex_pv_034_1_2",
+              "eng": "Who put you up to this silly prank?",
+              "vie": "Ai đã xúi giục bạn làm trò đùa ngớ ngẩn này vậy?"
+            }
+          ]
+        }
+      ],
+      "tags": ["behavior", "influence"],
+      "generalNotes": "Thường mang hàm ý tiêu cực."
+    },
+    {
+      "phrasalVerb": "Go after (someone/something)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ ˈæftər/",
+      "meanings": [
+        {
+          "id": "m_pv_035_1",
+          "text": "Theo đuổi, đuổi theo (ai đó)",
+          "notes": "Đi theo ai đó để bắt hoặc nói chuyện với họ.",
+          "examples": [
+            {
+              "id": "ex_pv_035_1_1",
+              "eng": "The police went after the thief.",
+              "vie": "Cảnh sát đã đuổi theo tên trộm."
+            },
+            {
+              "id": "ex_pv_035_1_2",
+              "eng": "He went after her to apologize.",
+              "vie": "Anh ấy đã đi theo cô ấy để xin lỗi."
+            }
+          ]
+        },
+        {
+          "id": "m_pv_035_2",
+          "text": "Cố gắng giành được, đạt được (cái gì đó)",
+          "notes": "Nỗ lực để có được một thứ gì đó bạn muốn, như công việc, giải thưởng.",
+          "examples": [
+            {
+              "id": "ex_pv_035_2_1",
+              "eng": "She decided to go after her dream job.",
+              "vie": "Cô ấy quyết định theo đuổi công việc mơ ước của mình."
+            },
+            {
+              "id": "ex_pv_035_2_2",
+              "eng": "The company is going after a bigger share of the market.",
+              "vie": "Công ty đang cố gắng giành lấy thị phần lớn hơn."
+            }
+          ]
+        }
+      ],
+      "tags": ["actions_tasks", "goals", "pursuit"],
+      "generalNotes": ""
+    },
+    {
+      "phrasalVerb": "Go along with (an idea/someone)",
+      "baseVerb": "Go",
+      "category": "phrasal_verbs",
+      "pronunciation": "/ɡoʊ əˈlɔːŋ wɪθ/",
+      "meanings": [
+        {
+          "id": "m_pv_036_1",
+          "text": "Đồng ý với, chấp nhận một ý kiến, quyết định hoặc đề xuất",
+          "notes": "Thể hiện sự đồng thuận hoặc ủng hộ một kế hoạch, ý tưởng mà không phản đối.",
+          "examples": [
+            {
+              "id": "ex_pv_036_1_1",
+              "eng": "I'll go along with your suggestion for now.",
+              "vie": "Hiện tại tôi sẽ đồng ý với đề xuất của bạn."
+            },
+            {
+              "id": "ex_pv_036_1_2",
+              "eng": "Whatever you decide, I'll go along with it.",
+              "vie": "Dù bạn quyết định thế nào, tôi cũng sẽ đồng ý."
+            }
+          ]
+        }
+      ],
+      "tags": ["communication", "decision", "agreement"],
+      "generalNotes": ""
+    }  
   ]
 }
