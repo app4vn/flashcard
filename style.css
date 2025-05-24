@@ -213,85 +213,84 @@ body {
     transition: opacity 0.5s ease-in-out, visibility 0s linear 0s;
 }
 
-/* CSS cho các nút SRS để hiển thị tốt hơn trên một hàng */
 .srs-btn {
-    /* Tailwind đã xử lý responsive qua text-xs sm:text-sm và px-2 sm:px-4 */
-    /* Nếu cần, có thể thêm min-width ở đây để tránh nút quá hẹp */
-    /* Ví dụ: min-width: 60px; */
-    white-space: nowrap; /* Ngăn chữ xuống dòng nếu không đủ chỗ */
+    white-space: nowrap; 
 }
 
-/* CSS cho các nút hành động bổ sung */
 .additional-action-btn {
     display: flex;
-    flex-direction: column; /* Icon ở trên, text ở dưới */
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
-    padding: 0.5rem; /* Giảm padding một chút */
-    border-radius: 0.375rem; /* rounded-md */
+    padding: 0.5rem; 
+    border-radius: 0.375rem; 
     transition: background-color 0.15s ease-in-out;
-    font-size: 0.75rem; /* text-xs */
+    font-size: 0.75rem; 
     line-height: 1rem;
 }
 .additional-action-btn i {
-    margin-bottom: 0.25rem; /* Khoảng cách giữa icon và text */
-    font-size: 1.125rem; /* Kích thước icon lớn hơn một chút */
+    margin-bottom: 0.25rem; 
+    font-size: 1.125rem; 
 }
 .additional-action-btn span {
-     /* Kích thước chữ đã được Tailwind xử lý qua text-xs sm:text-sm trong HTML */
 }
 
-/* Đảm bảo các nút trong Bottom Sheet có đủ padding và dễ nhấn */
 #bottom-sheet-content .srs-info-item {
     padding: 0.25rem 0;
-    font-size: 0.875rem; /* text-sm */
+    font-size: 0.875rem; 
 }
 #bottom-sheet-content .srs-info-item strong {
-    font-weight: 600; /* font-semibold */
-    color: #4b5563; /* Tailwind gray-600 */
+    font-weight: 600; 
+    color: #4b5563; 
 }
 .dark #bottom-sheet-content .srs-info-item strong {
-    color: #d1d5db; /* Tailwind gray-300 */
+    color: #d1d5db; 
 }
 
-/* CSS cho textarea ghi chú trong Bottom Sheet (nếu có) */
 #bottom-sheet-notes-textarea {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #d1d5db; /* Tailwind gray-300 */
-    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #d1d5db; 
+    border-radius: 0.375rem; 
     min-height: 80px;
     margin-bottom: 0.5rem;
 }
 .dark #bottom-sheet-notes-textarea {
-    background-color: #4b5563; /* Tailwind gray-600 */
-    border-color: #6b7280; /* Tailwind gray-500 */
-    color: #e5e7eb; /* Tailwind gray-200 */
+    background-color: #4b5563; 
+    border-color: #6b7280; 
+    color: #e5e7eb; 
 }
-/* CSS cho Bottom Sheet ở chế độ xem video */
+
+/* *** CẬP NHẬT CSS CHO BOTTOM SHEET VIDEO MODE *** */
 #bottom-sheet.bottom-sheet-video-mode {
-    max-height: 85vh; /* Tăng chiều cao tối đa cho chế độ video */
+    max-height: 90vh; /* Tăng chiều cao tối đa lên 90% viewport height */
+    height: 90vh; /* Có thể đặt height cố định để đảm bảo nó luôn cao */
+    padding-top: 0.5rem; /* Giảm padding trên nếu cần */
     padding-bottom: 0.5rem; /* Giảm padding dưới nếu cần */
 }
 
 #bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content {
-    /* Cho phép nội dung (iframe) chiếm gần hết không gian */
     flex-grow: 1; 
-    display: flex; /* Để iframe có thể co giãn */
+    display: flex; 
     flex-direction: column;
+    padding: 0; /* Bỏ padding của content để iframe chiếm trọn */
 }
 
-/* Đảm bảo iframe video chiếm không gian tốt */
 #bottom-sheet-content .video-iframe-container {
     width: 100%;
-    flex-grow: 1; /* Cho phép container này lớn lên để lấp đầy không gian */
+    /* Sử dụng aspect-ratio để duy trì tỷ lệ 16:9 cho video */
+    aspect-ratio: 16 / 9; 
+    /* Hoặc nếu không dùng aspect-ratio, bạn có thể set flex-grow và để iframe tự điều chỉnh */
+    /* flex-grow: 1; */
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: #000; /* Nền đen cho khu vực video */
+    max-height: calc(90vh - 60px); /* Trừ đi chiều cao của header bottom sheet (ước lượng) */
 }
 
 #bottom-sheet-content .video-iframe-container iframe {
     width: 100%;
-    height: 100%; /* Iframe sẽ chiếm toàn bộ container của nó */
-    min-height: 300px; /* Đặt chiều cao tối thiểu để không quá nhỏ */
+    height: 100%; 
 }
+/* *** KẾT THÚC CẬP NHẬT CSS *** */
