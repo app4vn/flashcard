@@ -57,8 +57,9 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
-    actionBtnNotes, actionBtnVideo, actionBtnPracticeCard,
-    exitSingleCardPracticeBtn; 
+    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, // Đổi actionBtnVideo thành actionBtnMedia
+    exitSingleCardPracticeBtn,
+    bottomSheetTabsContainer, tabBtnYouglish, tabBtnYouTube; // Biến cho tabs
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
@@ -84,6 +85,20 @@ let currentEditingDeckId = null;
 let isSingleCardPracticeMode = false;
 let originalCurrentData = [];
 let originalCurrentIndex = 0;
+let currentYouglishWidget = null; // Để lưu instance của Youglish widget
+let isYouglishApiReady = false;   // Cờ báo API Youglish đã sẵn sàng
+
+// Hàm này sẽ được Youglish API gọi khi nó tải xong
+window.onYouglishAPIReady = function() {
+    console.log("Youglish API is ready.");
+    isYouglishApiReady = true;
+    // Nếu có một hàm chờ để tạo widget, có thể gọi ở đây
+    if (typeof window.processPendingYouglishWidget === 'function') {
+        window.processPendingYouglishWidget();
+        window.processPendingYouglishWidget = null; // Xóa đi sau khi gọi
+    }
+};
+
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
 
@@ -402,9 +417,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     userEmailDisplayMain = document.getElementById('user-email-display');
     srsFeedbackToastEl = document.getElementById('srs-feedback-toast'); 
     actionBtnNotes = document.getElementById('action-btn-notes');
-    actionBtnVideo = document.getElementById('action-btn-video');
+    actionBtnMedia = document.getElementById('action-btn-media'); // Đã đổi ID
     actionBtnPracticeCard = document.getElementById('action-btn-practice-card');
     exitSingleCardPracticeBtn = document.getElementById('exit-single-card-practice-btn');
+    bottomSheetTabsContainer = document.getElementById('bottom-sheet-tabs');
+    tabBtnYouglish = document.getElementById('tab-btn-youglish');
+    tabBtnYouTube = document.getElementById('tab-btn-youtube');
     
     window.wordDisplay = wordDisplay; 
     window.updateSidebarFilterVisibility = updateSidebarFilterVisibility;
@@ -1376,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
-        if (actionBtnVideo) actionBtnVideo.style.display = 'none'; 
+        if (actionBtnMedia) actionBtnMedia.style.display = 'flex'; // Luôn hiển thị nút media
         if (exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none'; 
 
 
@@ -1415,7 +1433,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if(speakerBtn) speakerBtn.style.display = 'block';
                 if(flashcardElement) flashcardElement.classList.remove('practice-mode-word-quiz');
             }
-            // Hiển thị nút thoát nếu đang ở chế độ luyện tập một thẻ
             if (isSingleCardPracticeMode && exitSingleCardPracticeBtn) {
                 exitSingleCardPracticeBtn.style.display = 'inline-flex';
                 if(prevBtn) prevBtn.style.display = 'none';
@@ -1525,7 +1542,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const hasActionsForBottomSheet = (item.isUserCard && userId) || (!item.isUserCard && userId);
             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = hasActionsForBottomSheet ? 'block' : 'none';
             if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = hasActionsForBottomSheet ? 'block' : 'none';
-            if (actionBtnVideo) actionBtnVideo.style.display = item.videoUrl ? 'flex' : 'none'; 
+            // Nút actionBtnMedia (Youglish) sẽ luôn hiển thị nếu có thẻ
+            if (actionBtnMedia && item) actionBtnMedia.style.display = 'flex'; else if (actionBtnMedia) actionBtnMedia.style.display = 'none';
 
 
             if (item.meanings && item.meanings.length > 0) { item.meanings.forEach((mObj, idx) => { const meaningBlockDiv = document.createElement('div'); meaningBlockDiv.className = `meaning-block-on-card ${idx > 0 ? "mt-4 pt-3 border-t border-blue-400 border-opacity-50" : (item.meanings.length > 1 ? "bg-black bg-opacity-10 p-3 rounded-lg" : "") }`; const meaningTextP = document.createElement('p'); meaningTextP.className = "meaning-text-on-card"; if (item.meanings.length > 1) { meaningTextP.textContent = `${idx + 1}. ${mObj.text}`; } else { meaningTextP.textContent = mObj.text; } meaningBlockDiv.appendChild(meaningTextP); if (mObj.notes) { const meaningNotesP = document.createElement('p'); meaningNotesP.className = "meaning-notes-on-card"; meaningNotesP.textContent = mObj.notes; meaningBlockDiv.appendChild(meaningNotesP); } if (mObj.examples && mObj.examples.length > 0) { const examplesContainer = document.createElement('div'); examplesContainer.className = "ml-3 mt-3"; const examplesListDiv = document.createElement('div'); examplesListDiv.className = "space-y-1.5"; examplesListDiv.dataset.meaningId = mObj.id; const maxVisibleExamples = 1; const totalExamples = mObj.examples.length; mObj.examples.forEach((ex, exIdx) => { const exD = document.createElement('div'); exD.className="example-item-on-card"; if (exIdx >= maxVisibleExamples) { exD.classList.add('hidden'); } const eP = document.createElement('p'); eP.className="example-eng-on-card"; const textSpan = document.createElement('span'); const enLabel = document.createElement('span'); enLabel.className = 'example-label'; enLabel.textContent = 'EN: '; textSpan.appendChild(enLabel); textSpan.appendChild(document.createTextNode(ex.eng)); eP.appendChild(textSpan); const copyBtn = document.createElement('button'); copyBtn.className = 'copy-example-btn'; copyBtn.title = 'Sao chép ví dụ'; const initialCopySvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>`; const copiedSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`; copyBtn.innerHTML = initialCopySvg; copyBtn.onclick = (e) => { e.stopPropagation(); navigator.clipboard.writeText(ex.eng).then(() => { copyBtn.innerHTML = copiedSvg; setTimeout(() => { copyBtn.innerHTML = initialCopySvg; }, 1500); }).catch(err => { console.error('Không thể sao chép: ', err); }); }; eP.appendChild(copyBtn); exD.appendChild(eP); if(ex.vie){ const vP = document.createElement('p');vP.className="example-vie-on-card";const vnLabel = document.createElement('span');vnLabel.className = 'example-label';vnLabel.textContent = 'VN: ';vP.appendChild(vnLabel);vP.appendChild(document.createTextNode(`(${ex.vie})`));exD.appendChild(vP); } if(ex.exampleNotes){ const nP=document.createElement('p');nP.className="example-notes-on-card";nP.textContent=`Ghi chú VD: ${ex.exampleNotes}`;exD.appendChild(nP); } examplesListDiv.appendChild(exD); }); examplesContainer.appendChild(examplesListDiv); if (totalExamples > maxVisibleExamples) { const toggleExamplesBtn = document.createElement('button'); toggleExamplesBtn.className = "toggle-examples-btn"; let hiddenCount = totalExamples - maxVisibleExamples; toggleExamplesBtn.textContent = `Xem thêm ${hiddenCount} ví dụ...`; toggleExamplesBtn.dataset.expanded = "false"; toggleExamplesBtn.onclick = (e) => { e.stopPropagation(); const isExpanded = toggleExamplesBtn.dataset.expanded === "true"; const exampleItems = examplesListDiv.querySelectorAll('.example-item-on-card'); exampleItems.forEach((item, itemIdx) => { if (itemIdx >= maxVisibleExamples) { item.classList.toggle('hidden', isExpanded); } }); if (isExpanded) { toggleExamplesBtn.textContent = `Xem thêm ${hiddenCount} ví dụ...`; toggleExamplesBtn.dataset.expanded = "false"; } else { toggleExamplesBtn.textContent = "Ẩn bớt ví dụ"; toggleExamplesBtn.dataset.expanded = "true"; } }; examplesContainer.appendChild(toggleExamplesBtn); } meaningBlockDiv.appendChild(examplesContainer); } if(meaningDisplayContainer) meaningDisplayContainer.appendChild(meaningBlockDiv); }); } 
@@ -1667,7 +1685,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             flashcardElement.classList.remove('practice-mode-front-only');
             flashcardElement.classList.add('flipped'); 
             
-            const cardToPractice = isSingleCardPracticeMode ? originalCurrentData[originalCurrentIndex] : window.currentData[window.currentIndex];
             processSrsRatingWrapper(isCorrect ? 'easy' : 'again'); 
             updateCardInfo(); 
         }
@@ -1956,16 +1973,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        function openBottomSheet(cardItem, viewType = 'default') { 
+        function openBottomSheet(cardItem, viewType = 'default', subView = 'youglish') { 
             if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
             
-            let hasActions = false; // *** KHAI BÁO BIẾN hasActions ở đây ***
+            let hasActions = false; 
             bottomSheetContent.innerHTML = ''; 
             const loggedIn = getCurrentUserId();
             let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
 
-            bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode');
+            // Reset classes và style
+            bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode');
             bottomSheet.style.paddingBottom = ''; 
+            if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
+
 
             if (viewType === 'default') {
                 bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2074,28 +2094,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     bottomSheetContent.appendChild(deleteBtnEl);
                     hasActions = true;
                 }
-                 if (!hasActions) { 
-                    console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
-                    if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
-                    if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
-                    return; 
-                }
-
             } else if (viewType === 'notes') {
-    bottomSheet.classList.add('bottom-sheet-notes-mode');
-    bottomSheetTitle.textContent = `Ghi chú / Mẹo nhớ / Ví dụ: ${cardTerm.length > 15 ? cardTerm.substring(0,12) + '...' : cardTerm}`; // Cập nhật tiêu đề
-    const notesTextarea = document.createElement('textarea');
-    notesTextarea.id = 'bottom-sheet-notes-textarea';
-    notesTextarea.value = cardItem.generalNotes || '';
-    notesTextarea.rows = 8; // Có thể tăng số dòng mặc định
-    notesTextarea.placeholder = "Nhập ghi chú chung, mẹo ghi nhớ (ví dụ: Mẹo: ...), hoặc ví dụ của bạn (ví dụ: VD: ...)"; // Cập nhật placeholder
-    bottomSheetContent.appendChild(notesTextarea);
+                bottomSheet.classList.add('bottom-sheet-notes-mode');
+                bottomSheetTitle.textContent = `Ghi chú cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                const notesTextarea = document.createElement('textarea');
+                notesTextarea.id = 'bottom-sheet-notes-textarea';
+                notesTextarea.value = cardItem.generalNotes || '';
+                notesTextarea.rows = 8; // Tăng số dòng mặc định
+                notesTextarea.placeholder = "Nhập ghi chú chung, mẹo ghi nhớ (ví dụ: Mẹo: ...), hoặc ví dụ của bạn (ví dụ: VD: ...)";
+                bottomSheetContent.appendChild(notesTextarea);
 
-    const saveNotesBtn = document.createElement('button');
-    saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Nội dung`; // Cập nhật text nút
+                const saveNotesBtn = document.createElement('button');
+                saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Nội dung`;
                 saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700', 'py-2', 'px-4', 'rounded-md', 'w-full', 'flex', 'items-center', 'justify-center');
                 saveNotesBtn.onclick = async () => {
-                    const newNotes = notesTextarea.value.trim();
+                    const newNotes = notesTextarea.value; // Không trim() để giữ lại xuống dòng
                     const dataToUpdate = { generalNotes: newNotes, updatedAt: serverTimestamp() };
                     let updateSuccess = false;
                     if (cardItem.isUserCard && loggedIn) {
@@ -2118,29 +2131,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     closeBottomSheet();
                 };
                 bottomSheetContent.appendChild(saveNotesBtn);
-            } else if (viewType === 'video') {
-                bottomSheet.classList.add('bottom-sheet-video-mode');
-                bottomSheetTitle.textContent = `Video: ${cardTerm.length > 25 ? cardTerm.substring(0,22) + '...' : cardTerm}`;
-                if (cardItem.videoUrl) {
-                    const videoId = extractYouTubeVideoId(cardItem.videoUrl);
-                    if (videoId) {
-                        const iframeContainer = document.createElement('div');
-                        iframeContainer.className = 'video-iframe-container w-full'; 
-                        const iframe = document.createElement('iframe');
-                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
-                        iframe.title = "YouTube video player";
-                        iframe.frameBorder = "0";
-                        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-                        iframe.allowFullscreen = true;
-                        
-                        iframeContainer.appendChild(iframe);
-                        bottomSheetContent.appendChild(iframeContainer);
-                    } else {
-                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video không hợp lệ hoặc không phải YouTube.</p>';
-                    }
-                } else {
-                    bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Không có video cho thẻ này.</p>';
+                hasActions = true; // Luôn có action là lưu ghi chú
+            } else if (viewType === 'media') {
+                bottomSheet.classList.add('bottom-sheet-media-mode'); // Class chung cho media
+                bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'flex';
+                
+                // Tạo các container cho nội dung tab (nếu chưa có)
+                let youglishContainer = document.getElementById('youglish-tab-content');
+                if (!youglishContainer) {
+                    youglishContainer = document.createElement('div');
+                    youglishContainer.id = 'youglish-tab-content';
+                    youglishContainer.className = 'bottom-sheet-tab-content';
+                    bottomSheetContent.appendChild(youglishContainer);
                 }
+                let youtubeContainer = document.getElementById('youtube-tab-content');
+                if (!youtubeContainer) {
+                    youtubeContainer = document.createElement('div');
+                    youtubeContainer.id = 'youtube-tab-content';
+                    youtubeContainer.className = 'bottom-sheet-tab-content hidden'; // Ban đầu ẩn
+                    bottomSheetContent.appendChild(youtubeContainer);
+                }
+                
+                setActiveMediaTab(initialSubView, cardItem); // Mặc định mở tab Youglish
+                hasActions = true; 
             } else if (viewType === 'practice_options') {
                  bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
                  const practiceMeaningBtn = document.createElement('button');
@@ -2158,8 +2172,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     closeBottomSheet(); 
                 };
                  bottomSheetContent.appendChild(practiceTypingBtn);
+                 hasActions = true;
             }
             
+            if (!hasActions && viewType === 'default') { 
+                 console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
+                 if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
+                 if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
+                 return; 
+            }
+
             bottomSheetOverlay.classList.remove('hidden');
             bottomSheet.classList.remove('translate-y-full');
             requestAnimationFrame(() => {
@@ -2168,11 +2190,102 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        function setActiveMediaTab(tabName, cardItem) {
+            const youglishContent = document.getElementById('youglish-tab-content');
+            const youtubeContent = document.getElementById('youtube-tab-content');
+            let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
+
+            if (currentYouglishWidget) { // Hủy widget cũ nếu có
+                try { currentYouglishWidget.destroy(); } catch(e) { console.warn("Error destroying Youglish widget", e); }
+                currentYouglishWidget = null;
+            }
+            if (youglishContent) youglishContent.innerHTML = ''; // Xóa nội dung cũ của các tab
+            if (youtubeContent) youtubeContent.innerHTML = '';
+
+            if (tabName === 'youglish') {
+                if (tabBtnYouglish) tabBtnYouglish.classList.add('active');
+                if (tabBtnYouTube) tabBtnYouTube.classList.remove('active');
+                if (youglishContent) youglishContent.classList.remove('hidden');
+                if (youtubeContent) youtubeContent.classList.add('hidden');
+
+                const widgetContainerId = 'youglish-widget-dynamic-' + Date.now();
+                const widgetDiv = document.createElement('div');
+                widgetDiv.id = widgetContainerId;
+                widgetDiv.className = 'video-iframe-container'; // Dùng chung class để CSS xử lý kích thước
+                if (youglishContent) youglishContent.appendChild(widgetDiv);
+                
+                const createWidget = () => {
+                    if (document.getElementById(widgetContainerId)) {
+                         currentYouglishWidget = new YG.Widget(widgetContainerId, {
+                            width: "100%", 
+                            components: 0, 
+                            events: {
+                                'onFetchDone': function(event) {
+                                    if (event.totalResults === 0 && document.getElementById(widgetContainerId)) {
+                                        document.getElementById(widgetContainerId).innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Không tìm thấy kết quả cho từ này trên Youglish.</p>';
+                                    }
+                                },
+                                'onError': function(event) {
+                                    if (document.getElementById(widgetContainerId)) {
+                                        document.getElementById(widgetContainerId).innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải Youglish widget.</p>';
+                                    }
+                                }
+                            }
+                        });
+                        currentYouglishWidget.fetch(cardTerm, "english", "us");
+                    }
+                };
+
+                if (isYouglishApiReady && typeof YG !== "undefined" && YG.Widget) {
+                    createWidget();
+                } else {
+                    console.log("Youglish API not ready, queuing widget creation.");
+                    window.processPendingYouglishWidget = createWidget; 
+                    // Script Youglish sẽ gọi onYouglishAPIReady, sau đó onYouglishAPIReady sẽ gọi createWidget
+                }
+
+            } else if (tabName === 'youtube_custom') {
+                if (tabBtnYouTube) tabBtnYouTube.classList.add('active');
+                if (tabBtnYouglish) tabBtnYouglish.classList.remove('active');
+                if (youtubeContent) youtubeContent.classList.remove('hidden');
+                if (youglishContent) youglishContent.classList.add('hidden');
+
+                if (cardItem.videoUrl) {
+                    const videoId = extractYouTubeVideoId(cardItem.videoUrl);
+                    if (videoId) {
+                        const iframeContainer = document.createElement('div');
+                        iframeContainer.className = 'video-iframe-container w-full'; 
+                        const iframe = document.createElement('iframe');
+                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                        iframe.title = "YouTube video player";
+                        iframe.frameBorder = "0";
+                        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                        iframe.allowFullscreen = true;
+                        iframeContainer.appendChild(iframe);
+                        if (youtubeContent) youtubeContent.appendChild(iframeContainer);
+                    } else {
+                        if (youtubeContent) youtubeContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video YouTube không hợp lệ.</p>';
+                    }
+                } else {
+                    if (youtubeContent) youtubeContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Chưa có video YouTube nào được gán cho thẻ này. Bạn có thể thêm link trong phần sửa thẻ.</p>';
+                }
+            }
+        }
+
+
         function closeBottomSheet() {
             if (!bottomSheet || !bottomSheetOverlay) return;
-            bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode'); 
+            
+            if (currentYouglishWidget) { // Hủy Youglish widget nếu có
+                try { currentYouglishWidget.destroy(); } catch(e) { console.warn("Error destroying Youglish widget during close", e); }
+                currentYouglishWidget = null;
+            }
+
+            bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode'); 
             bottomSheetOverlay.classList.remove('active');
             bottomSheet.style.paddingBottom = ''; 
+            if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; // Ẩn tabs khi đóng
+
             setTimeout(() => {
                 bottomSheet.classList.add('translate-y-full');
                 bottomSheetOverlay.classList.add('hidden');
@@ -2180,6 +2293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (videoIframe) {
                     videoIframe.src = ''; 
                 }
+                bottomSheetContent.innerHTML = ''; // Xóa sạch nội dung để chuẩn bị cho lần mở tiếp theo
             }, 300); 
         }
         
@@ -2377,15 +2491,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const currentCard = window.currentData[window.currentIndex];
                 if (currentCard) openBottomSheet(currentCard, 'notes');
             });
-            if(actionBtnVideo) actionBtnVideo.addEventListener('click', () => {
+            if(actionBtnMedia) actionBtnMedia.addEventListener('click', () => { // Đã đổi ID
                 const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'video');
+                if (currentCard) openBottomSheet(currentCard, 'media', 'youglish'); // Mặc định mở tab Youglish
             });
             if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
                 const currentCard = window.currentData[window.currentIndex];
                 if (currentCard) openBottomSheet(currentCard, 'practice_options');
             });
             if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.addEventListener('click', exitSingleCardPractice);
+
+            if(tabBtnYouglish) tabBtnYouglish.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if(currentCard) setActiveMediaTab('youglish', currentCard);
+            });
+            if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if(currentCard) setActiveMediaTab('youtube_custom', currentCard);
+            });
 
 
             if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';if(cat==='phrasalVerbs' || cat === 'collocations'){st.tag='all';if(tagSelect)tagSelect.value='all';st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';} const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}st.filterMarked='all_study';if(filterCardStatusSelect)filterCardStatusSelect.value='all_study';st.currentIndex=0;applyAllFilters();closeSidebar();});
