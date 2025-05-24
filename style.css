@@ -180,7 +180,7 @@ body {
 #bottom-sheet.active {
     transform: translateY(0);
 }
-#bottom-sheet-content button {
+#bottom-sheet-content button:not(.bottom-sheet-tab-btn) { /* Áp dụng cho các nút action, không phải tab */
     display: flex;
     align-items: center;
     width: 100%;
@@ -189,13 +189,13 @@ body {
     border-radius: 0.375rem; 
     transition: background-color 0.15s ease-in-out;
 }
-#bottom-sheet-content button:hover {
+#bottom-sheet-content button:not(.bottom-sheet-tab-btn):hover {
     background-color: #f3f4f6; 
 }
-.dark #bottom-sheet-content button:hover {
+.dark #bottom-sheet-content button:not(.bottom-sheet-tab-btn):hover {
     background-color: #374151; 
 }
-#bottom-sheet-content button i {
+#bottom-sheet-content button:not(.bottom-sheet-tab-btn) i {
     width: 1.25rem; 
     margin-right: 0.75rem; 
     text-align: center;
@@ -224,16 +224,38 @@ body {
     justify-content: center;
     padding: 0.5rem 0.25rem; 
     border-radius: 0.375rem; 
-    transition: background-color 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     font-size: 0.7rem; 
     line-height: 1; 
     min-height: 50px; 
+    border: 1px solid transparent; /* Thêm border transparent để không bị giật khi hover */
 }
+.additional-action-btn:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+/* Làm nổi bật nút Nghe/Xem (Youglish) */
+#action-btn-media { /* Hoặc #action-btn-youglish tùy theo ID bạn đặt */
+    background-color: #ecfdf5; /* Tailwind green-50 */
+    color: #059669; /* Tailwind green-700 */
+    border: 1px solid #a7f3d0; /* Tailwind green-200 */
+}
+#action-btn-media:hover {
+    background-color: #d1fae5; /* Tailwind green-100 */
+    border-color: #6ee7b7; /* Tailwind green-300 */
+}
+.dark #action-btn-media {
+    background-color: #064e3b; /* Tailwind green-900 */
+    color: #a7f3d0; /* Tailwind green-200 */
+    border-color: #057a55; /* Tailwind green-700 */
+}
+.dark #action-btn-media:hover {
+    background-color: #047857; /* Tailwind green-800 */
+}
+
+
 .additional-action-btn i {
     margin-bottom: 0.125rem; 
     font-size: 1rem; 
-}
-.additional-action-btn span {
 }
 
 #bottom-sheet-content .srs-info-item {
@@ -253,7 +275,7 @@ body {
     padding: 0.5rem;
     border: 1px solid #d1d5db; 
     border-radius: 0.375rem; 
-    min-height: 80px; 
+    min-height: 150px; /* Tăng chiều cao tối thiểu cho textarea trong bottom sheet */
     resize: vertical; 
     margin-bottom: 0.5rem;
 }
@@ -263,51 +285,99 @@ body {
     color: #e5e7eb; 
 }
 
-/* *** CẬP NHẬT CSS CHO BOTTOM SHEET VIDEO MODE VÀ NOTES MODE *** */
-#bottom-sheet.bottom-sheet-video-mode {
-    height: 75vh; /* Đặt chiều cao khoảng 75% viewport height, ví dụ 75vh */
-    max-height: 75vh; /* Giới hạn chiều cao tối đa */
-    padding: 0.5rem; /* Giữ một chút padding cho toàn bộ sheet */
-}
-#bottom-sheet.bottom-sheet-notes-mode { 
-    height: 60vh; /* Chiều cao cho chế độ ghi chú, có thể điều chỉnh */
-    max-height: 70vh; 
+#bottom-sheet.bottom-sheet-video-mode,
+#bottom-sheet.bottom-sheet-notes-mode,
+#bottom-sheet.bottom-sheet-media-mode { /* Thêm class cho media mode */
+    height: 75vh; 
+    max-height: 75vh; 
     padding: 0.5rem; 
 }
 
-
 #bottom-sheet.bottom-sheet-video-mode #bottom-sheet-title,
-#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-title {
+#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-title,
+#bottom-sheet.bottom-sheet-media-mode #bottom-sheet-title {
     margin-bottom: 0.5rem; 
     padding-bottom: 0.5rem; 
-    flex-shrink: 0; /* Ngăn header co lại khi nội dung lớn */
+    flex-shrink: 0; 
 }
 
 #bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content,
-#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-content {
+#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-content,
+#bottom-sheet.bottom-sheet-media-mode #bottom-sheet-content {
     flex-grow: 1; 
     display: flex; 
     flex-direction: column; 
-    padding: 0; 
-    overflow: hidden; /* Quan trọng: Ngăn scrollbar không mong muốn ở đây */
+    /* padding: 0; Bỏ padding ở đây để các tab có thể tự quản lý */
+    overflow: hidden; 
 }
 
-/* Riêng cho video */
-#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container {
+/* CSS cho Tabs trong Bottom Sheet */
+#bottom-sheet-tabs {
+    display: flex; /* Sẽ được JS bật lên khi cần */
+    border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
+    margin-bottom: 0.75rem; /* mb-3 */
+}
+.dark #bottom-sheet-tabs {
+    border-bottom-color: #374151; /* Tailwind gray-700 */
+}
+.bottom-sheet-tab-btn {
+    flex-grow: 1;
+    padding: 0.75rem 0.5rem; /* py-3 px-2 */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    color: #6b7280; /* Tailwind gray-500 */
+    border-bottom: 2px solid transparent; /* Đường gạch dưới cho tab không active */
+    transition: color 0.2s, border-color 0.2s;
+}
+.dark .bottom-sheet-tab-btn {
+    color: #9ca3af; /* Tailwind gray-400 */
+}
+.bottom-sheet-tab-btn:hover {
+    color: #1f2937; /* Tailwind gray-800 */
+}
+.dark .bottom-sheet-tab-btn:hover {
+    color: #e5e7eb; /* Tailwind gray-200 */
+}
+.bottom-sheet-tab-btn.active {
+    color: #4f46e5; /* Tailwind indigo-600 */
+    border-bottom-color: #4f46e5; /* Tailwind indigo-600 */
+}
+.dark .bottom-sheet-tab-btn.active {
+    color: #818cf8; /* Tailwind indigo-400 */
+    border-bottom-color: #818cf8; /* Tailwind indigo-400 */
+}
+
+/* CSS cho nội dung của từng tab */
+.bottom-sheet-tab-content {
     width: 100%;
-    /* aspect-ratio: 16 / 9;  Tạm thời bỏ để JS kiểm soát chiều cao */
+    height: 100%; /* Để nội dung tab chiếm hết không gian còn lại */
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung tab dài */
+}
+.bottom-sheet-tab-content.hidden {
+    display: none;
+}
+
+
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container,
+#bottom-sheet.bottom-sheet-media-mode #bottom-sheet-content .video-iframe-container { /* Áp dụng cho cả media mode */
+    width: 100%;
+    aspect-ratio: 16 / 9; 
     background-color: #000; 
     margin: auto 0; 
     display: flex; 
     align-items: center;
     justify-content: center;
-    flex-grow: 1; /* Cho phép container này lớn lên */
-    overflow: hidden; /* Đảm bảo iframe không tràn ra ngoài */
-    position: relative; /* Để iframe có thể định vị tuyệt đối bên trong */
+    flex-grow: 1; 
+    overflow: hidden; 
+    position: relative; 
 }
 
-#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container iframe {
-    /* JS sẽ đặt width và height cho iframe để duy trì aspect ratio */
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container iframe,
+#bottom-sheet.bottom-sheet-media-mode #bottom-sheet-content .video-iframe-container iframe {
     position: absolute;
     top: 0;
     left: 0;
@@ -316,21 +386,21 @@ body {
     border: none; 
 }
 
-/* Riêng cho notes */
 #bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-content {
     padding: 0.5rem; 
-    overflow-y: auto; /* Cho phép cuộn nếu nội dung ghi chú dài */
+    overflow-y: auto; 
 }
 
 #bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-notes-textarea {
     flex-grow: 1; 
-    min-height: 150px; /* Tăng chiều cao tối thiểu cho textarea */
-    /* Đảm bảo textarea không gây scroll cho #bottom-sheet-content */
-    max-height: calc(100% - 4rem); /* Trừ đi chiều cao của nút Lưu (ước lượng) */
+    min-height: 150px; 
+    max-height: calc(100% - 4rem); 
 }
-/* *** KẾT THÚC CẬP NHẬT CSS *** */
 
 #notes-display {
     white-space: pre-wrap; 
     word-break: break-word; 
+    font-size: 0.875rem; 
+    line-height: 1.5;   
+    color: #e0f2fe;     
 }
