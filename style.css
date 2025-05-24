@@ -252,7 +252,9 @@ body {
     padding: 0.5rem;
     border: 1px solid #d1d5db; 
     border-radius: 0.375rem; 
-    min-height: 80px;
+    min-height: 80px; /* Chiều cao tối thiểu ban đầu */
+    /* Sẽ cho phép cuộn nếu nội dung dài hơn */
+    resize: vertical; /* Cho phép người dùng thay đổi kích thước theo chiều dọc */
     margin-bottom: 0.5rem;
 }
 .dark #bottom-sheet-notes-textarea {
@@ -261,19 +263,22 @@ body {
     color: #e5e7eb; 
 }
 
-/* *** CẬP NHẬT CSS CHO BOTTOM SHEET VIDEO MODE *** */
-#bottom-sheet.bottom-sheet-video-mode {
-    height: 75vh; /* Đặt chiều cao khoảng 75% viewport height */
-    max-height: 75vh; /* Giới hạn chiều cao tối đa */
+/* *** CẬP NHẬT CSS CHO BOTTOM SHEET VIDEO MODE VÀ NOTES MODE *** */
+#bottom-sheet.bottom-sheet-video-mode,
+#bottom-sheet.bottom-sheet-notes-mode { /* Áp dụng cho cả notes mode */
+    height: 75vh; /* Khoảng 2/3 đến 3/4 màn hình */
+    max-height: 75vh; 
     padding: 0.5rem; 
 }
 
-#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-title {
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-title,
+#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-title {
     margin-bottom: 0.5rem; 
     padding-bottom: 0.5rem; 
 }
 
-#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content {
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content,
+#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-content {
     flex-grow: 1; 
     display: flex; 
     flex-direction: column; 
@@ -281,25 +286,32 @@ body {
     overflow: hidden; 
 }
 
-#bottom-sheet-content .video-iframe-container {
+/* Riêng cho video */
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container {
     width: 100%;
-    /* Duy trì tỷ lệ 16:9 cho video, nhưng cho phép nó co lại nếu không đủ chiều cao */
-    /* Chúng ta sẽ để JS tính toán chiều cao tối ưu cho iframe sau */
-    /* aspect-ratio: 16 / 9;  <-- Tạm thời bỏ để JS kiểm soát chiều cao tốt hơn */
+    aspect-ratio: 16 / 9; 
     background-color: #000; 
     margin: auto 0; 
-    display: flex; /* Để căn giữa iframe */
+    display: flex; 
     align-items: center;
     justify-content: center;
-    /* Chiều cao của container này sẽ được điều chỉnh bằng JS để vừa với video */
-    /* Hoặc có thể để nó chiếm toàn bộ không gian còn lại của bottom-sheet-content */
-    flex-grow: 1;
+    flex-grow: 1; /* Cho phép co giãn nếu cần, nhưng aspect-ratio sẽ ưu tiên */
 }
 
-#bottom-sheet-content .video-iframe-container iframe {
-    /* JS sẽ đặt width và height cho iframe để duy trì aspect ratio */
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container iframe {
     max-width: 100%;
     max-height: 100%;
     border: none; 
+}
+
+/* Riêng cho notes */
+#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-content {
+    padding: 0.5rem; /* Thêm lại padding cho content của notes */
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung ghi chú dài */
+}
+
+#bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-notes-textarea {
+    flex-grow: 1; /* Cho textarea chiếm hết không gian còn lại */
+    min-height: 150px; /* Tăng chiều cao tối thiểu cho textarea */
 }
 /* *** KẾT THÚC CẬP NHẬT CSS *** */
