@@ -2148,7 +2148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     bottomSheetContent.appendChild(youtubeContainer);
                 }
                 
-                setActiveMediaTab(initialSubView, cardItem); 
+                setActiveMediaTab(subView, cardItem); 
                 hasActions = true; 
             } else if (viewType === 'practice_options') {
                  bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
