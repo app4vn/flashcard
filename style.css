@@ -180,7 +180,7 @@ body {
 #bottom-sheet.active {
     transform: translateY(0);
 }
-#bottom-sheet-content button:not(.bottom-sheet-tab-btn) { /* Áp dụng cho các nút action, không phải tab */
+#bottom-sheet-content button:not(.bottom-sheet-tab-btn) { 
     display: flex;
     align-items: center;
     width: 100%;
@@ -228,28 +228,27 @@ body {
     font-size: 0.7rem; 
     line-height: 1; 
     min-height: 50px; 
-    border: 1px solid transparent; /* Thêm border transparent để không bị giật khi hover */
+    border: 1px solid transparent; 
 }
 .additional-action-btn:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-/* Làm nổi bật nút Nghe/Xem (Youglish) */
-#action-btn-media { /* Hoặc #action-btn-youglish tùy theo ID bạn đặt */
-    background-color: #ecfdf5; /* Tailwind green-50 */
-    color: #059669; /* Tailwind green-700 */
-    border: 1px solid #a7f3d0; /* Tailwind green-200 */
+#action-btn-media { 
+    background-color: #ecfdf5; 
+    color: #059669; 
+    border: 1px solid #a7f3d0; 
 }
 #action-btn-media:hover {
-    background-color: #d1fae5; /* Tailwind green-100 */
-    border-color: #6ee7b7; /* Tailwind green-300 */
+    background-color: #d1fae5; 
+    border-color: #6ee7b7; 
 }
 .dark #action-btn-media {
-    background-color: #064e3b; /* Tailwind green-900 */
-    color: #a7f3d0; /* Tailwind green-200 */
-    border-color: #057a55; /* Tailwind green-700 */
+    background-color: #064e3b; 
+    color: #a7f3d0; 
+    border-color: #057a55; 
 }
 .dark #action-btn-media:hover {
-    background-color: #047857; /* Tailwind green-800 */
+    background-color: #047857; 
 }
 
 
@@ -275,7 +274,7 @@ body {
     padding: 0.5rem;
     border: 1px solid #d1d5db; 
     border-radius: 0.375rem; 
-    min-height: 150px; /* Tăng chiều cao tối thiểu cho textarea trong bottom sheet */
+    min-height: 150px; 
     resize: vertical; 
     margin-bottom: 0.5rem;
 }
@@ -285,10 +284,11 @@ body {
     color: #e5e7eb; 
 }
 
+/* *** KHÔI PHỤC CSS CHO BOTTOM SHEET VIDEO/MEDIA/NOTES MODE *** */
 #bottom-sheet.bottom-sheet-video-mode,
 #bottom-sheet.bottom-sheet-notes-mode,
-#bottom-sheet.bottom-sheet-media-mode { /* Thêm class cho media mode */
-    height: 75vh; 
+#bottom-sheet.bottom-sheet-media-mode { 
+    height: 75vh; /* Chiều cao khoảng 75% viewport height */
     max-height: 75vh; 
     padding: 0.5rem; 
 }
@@ -307,63 +307,62 @@ body {
     flex-grow: 1; 
     display: flex; 
     flex-direction: column; 
-    /* padding: 0; Bỏ padding ở đây để các tab có thể tự quản lý */
+    padding: 0; 
     overflow: hidden; 
 }
 
 /* CSS cho Tabs trong Bottom Sheet */
 #bottom-sheet-tabs {
-    display: flex; /* Sẽ được JS bật lên khi cần */
-    border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
-    margin-bottom: 0.75rem; /* mb-3 */
+    display: flex; 
+    border-bottom: 1px solid #e5e7eb; 
+    margin-bottom: 0.75rem; 
 }
 .dark #bottom-sheet-tabs {
-    border-bottom-color: #374151; /* Tailwind gray-700 */
+    border-bottom-color: #374151; 
 }
 .bottom-sheet-tab-btn {
     flex-grow: 1;
-    padding: 0.75rem 0.5rem; /* py-3 px-2 */
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 500; /* font-medium */
+    padding: 0.75rem 0.5rem; 
+    font-size: 0.875rem; 
+    font-weight: 500; 
     text-align: center;
     cursor: pointer;
     border: none;
     background-color: transparent;
-    color: #6b7280; /* Tailwind gray-500 */
-    border-bottom: 2px solid transparent; /* Đường gạch dưới cho tab không active */
+    color: #6b7280; 
+    border-bottom: 2px solid transparent; 
     transition: color 0.2s, border-color 0.2s;
 }
 .dark .bottom-sheet-tab-btn {
-    color: #9ca3af; /* Tailwind gray-400 */
+    color: #9ca3af; 
 }
 .bottom-sheet-tab-btn:hover {
-    color: #1f2937; /* Tailwind gray-800 */
+    color: #1f2937; 
 }
 .dark .bottom-sheet-tab-btn:hover {
-    color: #e5e7eb; /* Tailwind gray-200 */
+    color: #e5e7eb; 
 }
 .bottom-sheet-tab-btn.active {
-    color: #4f46e5; /* Tailwind indigo-600 */
-    border-bottom-color: #4f46e5; /* Tailwind indigo-600 */
+    color: #4f46e5; 
+    border-bottom-color: #4f46e5; 
 }
 .dark .bottom-sheet-tab-btn.active {
-    color: #818cf8; /* Tailwind indigo-400 */
-    border-bottom-color: #818cf8; /* Tailwind indigo-400 */
+    color: #818cf8; 
+    border-bottom-color: #818cf8; 
 }
 
 /* CSS cho nội dung của từng tab */
 .bottom-sheet-tab-content {
     width: 100%;
-    height: 100%; /* Để nội dung tab chiếm hết không gian còn lại */
-    overflow-y: auto; /* Cho phép cuộn nếu nội dung tab dài */
+    height: 100%; 
+    overflow-y: auto; 
 }
 .bottom-sheet-tab-content.hidden {
     display: none;
 }
 
-
-#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container,
-#bottom-sheet.bottom-sheet-media-mode #bottom-sheet-content .video-iframe-container { /* Áp dụng cho cả media mode */
+/* Riêng cho video/media (Youglish hoặc YouTube) */
+#bottom-sheet.bottom-sheet-media-mode #bottom-sheet-content .video-iframe-container {
     width: 100%;
     aspect-ratio: 16 / 9; 
     background-color: #000; 
@@ -376,7 +375,6 @@ body {
     position: relative; 
 }
 
-#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content .video-iframe-container iframe,
 #bottom-sheet.bottom-sheet-media-mode #bottom-sheet-content .video-iframe-container iframe {
     position: absolute;
     top: 0;
@@ -386,6 +384,7 @@ body {
     border: none; 
 }
 
+/* Riêng cho notes */
 #bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-content {
     padding: 0.5rem; 
     overflow-y: auto; 
@@ -396,6 +395,7 @@ body {
     min-height: 150px; 
     max-height: calc(100% - 4rem); 
 }
+/* *** KẾT THÚC CẬP NHẬT CSS *** */
 
 #notes-display {
     white-space: pre-wrap; 
