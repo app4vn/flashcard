@@ -1392,7 +1392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
-        if (actionBtnMedia) actionBtnMedia.style.display = 'flex'; // Luôn hiển thị nút media
+        if (actionBtnMedia) actionBtnMedia.style.display = 'flex'; 
         if (exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none'; 
 
 
@@ -1970,6 +1970,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
+        // *** SỬA LỖI: Đảm bảo tham số thứ ba là 'subView' ***
         function openBottomSheet(cardItem, viewType = 'default', subView = 'youglish') { 
             if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
             
@@ -2137,7 +2138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!youglishContainer) {
                     youglishContainer = document.createElement('div');
                     youglishContainer.id = 'youglish-tab-content';
-                    youglishContainer.className = 'bottom-sheet-tab-content'; // Sẽ được quản lý active/hidden bởi setActiveMediaTab
+                    youglishContainer.className = 'bottom-sheet-tab-content'; 
                     bottomSheetContent.appendChild(youglishContainer);
                 }
                 let youtubeContainer = document.getElementById('youtube-tab-content');
@@ -2148,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     bottomSheetContent.appendChild(youtubeContainer);
                 }
                 
-                setActiveMediaTab(subView, cardItem); 
+                setActiveMediaTab(subView, cardItem); // *** SỬA Ở ĐÂY: Dùng subView thay vì initialSubView ***
                 hasActions = true; 
             } else if (viewType === 'practice_options') {
                  bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2203,14 +2204,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (youglishContent) youglishContent.classList.remove('hidden');
                 if (youtubeContent) youtubeContent.classList.add('hidden');
 
-                const widgetContainerId = 'youglish-widget-dynamic-' + Date.now(); // ID động
+                const widgetContainerId = 'youglish-widget-dynamic-' + Date.now(); 
                 const widgetDiv = document.createElement('div');
                 widgetDiv.id = widgetContainerId;
                 widgetDiv.className = 'video-iframe-container'; 
                 if (youglishContent) youglishContent.appendChild(widgetDiv);
                 
                 const createWidget = () => {
-                    if (document.getElementById(widgetContainerId)) { // Kiểm tra div còn tồn tại
+                    if (document.getElementById(widgetContainerId)) { 
                          currentYouglishWidget = new YG.Widget(widgetContainerId, {
                             width: "100%", 
                             components: 0, 
