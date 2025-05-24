@@ -268,3 +268,30 @@ body {
     border-color: #6b7280; /* Tailwind gray-500 */
     color: #e5e7eb; /* Tailwind gray-200 */
 }
+/* CSS cho Bottom Sheet ở chế độ xem video */
+#bottom-sheet.bottom-sheet-video-mode {
+    max-height: 85vh; /* Tăng chiều cao tối đa cho chế độ video */
+    padding-bottom: 0.5rem; /* Giảm padding dưới nếu cần */
+}
+
+#bottom-sheet.bottom-sheet-video-mode #bottom-sheet-content {
+    /* Cho phép nội dung (iframe) chiếm gần hết không gian */
+    flex-grow: 1; 
+    display: flex; /* Để iframe có thể co giãn */
+    flex-direction: column;
+}
+
+/* Đảm bảo iframe video chiếm không gian tốt */
+#bottom-sheet-content .video-iframe-container {
+    width: 100%;
+    flex-grow: 1; /* Cho phép container này lớn lên để lấp đầy không gian */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bottom-sheet-content .video-iframe-container iframe {
+    width: 100%;
+    height: 100%; /* Iframe sẽ chiếm toàn bộ container của nó */
+    min-height: 300px; /* Đặt chiều cao tối thiểu để không quá nhỏ */
+}
