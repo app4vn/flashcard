@@ -1913,12 +1913,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        function openBottomSheet(cardItem, viewType = 'default') { 
+       function openBottomSheet(cardItem, viewType = 'default') { 
             if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
             bottomSheetContent.innerHTML = ''; 
             const loggedIn = getCurrentUserId();
             let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
+
+            // Xóa class chế độ video nếu có từ lần mở trước
+            bottomSheet.classList.remove('bottom-sheet-video-mode');
+            bottomSheet.style.paddingBottom = ''; // Reset padding
 
             if (viewType === 'default') {
                 bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2034,7 +2038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     bottomSheetContent.appendChild(deleteBtnEl);
                     hasContentForDefaultView = true;
                 }
-                 if (!hasContentForDefaultView) { // Nếu không có action nào cho view default
+                 if (!hasContentForDefaultView) { 
                     console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
                     if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
                     if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
@@ -2078,26 +2082,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
                 bottomSheetContent.appendChild(saveNotesBtn);
             } else if (viewType === 'video') {
-                bottomSheetTitle.textContent = `Video cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                bottomSheet.classList.add('bottom-sheet-video-mode'); // Thêm class cho chế độ video
+                bottomSheet.style.paddingBottom = '0'; // Bỏ padding dưới để video chiếm trọn
+                bottomSheetTitle.textContent = `Video: ${cardTerm.length > 25 ? cardTerm.substring(0,22) + '...' : cardTerm}`;
                 if (cardItem.videoUrl) {
                     const videoId = extractYouTubeVideoId(cardItem.videoUrl);
                     if (videoId) {
                         const iframeContainer = document.createElement('div');
-                        iframeContainer.className = 'aspect-w-16 aspect-h-9'; // Tailwind aspect ratio
+                        // Sử dụng class của Tailwind cho aspect ratio nếu bạn đã cấu hình
+                        // Hoặc set style trực tiếp:
+                        iframeContainer.className = 'video-iframe-container w-full'; // Thêm class để CSS target
+                        iframeContainer.style.position = 'relative';
+                        iframeContainer.style.paddingBottom = '56.25%'; /* 16:9 aspect ratio */
+                        iframeContainer.style.height = '0';
+                        iframeContainer.style.overflow = 'hidden';
+
                         const iframe = document.createElement('iframe');
                         iframe.src = `https://www.youtube.com/embed/${videoId}`;
                         iframe.title = "YouTube video player";
-                        iframe.frameborder = "0";
+                        iframe.frameBorder = "0";
                         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-                        iframe.allowfullscreen = true;
-                        iframe.className = "w-full h-full";
+                        iframe.allowFullscreen = true;
+                        iframe.style.position = 'absolute';
+                        iframe.style.top = '0';
+                        iframe.style.left = '0';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        
                         iframeContainer.appendChild(iframe);
                         bottomSheetContent.appendChild(iframeContainer);
                     } else {
-                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Link video không hợp lệ hoặc không phải YouTube.</p>';
+                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video không hợp lệ hoặc không phải YouTube.</p>';
                     }
                 } else {
-                    bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Không có video cho thẻ này.</p>';
+                    bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Không có video cho thẻ này.</p>';
                 }
             } else if (viewType === 'practice_options') {
                  bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2120,231 +2138,236 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        function closeBottomSheet() {
-            if (!bottomSheet || !bottomSheetOverlay) return;
-            bottomSheet.classList.remove('active');
-            bottomSheetOverlay.classList.remove('active');
-            setTimeout(() => {
-                bottomSheet.classList.add('translate-y-full');
-                bottomSheetOverlay.classList.add('hidden');
-                const videoIframe = bottomSheetContent.querySelector('iframe');
-                if (videoIframe) {
-                    videoIframe.src = ''; 
+// ... (Các hàm còn lại của script.js giữ nguyên như trước) ...
+// Đảm bảo các hàm như closeBottomSheet, extractYouTubeVideoId, setupEventListeners, ... vẫn còn đầy đủ.
+
+// Dưới đây là phần cuối của file để bạn dễ hình dung vị trí:
+    function closeBottomSheet() { // Đảm bảo hàm này được định nghĩa đúng
+        if (!bottomSheet || !bottomSheetOverlay) return;
+        bottomSheet.classList.remove('active', 'bottom-sheet-video-mode'); // Xóa cả class video mode
+        bottomSheetOverlay.classList.remove('active');
+        bottomSheet.style.paddingBottom = ''; // Reset padding
+        setTimeout(() => {
+            bottomSheet.classList.add('translate-y-full');
+            bottomSheetOverlay.classList.add('hidden');
+            const videoIframe = bottomSheetContent.querySelector('iframe');
+            if (videoIframe) {
+                videoIframe.src = ''; 
+            }
+        }, 300); 
+    }
+    
+    function extractYouTubeVideoId(url) {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2] && match[2].length === 11) ? match[2] : null;
+    }
+
+
+    function setupEventListeners() {
+        if(hamburgerMenuBtn) hamburgerMenuBtn.addEventListener('click', openSidebar); 
+        if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar); 
+        if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+        
+        if(cardSourceSelect) cardSourceSelect.addEventListener('change', async (e)=>{ 
+            currentDatasetSource=e.target.value;
+            const userId = getCurrentUserId();
+            if (currentDatasetSource === 'user' && !userId) { 
+                openAuthModalFromAuth('login');
+                window.currentData = [];
+                window.updateFlashcard(); 
+                window.updateSidebarFilterVisibility(); 
+                return; 
+            }
+            if(practiceTypeSelect) practiceTypeSelect.value="off";
+            practiceType="off";
+            if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards';
+            await loadVocabularyData(categorySelect.value); 
+            window.updateSidebarFilterVisibility(); 
+            window.updateMainHeaderTitle();
+        });
+
+        if(userDeckSelect) userDeckSelect.addEventListener('change', async ()=>{ 
+            const userId = getCurrentUserId(); 
+            if(!userId) return; 
+            const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
+            stateForCurrentCategory.deckId = userDeckSelect.value;
+            appState.lastSelectedDeckId = userDeckSelect.value; 
+            saveAppState();
+            activeMasterList = await loadUserCards(userDeckSelect.value);
+            applyAllFilters(false); 
+        });
+        
+        if(manageDecksBtn) manageDecksBtn.addEventListener('click', async ()=>{ 
+            const userId = getCurrentUserId(); 
+            if(!userId) { 
+                alert("Vui lòng đăng nhập để quản lý bộ thẻ."); 
+                openAuthModalFromAuth('login');
+                return; 
+            } 
+            await loadUserDecks(); 
+            renderExistingDecksList();
+            manageDecksModal.classList.remove('hidden','opacity-0');
+            if (deckModalContent) deckModalContent.classList.remove('scale-95');
+            if (deckModalContent) deckModalContent.classList.add('scale-100');
+            newDeckNameInput.value='';
+            newDeckNameInput.focus();
+        });
+        if(closeDeckModalBtn) closeDeckModalBtn.addEventListener('click', ()=>{
+            manageDecksModal.classList.add('opacity-0');
+            if (deckModalContent) deckModalContent.classList.add('scale-95');
+            setTimeout(()=>manageDecksModal.classList.add('hidden'),250);
+        });
+
+        if(addNewDeckBtn) addNewDeckBtn.addEventListener('click', async ()=>{ 
+            const userId = getCurrentUserId();
+            if(!userId) {
+                alert("Vui lòng đăng nhập để tạo bộ thẻ.");
+                openAuthModalFromAuth('login');
+                return;
+            }
+
+            const deckName = newDeckNameInput.value.trim(); 
+
+            if (!deckName) { 
+                alert("Tên bộ thẻ không được để trống.");
+                newDeckNameInput.focus();
+                return;
+            }
+            
+            const createdDeck = await createDeck(deckName); 
+
+            if(createdDeck){ 
+                newDeckNameInput.value = ''; 
+
+                if(currentDatasetSource === 'user'){
+                    appState.lastSelectedDeckId = createdDeck.id; 
+                    const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
+                    stateForCurrentCategory.deckId = createdDeck.id; 
+                    saveAppState(); 
+                    userDeckSelect.value = createdDeck.id;
+                    activeMasterList = await loadUserCards(createdDeck.id); 
+                    applyAllFilters(false); 
+                    updateMainHeaderTitle();
                 }
-            }, 300); 
+            }
+        });
+
+        if(openAddCardModalBtn) openAddCardModalBtn.addEventListener('click', async () => { 
+            await openAddEditModal('add'); 
+        });
+        if(closeModalBtn) closeModalBtn.addEventListener('click', closeAddEditModal); 
+        if(cancelCardBtn) cancelCardBtn.addEventListener('click', closeAddEditModal);
+        if(addEditCardForm) addEditCardForm.addEventListener('submit', async (e)=>{ 
+            e.preventDefault();
+            await handleSaveCard(); 
+        });
+
+        if (manualInputModeBtn) {
+            manualInputModeBtn.addEventListener('click', () => switchToInputMode('manual'));
+        }
+        if (jsonInputModeBtn) {
+            jsonInputModeBtn.addEventListener('click', () => switchToInputMode('json'));
+        }
+        if (processJsonBtn) {
+            processJsonBtn.addEventListener('click', processAndSaveJsonCards);
+        }
+
+        if (closeCopyToDeckModalBtn) {
+            closeCopyToDeckModalBtn.addEventListener('click', closeCopyToDeckModal);
+        }
+        if (cancelCopyToDeckBtn) {
+            cancelCopyToDeckBtn.addEventListener('click', closeCopyToDeckModal);
+        }
+        if (confirmCopyToDeckBtn) {
+            confirmCopyToDeckBtn.addEventListener('click', handleConfirmCopyToDeck);
+        }
+        if (copyToDeckSelect) {
+            copyToDeckSelect.addEventListener('change', function() {
+                if (this.value === '_create_new_deck_') {
+                    copyNewDeckNameContainer.style.display = 'block';
+                    copyNewDeckNameInput.focus();
+                } else {
+                    copyNewDeckNameContainer.style.display = 'none';
+                    copyNewDeckNameInput.value = '';
+                    copyNewDeckError.classList.add('hidden');
+                }
+            });
+        }
+
+        if (cardOptionsMenuBtn) {
+            cardOptionsMenuBtn.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if (currentCard) openBottomSheet(currentCard, 'default'); 
+            });
+        }
+        if (cardOptionsMenuBtnBack) {
+             cardOptionsMenuBtnBack.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if (currentCard) openBottomSheet(currentCard, 'default'); 
+            });
+        }
+        if (closeBottomSheetBtn) {
+            closeBottomSheetBtn.addEventListener('click', closeBottomSheet);
+        }
+        if (bottomSheetOverlay) {
+            bottomSheetOverlay.addEventListener('click', closeBottomSheet);
         }
         
-        function extractYouTubeVideoId(url) {
-            if (!url) return null;
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
+        if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
+            const currentCard = window.currentData[window.currentIndex];
+            if (currentCard) openBottomSheet(currentCard, 'notes');
+        });
+        if(actionBtnVideo) actionBtnVideo.addEventListener('click', () => {
+            const currentCard = window.currentData[window.currentIndex];
+            if (currentCard) openBottomSheet(currentCard, 'video');
+        });
+        if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
+            const currentCard = window.currentData[window.currentIndex];
+            if (currentCard) openBottomSheet(currentCard, 'practice_options');
+        });
 
 
-        function setupEventListeners() {
-            if(hamburgerMenuBtn) hamburgerMenuBtn.addEventListener('click', openSidebar); 
-            if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar); 
-            if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
-            
-            if(cardSourceSelect) cardSourceSelect.addEventListener('change', async (e)=>{ 
-                currentDatasetSource=e.target.value;
-                const userId = getCurrentUserId();
-                if (currentDatasetSource === 'user' && !userId) { 
-                    openAuthModalFromAuth('login');
-                    window.currentData = [];
-                    window.updateFlashcard(); 
-                    window.updateSidebarFilterVisibility(); 
-                    return; 
-                }
-                if(practiceTypeSelect) practiceTypeSelect.value="off";
-                practiceType="off";
-                if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards';
-                await loadVocabularyData(categorySelect.value); 
-                window.updateSidebarFilterVisibility(); 
-                window.updateMainHeaderTitle();
-            });
-
-            if(userDeckSelect) userDeckSelect.addEventListener('change', async ()=>{ 
-                const userId = getCurrentUserId(); 
-                if(!userId) return; 
-                const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
-                stateForCurrentCategory.deckId = userDeckSelect.value;
-                appState.lastSelectedDeckId = userDeckSelect.value; 
-                saveAppState();
-                activeMasterList = await loadUserCards(userDeckSelect.value);
-                applyAllFilters(false); 
-            });
-            
-            if(manageDecksBtn) manageDecksBtn.addEventListener('click', async ()=>{ 
-                const userId = getCurrentUserId(); 
-                if(!userId) { 
-                    alert("Vui lòng đăng nhập để quản lý bộ thẻ."); 
-                    openAuthModalFromAuth('login');
-                    return; 
-                } 
-                await loadUserDecks(); 
-                renderExistingDecksList();
-                manageDecksModal.classList.remove('hidden','opacity-0');
-                if (deckModalContent) deckModalContent.classList.remove('scale-95');
-                if (deckModalContent) deckModalContent.classList.add('scale-100');
-                newDeckNameInput.value='';
-                newDeckNameInput.focus();
-            });
-            if(closeDeckModalBtn) closeDeckModalBtn.addEventListener('click', ()=>{
-                manageDecksModal.classList.add('opacity-0');
-                if (deckModalContent) deckModalContent.classList.add('scale-95');
-                setTimeout(()=>manageDecksModal.classList.add('hidden'),250);
-            });
-
-            if(addNewDeckBtn) addNewDeckBtn.addEventListener('click', async ()=>{ 
-                const userId = getCurrentUserId();
-                if(!userId) {
-                    alert("Vui lòng đăng nhập để tạo bộ thẻ.");
-                    openAuthModalFromAuth('login');
-                    return;
-                }
-
-                const deckName = newDeckNameInput.value.trim(); 
-
-                if (!deckName) { 
-                    alert("Tên bộ thẻ không được để trống.");
-                    newDeckNameInput.focus();
-                    return;
-                }
-                
-                const createdDeck = await createDeck(deckName); 
-
-                if(createdDeck){ 
-                    newDeckNameInput.value = ''; 
-
-                    if(currentDatasetSource === 'user'){
-                        appState.lastSelectedDeckId = createdDeck.id; 
-                        const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
-                        stateForCurrentCategory.deckId = createdDeck.id; 
-                        saveAppState(); 
-                        userDeckSelect.value = createdDeck.id;
-                        activeMasterList = await loadUserCards(createdDeck.id); 
-                        applyAllFilters(false); 
-                        updateMainHeaderTitle();
-                    }
-                }
-            });
-
-            if(openAddCardModalBtn) openAddCardModalBtn.addEventListener('click', async () => { 
-                await openAddEditModal('add'); 
-            });
-            if(closeModalBtn) closeModalBtn.addEventListener('click', closeAddEditModal); 
-            if(cancelCardBtn) cancelCardBtn.addEventListener('click', closeAddEditModal);
-            if(addEditCardForm) addEditCardForm.addEventListener('submit', async (e)=>{ 
-                e.preventDefault();
-                await handleSaveCard(); 
-            });
-
-            if (manualInputModeBtn) {
-                manualInputModeBtn.addEventListener('click', () => switchToInputMode('manual'));
-            }
-            if (jsonInputModeBtn) {
-                jsonInputModeBtn.addEventListener('click', () => switchToInputMode('json'));
-            }
-            if (processJsonBtn) {
-                processJsonBtn.addEventListener('click', processAndSaveJsonCards);
-            }
-
-            if (closeCopyToDeckModalBtn) {
-                closeCopyToDeckModalBtn.addEventListener('click', closeCopyToDeckModal);
-            }
-            if (cancelCopyToDeckBtn) {
-                cancelCopyToDeckBtn.addEventListener('click', closeCopyToDeckModal);
-            }
-            if (confirmCopyToDeckBtn) {
-                confirmCopyToDeckBtn.addEventListener('click', handleConfirmCopyToDeck);
-            }
-            if (copyToDeckSelect) {
-                copyToDeckSelect.addEventListener('change', function() {
-                    if (this.value === '_create_new_deck_') {
-                        copyNewDeckNameContainer.style.display = 'block';
-                        copyNewDeckNameInput.focus();
-                    } else {
-                        copyNewDeckNameContainer.style.display = 'none';
-                        copyNewDeckNameInput.value = '';
-                        copyNewDeckError.classList.add('hidden');
-                    }
-                });
-            }
-
-            if (cardOptionsMenuBtn) {
-                cardOptionsMenuBtn.addEventListener('click', () => {
-                    const currentCard = window.currentData[window.currentIndex];
-                    if (currentCard) openBottomSheet(currentCard, 'default'); 
-                });
-            }
-            if (cardOptionsMenuBtnBack) {
-                 cardOptionsMenuBtnBack.addEventListener('click', () => {
-                    const currentCard = window.currentData[window.currentIndex];
-                    if (currentCard) openBottomSheet(currentCard, 'default'); 
-                });
-            }
-            if (closeBottomSheetBtn) {
-                closeBottomSheetBtn.addEventListener('click', closeBottomSheet);
-            }
-            if (bottomSheetOverlay) {
-                bottomSheetOverlay.addEventListener('click', closeBottomSheet);
-            }
-            
-            if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
-                const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'notes');
-            });
-            if(actionBtnVideo) actionBtnVideo.addEventListener('click', () => {
-                const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'video');
-            });
-            if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
-                const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'practice_options');
-            });
-
-
-            if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';if(cat==='phrasalVerbs' || cat === 'collocations'){st.tag='all';if(tagSelect)tagSelect.value='all';st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';} const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}st.filterMarked='all_study';if(filterCardStatusSelect)filterCardStatusSelect.value='all_study';st.currentIndex=0;applyAllFilters();closeSidebar();});
-            if(categorySelect) categorySelect.addEventListener('change', async (e)=>{ 
-                clearLearningTimer();
-                const selCat=e.target.value;
-                if(practiceTypeSelect)practiceTypeSelect.value="off";
-                practiceType="off";
-                searchInput.value='';
-                await loadVocabularyData(selCat); 
-                window.updateMainHeaderTitle();
-            });
-            if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>applyAllFilters(false)); 
-            if(tagSelect) tagSelect.addEventListener('change', ()=>applyAllFilters(false));
-            if(searchInput) searchInput.addEventListener('input', ()=>applyAllFilters(false)); 
-            if(filterCardStatusSelect) filterCardStatusSelect.addEventListener('change', ()=>applyAllFilters(false));
-            if(flipBtn) flipBtn.addEventListener('click', ()=>{if(practiceType==="off"&&window.currentData.length>0)flashcardElement.classList.toggle('flipped');});
-            if(flashcardElement) flashcardElement.addEventListener('click', (e)=>{ if (practiceType === "off" && e.target.closest('.flashcard') === flashcardElement && !e.target.closest('button#speaker-btn') && !e.target.closest('button#speaker-example-btn') && !e.target.closest('#card-options-menu-btn') && !e.target.closest('#card-options-menu-btn-back') && !e.target.closest('.toggle-examples-btn') && !e.target.closest('.copy-example-btn') && !e.target.closest('#empty-state-add-card-btn-on-card') ) { flashcardElement.classList.toggle('flipped'); } });
-            if(nextBtn) nextBtn.addEventListener('click', ()=>{if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}if(nextBtn.disabled)return;clearLearningTimer();if(window.currentIndex<window.currentData.length-1){window.currentIndex++;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}else if(practiceType!=="off"&&currentAnswerChecked&&window.currentIndex>=window.currentData.length-1)applyAllFilters();});
-            if(prevBtn) prevBtn.addEventListener('click', ()=>{if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}clearLearningTimer();if(window.currentIndex>0){window.currentIndex--;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}});
-            if(speakerBtn) speakerBtn.addEventListener('click', (e)=>{e.stopPropagation();if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}const txt=wordDisplay.dataset.ttsText;if(txt&&!speakerBtn.disabled)speakText(txt,currentWordSpansMeta);});
-            if(speakerExampleBtn) speakerExampleBtn.addEventListener('click', (e)=>{e.stopPropagation();window.speechSynthesis.cancel();isSpeakingExampleQueue=false;currentExampleSpeechIndex=0;exampleSpeechQueue=[];const item=window.currentData[window.currentIndex];if(item&&item.meanings&&!speakerExampleBtn.disabled){item.meanings.forEach(m=>{if(m.examples){m.examples.forEach(ex=>{if(ex.eng&&ex.eng.trim())exampleSpeechQueue.push({text:ex.eng.trim(),spansMeta:[]});});}});if(exampleSpeechQueue.length>0){isSpeakingExampleQueue=true;speakerExampleBtn.disabled=true;playNextExampleInQueue();}}});
-            
-            if(btnSrsAgain) btnSrsAgain.addEventListener('click', () => processSrsRatingWrapper('again')); 
-            if(btnSrsHard) btnSrsHard.addEventListener('click', () => processSrsRatingWrapper('hard')); 
-            if(btnSrsGood) btnSrsGood.addEventListener('click', () => processSrsRatingWrapper('good')); 
-            if(btnSrsEasy) btnSrsEasy.addEventListener('click', () => processSrsRatingWrapper('easy'));
-            
-            function checkTypingAnswer(){if(window.currentData.length===0||!currentCorrectAnswerForPractice)return;currentAnswerChecked=true;feedbackMessage.classList.remove('hidden');typingInput.disabled=true;submitTypingAnswerBtn.disabled=true;const uA=typingInput.value.trim().toLowerCase();const cA=currentCorrectAnswerForPractice.trim().toLowerCase();const iC=uA===cA;if(iC){feedbackMessage.textContent='Đúng!';feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-green-100 text-green-700 border border-green-300';}else{feedbackMessage.textContent=`Sai! Đáp án đúng: ${currentCorrectAnswerForPractice}`;feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-red-100 text-red-700 border border-red-300';}flashcardElement.classList.remove('practice-mode-front-only');flashcardElement.classList.add('flipped');const i=window.currentData[window.currentIndex];const iCV=i.category;const id=getCardIdentifier(i,iCV);if(id)processSrsRatingWrapper(iC?'easy':'again');updateCardInfo();} 
-            
-            if(submitTypingAnswerBtn) submitTypingAnswerBtn.addEventListener('click', checkTypingAnswer);
-            if(typingInput) typingInput.addEventListener('keypress', (e)=>{if(e.key==='Enter'&&practiceType==='typing_practice'&&!submitTypingAnswerBtn.disabled)checkTypingAnswer();});
-            
-            if(addAnotherMeaningBlockAtEndBtn) addAnotherMeaningBlockAtEndBtn.addEventListener('click', () => addMeaningBlockToEnd());
-            if(cardWordInput) cardWordInput.addEventListener('input', () => clearFieldError(cardWordInput, cardWordError));
-            initializeClearButtonForSearch();
-            if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('input', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); if (inputValue.length === 0) { hideAutocompleteSuggestions(cardBaseVerbInput); return; } const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions); });
-            if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('focus', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); if (filteredSuggestions.length > 0 || inputValue.length === 0) { showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions.slice(0, 5)); } });
-            if(cardTagsInput) cardTagsInput.addEventListener('input', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); if (currentTagQuery.length === 0) { hideAutocompleteSuggestions(cardTagsInput); return; } const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); showAutocompleteSuggestions(cardTagsInput, filteredSuggestions, true); });
-            if(cardTagsInput) cardTagsInput.addEventListener('focus', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); if (filteredSuggestions.length > 0 || currentTagQuery.length === 0) { showAutocompleteSuggestions(cardTagsInput, filteredSuggestions.slice(0, 5), true); } });
-            document.addEventListener('click', function(event) { const activeSuggestionsList = document.querySelector('.autocomplete-suggestions-list'); if (activeSuggestionsList) { const inputId = activeSuggestionsList.id.replace('-suggestions', ''); const inputElement = document.getElementById(inputId); if (inputElement && !inputElement.contains(event.target) && !activeSuggestionsList.contains(event.target)) { hideAutocompleteSuggestions(inputElement); } } });
+        if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';if(cat==='phrasalVerbs' || cat === 'collocations'){st.tag='all';if(tagSelect)tagSelect.value='all';st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';} const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}st.filterMarked='all_study';if(filterCardStatusSelect)filterCardStatusSelect.value='all_study';st.currentIndex=0;applyAllFilters();closeSidebar();});
+        if(categorySelect) categorySelect.addEventListener('change', async (e)=>{ 
+            clearLearningTimer();
+            const selCat=e.target.value;
+            if(practiceTypeSelect)practiceTypeSelect.value="off";
+            practiceType="off";
+            searchInput.value='';
+            await loadVocabularyData(selCat); 
+            window.updateMainHeaderTitle();
+        });
+        if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>applyAllFilters(false)); 
+        if(tagSelect) tagSelect.addEventListener('change', ()=>applyAllFilters(false));
+        if(searchInput) searchInput.addEventListener('input', ()=>applyAllFilters(false)); 
+        if(filterCardStatusSelect) filterCardStatusSelect.addEventListener('change', ()=>applyAllFilters(false));
+        if(flipBtn) flipBtn.addEventListener('click', ()=>{if(practiceType==="off"&&window.currentData.length>0)flashcardElement.classList.toggle('flipped');});
+        if(flashcardElement) flashcardElement.addEventListener('click', (e)=>{ if (practiceType === "off" && e.target.closest('.flashcard') === flashcardElement && !e.target.closest('button#speaker-btn') && !e.target.closest('button#speaker-example-btn') && !e.target.closest('#card-options-menu-btn') && !e.target.closest('#card-options-menu-btn-back') && !e.target.closest('.toggle-examples-btn') && !e.target.closest('.copy-example-btn') && !e.target.closest('#empty-state-add-card-btn-on-card') ) { flashcardElement.classList.toggle('flipped'); } });
+        if(nextBtn) nextBtn.addEventListener('click', ()=>{if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}if(nextBtn.disabled)return;clearLearningTimer();if(window.currentIndex<window.currentData.length-1){window.currentIndex++;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}else if(practiceType!=="off"&&currentAnswerChecked&&window.currentIndex>=window.currentData.length-1)applyAllFilters();});
+        if(prevBtn) prevBtn.addEventListener('click', ()=>{if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}clearLearningTimer();if(window.currentIndex>0){window.currentIndex--;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}});
+        if(speakerBtn) speakerBtn.addEventListener('click', (e)=>{e.stopPropagation();if(isSpeakingExampleQueue){isSpeakingExampleQueue=false;window.speechSynthesis.cancel();speakerExampleBtn.disabled=!(window.currentData[window.currentIndex]&&window.currentData[window.currentIndex].meanings.some(m=>m.examples&&m.examples.length>0));}const txt=wordDisplay.dataset.ttsText;if(txt&&!speakerBtn.disabled)speakText(txt,currentWordSpansMeta);});
+        if(speakerExampleBtn) speakerExampleBtn.addEventListener('click', (e)=>{e.stopPropagation();window.speechSynthesis.cancel();isSpeakingExampleQueue=false;currentExampleSpeechIndex=0;exampleSpeechQueue=[];const item=window.currentData[window.currentIndex];if(item&&item.meanings&&!speakerExampleBtn.disabled){item.meanings.forEach(m=>{if(m.examples){m.examples.forEach(ex=>{if(ex.eng&&ex.eng.trim())exampleSpeechQueue.push({text:ex.eng.trim(),spansMeta:[]});});}});if(exampleSpeechQueue.length>0){isSpeakingExampleQueue=true;speakerExampleBtn.disabled=true;playNextExampleInQueue();}}});
+        
+        if(btnSrsAgain) btnSrsAgain.addEventListener('click', () => processSrsRatingWrapper('again')); 
+        if(btnSrsHard) btnSrsHard.addEventListener('click', () => processSrsRatingWrapper('hard')); 
+        if(btnSrsGood) btnSrsGood.addEventListener('click', () => processSrsRatingWrapper('good')); 
+        if(btnSrsEasy) btnSrsEasy.addEventListener('click', () => processSrsRatingWrapper('easy'));
+        
+        function checkTypingAnswer(){if(window.currentData.length===0||!currentCorrectAnswerForPractice)return;currentAnswerChecked=true;feedbackMessage.classList.remove('hidden');typingInput.disabled=true;submitTypingAnswerBtn.disabled=true;const uA=typingInput.value.trim().toLowerCase();const cA=currentCorrectAnswerForPractice.trim().toLowerCase();const iC=uA===cA;if(iC){feedbackMessage.textContent='Đúng!';feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-green-100 text-green-700 border border-green-300';}else{feedbackMessage.textContent=`Sai! Đáp án đúng: ${currentCorrectAnswerForPractice}`;feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-red-100 text-red-700 border border-red-300';}flashcardElement.classList.remove('practice-mode-front-only');flashcardElement.classList.add('flipped');const i=window.currentData[window.currentIndex];const iCV=i.category;const id=getCardIdentifier(i,iCV);if(id)processSrsRatingWrapper(iC?'easy':'again');updateCardInfo();} 
+        
+        if(submitTypingAnswerBtn) submitTypingAnswerBtn.addEventListener('click', checkTypingAnswer);
+        if(typingInput) typingInput.addEventListener('keypress', (e)=>{if(e.key==='Enter'&&practiceType==='typing_practice'&&!submitTypingAnswerBtn.disabled)checkTypingAnswer();});
+        
+        if(addAnotherMeaningBlockAtEndBtn) addAnotherMeaningBlockAtEndBtn.addEventListener('click', () => addMeaningBlockToEnd());
+        if(cardWordInput) cardWordInput.addEventListener('input', () => clearFieldError(cardWordInput, cardWordError));
+        initializeClearButtonForSearch();
+        if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('input', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); if (inputValue.length === 0) { hideAutocompleteSuggestions(cardBaseVerbInput); return; } const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions); });
+        if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('focus', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); if (filteredSuggestions.length > 0 || inputValue.length === 0) { showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions.slice(0, 5)); } });
+        if(cardTagsInput) cardTagsInput.addEventListener('input', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); if (currentTagQuery.length === 0) { hideAutocompleteSuggestions(cardTagsInput); return; } const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); showAutocompleteSuggestions(cardTagsInput, filteredSuggestions, true); });
+        if(cardTagsInput) cardTagsInput.addEventListener('focus', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); if (filteredSuggestions.length > 0 || currentTagQuery.length === 0) { showAutocompleteSuggestions(cardTagsInput, filteredSuggestions.slice(0, 5), true); } });
+        document.addEventListener('click', function(event) { const activeSuggestionsList = document.querySelector('.autocomplete-suggestions-list'); if (activeSuggestionsList) { const inputId = activeSuggestionsList.id.replace('-suggestions', ''); const inputElement = document.getElementById(inputId); if (inputElement && !inputElement.contains(event.target) && !activeSuggestionsList.contains(event.target)) { hideAutocompleteSuggestions(inputElement); } } });
         }
 
         async function setupInitialCategoryAndSource() { 
