@@ -41,7 +41,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     hamburgerMenuBtn, filterSidebar, closeSidebarBtn, sidebarOverlay, tagsDisplayFront, 
     typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn, 
     addEditCardModal, closeModalBtn, addEditCardForm, modalTitle, cardIdInput, 
-    cardWordInput, cardPronunciationInput, cardGeneralNotesInput, cardVideoUrlInput, // Thêm cardVideoUrlInput
+    cardWordInput, cardPronunciationInput, cardGeneralNotesInput, cardVideoUrlInput, 
     meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, 
     cardBaseVerbInput, cardTagsInput, cancelCardBtn, saveCardBtn, deckCreationHint, 
     userDeckFilterContainer, userDeckSelect, manageDecksBtn, modalDeckAssignmentContainer, 
@@ -57,11 +57,10 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
-    actionBtnNotes, actionBtnVideo, actionBtnPracticeCard; // Các nút action mới
+    actionBtnNotes, actionBtnVideo, actionBtnPracticeCard; 
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
-// ... (Giữ nguyên như trước) ...
 let baseVerbSuggestions = [];
 let tagSuggestions = [];
 let currentDatasetSource = 'web'; 
@@ -81,7 +80,6 @@ let currentExampleSpeechIndex = 0;
 let isSpeakingExampleQueue = false;
 let currentEditingCardId = null;
 let currentEditingDeckId = null; 
-
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
 
@@ -119,7 +117,6 @@ let appState = JSON.parse(JSON.stringify(defaultAppState));
 
 const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; 
 
-// ... (Các hàm loadAppState, saveAppState, getCategoryState, handleAuthStateChangedInApp giữ nguyên như trước) ...
 async function loadAppState() {
     const userId = getCurrentUserId(); 
     console.log("Attempting to load AppState. Current user ID:", userId);
@@ -349,7 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     cardWordInput = document.getElementById('card-word-input');
     cardPronunciationInput = document.getElementById('card-pronunciation-input');
     cardGeneralNotesInput = document.getElementById('card-general-notes-input');
-    cardVideoUrlInput = document.getElementById('card-video-url-input'); // Gán biến cho input video
+    cardVideoUrlInput = document.getElementById('card-video-url-input'); 
     meaningBlocksContainer = document.getElementById('meaning-blocks-container');
     addAnotherMeaningBlockAtEndBtn = document.getElementById('add-another-meaning-block-at-end-btn');
     phrasalVerbSpecificFields = document.getElementById('phrasal-verb-specific-fields');
@@ -839,7 +836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             cardPronunciationInput.value = cardData.pronunciation || ''; 
             cardGeneralNotesInput.value = cardData.generalNotes || ''; 
-            cardVideoUrlInput.value = cardData.videoUrl || ''; // Tải videoUrl
+            cardVideoUrlInput.value = cardData.videoUrl || ''; 
             if (cardData.meanings && cardData.meanings.length > 0) { 
                 cardData.meanings.forEach(meaningBlock => addMeaningBlockToEnd(meaningBlock)); 
             } else {
@@ -1070,7 +1067,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pronunciation: cardPronunciationInput.value.trim(), 
             meanings: meaningsData, 
             generalNotes: cardGeneralNotesInput.value.trim(), 
-            videoUrl: cardVideoUrlInput.value.trim() || null, // Lưu videoUrl
+            videoUrl: cardVideoUrlInput.value.trim() || null, 
             category: cardCategory, 
             deckId: assignedDeckId, 
             status: 'new', 
@@ -1270,7 +1267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             category: category, 
                             meanings: meaningsArray, 
                             generalNotes: card.generalNotes || card.notes || '', 
-                            videoUrl: card.videoUrl || null, // Thêm videoUrl
+                            videoUrl: card.videoUrl || null, 
                             status: 'new', 
                             lastReviewed: null,
                             reviewCount: 0,
@@ -1296,7 +1293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     card.easeFactor = firestoreStatus.easeFactor || 2.5;
                                     card.repetitions = firestoreStatus.repetitions || 0;
                                     card.isSuspended = firestoreStatus.isSuspended || false;
-                                    card.videoUrl = firestoreStatus.videoUrl || card.videoUrl || null; // Ưu tiên videoUrl từ Firestore
+                                    card.videoUrl = firestoreStatus.videoUrl || card.videoUrl || null; 
                                 }
                             }
                             return card;
@@ -1374,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
-        if (actionBtnVideo) actionBtnVideo.style.display = 'none'; // Ẩn nút video ban đầu
+        if (actionBtnVideo) actionBtnVideo.style.display = 'none'; 
 
 
         if (practiceType !== "off") {
@@ -1508,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const hasActionsForBottomSheet = (item.isUserCard && userId) || (!item.isUserCard && userId);
             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = hasActionsForBottomSheet ? 'block' : 'none';
             if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = hasActionsForBottomSheet ? 'block' : 'none';
-            if (actionBtnVideo) actionBtnVideo.style.display = item.videoUrl ? 'flex' : 'none'; // Hiển thị nút video nếu có URL
+            if (actionBtnVideo) actionBtnVideo.style.display = item.videoUrl ? 'flex' : 'none'; 
 
 
             if (item.meanings && item.meanings.length > 0) { item.meanings.forEach((mObj, idx) => { const meaningBlockDiv = document.createElement('div'); meaningBlockDiv.className = `meaning-block-on-card ${idx > 0 ? "mt-4 pt-3 border-t border-blue-400 border-opacity-50" : (item.meanings.length > 1 ? "bg-black bg-opacity-10 p-3 rounded-lg" : "") }`; const meaningTextP = document.createElement('p'); meaningTextP.className = "meaning-text-on-card"; if (item.meanings.length > 1) { meaningTextP.textContent = `${idx + 1}. ${mObj.text}`; } else { meaningTextP.textContent = mObj.text; } meaningBlockDiv.appendChild(meaningTextP); if (mObj.notes) { const meaningNotesP = document.createElement('p'); meaningNotesP.className = "meaning-notes-on-card"; meaningNotesP.textContent = mObj.notes; meaningBlockDiv.appendChild(meaningNotesP); } if (mObj.examples && mObj.examples.length > 0) { const examplesContainer = document.createElement('div'); examplesContainer.className = "ml-3 mt-3"; const examplesListDiv = document.createElement('div'); examplesListDiv.className = "space-y-1.5"; examplesListDiv.dataset.meaningId = mObj.id; const maxVisibleExamples = 1; const totalExamples = mObj.examples.length; mObj.examples.forEach((ex, exIdx) => { const exD = document.createElement('div'); exD.className="example-item-on-card"; if (exIdx >= maxVisibleExamples) { exD.classList.add('hidden'); } const eP = document.createElement('p'); eP.className="example-eng-on-card"; const textSpan = document.createElement('span'); const enLabel = document.createElement('span'); enLabel.className = 'example-label'; enLabel.textContent = 'EN: '; textSpan.appendChild(enLabel); textSpan.appendChild(document.createTextNode(ex.eng)); eP.appendChild(textSpan); const copyBtn = document.createElement('button'); copyBtn.className = 'copy-example-btn'; copyBtn.title = 'Sao chép ví dụ'; const initialCopySvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>`; const copiedSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`; copyBtn.innerHTML = initialCopySvg; copyBtn.onclick = (e) => { e.stopPropagation(); navigator.clipboard.writeText(ex.eng).then(() => { copyBtn.innerHTML = copiedSvg; setTimeout(() => { copyBtn.innerHTML = initialCopySvg; }, 1500); }).catch(err => { console.error('Không thể sao chép: ', err); }); }; eP.appendChild(copyBtn); exD.appendChild(eP); if(ex.vie){ const vP = document.createElement('p');vP.className="example-vie-on-card";const vnLabel = document.createElement('span');vnLabel.className = 'example-label';vnLabel.textContent = 'VN: ';vP.appendChild(vnLabel);vP.appendChild(document.createTextNode(`(${ex.vie})`));exD.appendChild(vP); } if(ex.exampleNotes){ const nP=document.createElement('p');nP.className="example-notes-on-card";nP.textContent=`Ghi chú VD: ${ex.exampleNotes}`;exD.appendChild(nP); } examplesListDiv.appendChild(exD); }); examplesContainer.appendChild(examplesListDiv); if (totalExamples > maxVisibleExamples) { const toggleExamplesBtn = document.createElement('button'); toggleExamplesBtn.className = "toggle-examples-btn"; let hiddenCount = totalExamples - maxVisibleExamples; toggleExamplesBtn.textContent = `Xem thêm ${hiddenCount} ví dụ...`; toggleExamplesBtn.dataset.expanded = "false"; toggleExamplesBtn.onclick = (e) => { e.stopPropagation(); const isExpanded = toggleExamplesBtn.dataset.expanded === "true"; const exampleItems = examplesListDiv.querySelectorAll('.example-item-on-card'); exampleItems.forEach((item, itemIdx) => { if (itemIdx >= maxVisibleExamples) { item.classList.toggle('hidden', isExpanded); } }); if (isExpanded) { toggleExamplesBtn.textContent = `Xem thêm ${hiddenCount} ví dụ...`; toggleExamplesBtn.dataset.expanded = "false"; } else { toggleExamplesBtn.textContent = "Ẩn bớt ví dụ"; toggleExamplesBtn.dataset.expanded = "true"; } }; examplesContainer.appendChild(toggleExamplesBtn); } meaningBlockDiv.appendChild(examplesContainer); } if(meaningDisplayContainer) meaningDisplayContainer.appendChild(meaningBlockDiv); }); } 
@@ -1891,7 +1888,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardToCopy.easeFactor = 2.5;      
             cardToCopy.repetitions = 0;  
             cardToCopy.isSuspended = false;
-            cardToCopy.videoUrl = currentCard.videoUrl || null; // Sao chép cả videoUrl
+            cardToCopy.videoUrl = currentCard.videoUrl || null; 
             cardToCopy.createdAt = serverTimestamp();
             cardToCopy.updatedAt = serverTimestamp();
 
@@ -1916,7 +1913,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        function openBottomSheet(cardItem, viewType = 'default') { // Thêm viewType
+        function openBottomSheet(cardItem, viewType = 'default') { 
             if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
             bottomSheetContent.innerHTML = ''; 
@@ -1925,7 +1922,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (viewType === 'default') {
                 bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                let hasActions = false;
+                let hasContentForDefaultView = false;
 
                 // Hiển thị thông tin SRS
                 if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
@@ -1951,7 +1948,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     srsInfoHtml += '</ul>';
                     srsInfoDiv.innerHTML = srsInfoHtml;
                     bottomSheetContent.appendChild(srsInfoDiv);
-                    hasActions = true; 
+                    hasContentForDefaultView = true; 
                 }
 
                 // Nút Sao chép
@@ -1960,7 +1957,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
                     copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
                     bottomSheetContent.appendChild(copyBtnEl);
-                    hasActions = true;
+                    hasContentForDefaultView = true;
                 }
                 // Nút Sửa thẻ
                 if (cardItem.isUserCard && loggedIn) {
@@ -1968,7 +1965,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
                     editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
                     bottomSheetContent.appendChild(editBtnEl);
-                    hasActions = true;
+                    hasContentForDefaultView = true;
                 }
                 // Nút Đặt lại Tiến độ Học
                 if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
@@ -1982,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             };
                             let updateSuccess = false;
                             if (cardItem.isUserCard) {
-                                updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
+                                updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
                             } else {
                                 const webCardGlobalId = getWebCardGlobalId(cardItem);
                                 if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, srsResetData);
@@ -1995,7 +1992,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     };
                     bottomSheetContent.appendChild(resetSrsBtn);
-                    hasActions = true;
+                    hasContentForDefaultView = true;
                 }
                 // Nút Tạm ngưng/Tiếp tục Ôn tập
                 if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
@@ -2008,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                         let updateSuccess = false;
                         if (cardItem.isUserCard) {
-                            updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
+                            updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
                         } else {
                             const webCardGlobalId = getWebCardGlobalId(cardItem);
                             if (webCardGlobalId) {
@@ -2026,7 +2023,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         closeBottomSheet();
                     };
                     bottomSheetContent.appendChild(suspendBtn);
-                    hasActions = true;
+                    hasContentForDefaultView = true;
                 }
                 // Nút Xóa thẻ
                 if (cardItem.isUserCard && loggedIn) {
@@ -2035,8 +2032,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
                     deleteBtnEl.onclick = async () => { await handleDeleteCard(); closeBottomSheet(); };
                     bottomSheetContent.appendChild(deleteBtnEl);
-                    hasActions = true;
+                    hasContentForDefaultView = true;
                 }
+                 if (!hasContentForDefaultView) { // Nếu không có action nào cho view default
+                    console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
+                    if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
+                    if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
+                    return; 
+                }
+
             } else if (viewType === 'notes') {
                 bottomSheetTitle.textContent = `Ghi chú cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
                 const notesTextarea = document.createElement('textarea');
@@ -2048,14 +2052,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const saveNotesBtn = document.createElement('button');
                 saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Ghi chú`;
-                saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700');
+                saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700', 'py-2', 'px-4', 'rounded-md', 'w-full', 'flex', 'items-center', 'justify-center');
                 saveNotesBtn.onclick = async () => {
                     const newNotes = notesTextarea.value.trim();
                     const dataToUpdate = { generalNotes: newNotes, updatedAt: serverTimestamp() };
                     let updateSuccess = false;
                     if (cardItem.isUserCard && loggedIn) {
-                        updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
-                    } else if (loggedIn) { // Thẻ web
+                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
+                    } else if (loggedIn) { 
                         const webCardGlobalId = getWebCardGlobalId(cardItem);
                          if (webCardGlobalId) {
                             const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
@@ -2066,37 +2070,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (updateSuccess) {
                         cardItem.generalNotes = newNotes;
                         alert("Đã lưu ghi chú.");
-                        updateFlashcard(); // Cập nhật hiển thị ghi chú trên thẻ nếu có
-                    } else if (loggedIn) { // Chỉ báo lỗi nếu đã đăng nhập mà không lưu được
+                        updateFlashcard(); 
+                    } else if (loggedIn) { 
                         alert("Lỗi lưu ghi chú.");
                     }
                     closeBottomSheet();
                 };
                 bottomSheetContent.appendChild(saveNotesBtn);
-                hasActions = true;
-
             } else if (viewType === 'video') {
                 bottomSheetTitle.textContent = `Video cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
                 if (cardItem.videoUrl) {
-                    // Logic để nhúng video YouTube
                     const videoId = extractYouTubeVideoId(cardItem.videoUrl);
                     if (videoId) {
+                        const iframeContainer = document.createElement('div');
+                        iframeContainer.className = 'aspect-w-16 aspect-h-9'; // Tailwind aspect ratio
                         const iframe = document.createElement('iframe');
-                        iframe.width = "100%"; // Hoặc kích thước cố định
-                        iframe.height = "315";
                         iframe.src = `https://www.youtube.com/embed/${videoId}`;
                         iframe.title = "YouTube video player";
                         iframe.frameborder = "0";
                         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
                         iframe.allowfullscreen = true;
-                        bottomSheetContent.appendChild(iframe);
+                        iframe.className = "w-full h-full";
+                        iframeContainer.appendChild(iframe);
+                        bottomSheetContent.appendChild(iframeContainer);
                     } else {
-                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Link video không hợp lệ.</p>';
+                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Link video không hợp lệ hoặc không phải YouTube.</p>';
                     }
                 } else {
                     bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Không có video cho thẻ này.</p>';
                 }
-                hasActions = true; // Vẫn coi là có action để mở sheet
             } else if (viewType === 'practice_options') {
                  bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
                  const practiceMeaningBtn = document.createElement('button');
@@ -2108,16 +2110,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                  practiceTypingBtn.innerHTML = `<i class="fas fa-keyboard w-5 mr-3 text-teal-500"></i> Luyện Gõ Từ (Thẻ này)`;
                  practiceTypingBtn.onclick = () => { console.log("Luyện gõ từ cho thẻ:", cardItem); showToast("Tính năng luyện tập riêng thẻ này đang phát triển.", 3000); closeBottomSheet(); };
                  bottomSheetContent.appendChild(practiceTypingBtn);
-                 hasActions = true;
             }
             
-            if (!hasActions && viewType === 'default') { // Chỉ không mở nếu là view default mà không có action nào
-                 console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
-                 if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
-                 if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
-                 return; 
-            }
-
             bottomSheetOverlay.classList.remove('hidden');
             bottomSheet.classList.remove('translate-y-full');
             requestAnimationFrame(() => {
@@ -2133,10 +2127,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTimeout(() => {
                 bottomSheet.classList.add('translate-y-full');
                 bottomSheetOverlay.classList.add('hidden');
-                 // Xóa nội dung video để dừng phát khi đóng
                 const videoIframe = bottomSheetContent.querySelector('iframe');
                 if (videoIframe) {
-                    videoIframe.src = ''; // Hoặc remove()
+                    videoIframe.src = ''; 
                 }
             }, 300); 
         }
@@ -2283,13 +2276,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (cardOptionsMenuBtn) {
                 cardOptionsMenuBtn.addEventListener('click', () => {
                     const currentCard = window.currentData[window.currentIndex];
-                    if (currentCard) openBottomSheet(currentCard, 'default'); // Mở view mặc định
+                    if (currentCard) openBottomSheet(currentCard, 'default'); 
                 });
             }
             if (cardOptionsMenuBtnBack) {
                  cardOptionsMenuBtnBack.addEventListener('click', () => {
                     const currentCard = window.currentData[window.currentIndex];
-                    if (currentCard) openBottomSheet(currentCard, 'default'); // Mở view mặc định
+                    if (currentCard) openBottomSheet(currentCard, 'default'); 
                 });
             }
             if (closeBottomSheetBtn) {
@@ -2299,7 +2292,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetOverlay.addEventListener('click', closeBottomSheet);
             }
             
-            // Event listeners cho các nút action mới
             if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
                 const currentCard = window.currentData[window.currentIndex];
                 if (currentCard) openBottomSheet(currentCard, 'notes');
