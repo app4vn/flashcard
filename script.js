@@ -2083,7 +2083,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             } else if (viewType === 'notes') {
     bottomSheet.classList.add('bottom-sheet-notes-mode');
-    bottomSheetTitle.textContent = `Ghi chú / Mẹo nhớ / Ví dụ cho: ${cardTerm.length > 15 ? cardTerm.substring(0,12) + '...' : cardTerm}`; // Cập nhật tiêu đề
+    bottomSheetTitle.textContent = `Ghi chú / Mẹo nhớ / Ví dụ: ${cardTerm.length > 15 ? cardTerm.substring(0,12) + '...' : cardTerm}`; // Cập nhật tiêu đề
     const notesTextarea = document.createElement('textarea');
     notesTextarea.id = 'bottom-sheet-notes-textarea';
     notesTextarea.value = cardItem.generalNotes || '';
