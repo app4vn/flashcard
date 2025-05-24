@@ -1,8 +1,15 @@
-// Firebase App and Auth imports
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"; 
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"; 
-// Firestore specific imports, serverTimestamp and Timestamp might be needed for data preparation
-import { getFirestore, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+  getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, getDoc, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; 
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
@@ -49,7 +56,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     bottomSheetOverlay, bottomSheet, bottomSheetTitle, closeBottomSheetBtn, bottomSheetContent,
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
-    srsFeedbackToastEl; // *** THÊM MỚI: Biến cho Toast Notification ***
+    srsFeedbackToastEl; 
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
@@ -267,30 +274,29 @@ async function handleAuthStateChangedInApp(user) {
     }
 }
 
-// *** THÊM MỚI: Hàm hiển thị Toast Notification ***
 let toastTimeout;
 function showToast(message, duration = 3000, type = 'info') {
     if (!srsFeedbackToastEl) return;
 
     srsFeedbackToastEl.textContent = message;
-    srsFeedbackToastEl.classList.remove('bg-slate-700', 'bg-red-600', 'bg-green-600'); // Xóa các class màu cũ
+    srsFeedbackToastEl.classList.remove('bg-slate-700', 'bg-red-600', 'bg-green-600', 'opacity-0', 'hidden'); 
+    srsFeedbackToastEl.classList.add('show'); // Kích hoạt transition CSS
 
     if (type === 'error') {
         srsFeedbackToastEl.classList.add('bg-red-600');
     } else if (type === 'success') {
         srsFeedbackToastEl.classList.add('bg-green-600');
     } else {
-        srsFeedbackToastEl.classList.add('bg-slate-700'); // Màu mặc định
+        srsFeedbackToastEl.classList.add('bg-slate-700'); 
     }
 
-    srsFeedbackToastEl.classList.add('show');
-
-    clearTimeout(toastTimeout); // Xóa timeout cũ nếu có
+    clearTimeout(toastTimeout); 
     toastTimeout = setTimeout(() => {
         srsFeedbackToastEl.classList.remove('show');
+        // Thêm class hidden sau khi transition opacity hoàn tất (nếu cần, tùy thuộc vào CSS)
+        // setTimeout(() => srsFeedbackToastEl.classList.add('hidden'), 500); // Phù hợp với duration của transition opacity
     }, duration);
 }
-// *** KẾT THÚC THÊM MỚI ***
 
 
 // Logic chính của ứng dụng
@@ -390,7 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     cardOptionsMenuBtnBack = document.getElementById('card-options-menu-btn-back'); 
     authActionButtonMain = document.getElementById('auth-action-btn'); 
     userEmailDisplayMain = document.getElementById('user-email-display');
-    srsFeedbackToastEl = document.getElementById('srs-feedback-toast'); // *** GÁN BIẾN CHO TOAST ***
+    srsFeedbackToastEl = document.getElementById('srs-feedback-toast'); 
     
     window.wordDisplay = wordDisplay; 
     window.updateSidebarFilterVisibility = updateSidebarFilterVisibility;
@@ -403,14 +409,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({ 
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getWebCardGlobalId,
+        utilGetWebCardGlobalIdFunc: getWebCardGlobalId, 
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
         dataGetCurrentCardFunc: () => window.currentData[window.currentIndex],
         dataGetWindowCurrentDataFunc: () => window.currentData,
         dataGetCurrentIndexFunc: () => window.currentIndex,
-        uiShowToastFunc: showToast // *** TRUYỀN HÀM SHOWTOAST VÀO SRS MODULE ***
+        uiShowToastFunc: showToast 
     });
     
     if (!getCurrentUserId()) { 
@@ -895,7 +901,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     async function getCardStatus(cardItem){ 
-        if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0};
+        if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
         const userId = getCurrentUserId();
 
         if (cardItem.isUserCard) { 
@@ -906,21 +912,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nextReviewDate: cardItem.nextReviewDate || null,
                 interval: cardItem.interval || 0,
                 easeFactor: cardItem.easeFactor || 2.5,
-                repetitions: cardItem.repetitions || 0
+                repetitions: cardItem.repetitions || 0,
+                isSuspended: cardItem.isSuspended || false
             };
         } else { 
             if (userId) { 
                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getWebCardGlobalId(cardItem));
                 if (firestoreStatus) {
                     return { 
-                        ...defaultCategoryState, 
+                        ...defaultCategoryState, // Có thể không cần thiết nếu firestoreStatus đã đủ
                         ...firestoreStatus,
-                        status: firestoreStatus.status || 'new' 
+                        status: firestoreStatus.status || 'new',
+                        isSuspended: firestoreStatus.isSuspended || false
                     };
                 }
             }
             const webCardGlobalId = getWebCardGlobalId(cardItem);
-            const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0};
+            const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
             if (!webCardGlobalId) return defaultStatus;
             try {
                 const legacyStatuses = JSON.parse(localStorage.getItem('flashcardCardStatuses_v4_nested_linked_ui_fixed_v2') || '{}'); 
@@ -934,7 +942,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     nextReviewDate: s.nextReviewDate || null,
                     interval: s.interval || 0,
                     easeFactor: s.easeFactor || 2.5,
-                    repetitions: s.repetitions || 0
+                    repetitions: s.repetitions || 0,
+                    isSuspended: s.isSuspended || false
                 };
             } catch (e) {
                 console.error("Error parsing legacy card statuses from localStorage", e);
@@ -977,7 +986,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
              console.log(`All cards loaded for user ${userId}:`, cards);
         } 
-        return cards;
+        return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false })); // Đảm bảo isSuspended tồn tại
     }
     
     async function handleSaveCard() { 
@@ -1903,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let hasActions = false;
 
             // --- Hiển thị thông tin SRS ---
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || cardItem.repetitions > 0) )) { 
+            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0)) )) { 
                 const srsInfoDiv = document.createElement('div');
                 srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
                 let srsInfoHtml = '<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập:</h4><ul class="list-inside space-y-0.5">';
@@ -1989,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             });
                             alert("Đã đặt lại tiến độ học cho thẻ.");
                             updateFlashcard(); 
-                            applyAllFilters(); // Áp dụng lại bộ lọc
+                            applyAllFilters(); 
                         }
                         closeBottomSheet();
                     }
