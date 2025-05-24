@@ -57,9 +57,9 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
-    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, // Đổi actionBtnVideo thành actionBtnMedia
+    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard,
     exitSingleCardPracticeBtn,
-    bottomSheetTabsContainer, tabBtnYouglish, tabBtnYouTube; // Biến cho tabs
+    bottomSheetTabsContainer, tabBtnYouglish, tabBtnYouTube; 
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
@@ -85,17 +85,15 @@ let currentEditingDeckId = null;
 let isSingleCardPracticeMode = false;
 let originalCurrentData = [];
 let originalCurrentIndex = 0;
-let currentYouglishWidget = null; // Để lưu instance của Youglish widget
-let isYouglishApiReady = false;   // Cờ báo API Youglish đã sẵn sàng
+let currentYouglishWidget = null; 
+let isYouglishApiReady = false;   
 
-// Hàm này sẽ được Youglish API gọi khi nó tải xong
 window.onYouglishAPIReady = function() {
     console.log("Youglish API is ready.");
     isYouglishApiReady = true;
-    // Nếu có một hàm chờ để tạo widget, có thể gọi ở đây
     if (typeof window.processPendingYouglishWidget === 'function') {
         window.processPendingYouglishWidget();
-        window.processPendingYouglishWidget = null; // Xóa đi sau khi gọi
+        window.processPendingYouglishWidget = null; 
     }
 };
 
@@ -417,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     userEmailDisplayMain = document.getElementById('user-email-display');
     srsFeedbackToastEl = document.getElementById('srs-feedback-toast'); 
     actionBtnNotes = document.getElementById('action-btn-notes');
-    actionBtnMedia = document.getElementById('action-btn-media'); // Đã đổi ID
+    actionBtnMedia = document.getElementById('action-btn-media'); 
     actionBtnPracticeCard = document.getElementById('action-btn-practice-card');
     exitSingleCardPracticeBtn = document.getElementById('exit-single-card-practice-btn');
     bottomSheetTabsContainer = document.getElementById('bottom-sheet-tabs');
@@ -1542,7 +1540,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const hasActionsForBottomSheet = (item.isUserCard && userId) || (!item.isUserCard && userId);
             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = hasActionsForBottomSheet ? 'block' : 'none';
             if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = hasActionsForBottomSheet ? 'block' : 'none';
-            // Nút actionBtnMedia (Youglish) sẽ luôn hiển thị nếu có thẻ
             if (actionBtnMedia && item) actionBtnMedia.style.display = 'flex'; else if (actionBtnMedia) actionBtnMedia.style.display = 'none';
 
 
@@ -1981,7 +1978,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loggedIn = getCurrentUserId();
             let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
 
-            // Reset classes và style
             bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode');
             bottomSheet.style.paddingBottom = ''; 
             if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
@@ -2100,7 +2096,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const notesTextarea = document.createElement('textarea');
                 notesTextarea.id = 'bottom-sheet-notes-textarea';
                 notesTextarea.value = cardItem.generalNotes || '';
-                notesTextarea.rows = 8; // Tăng số dòng mặc định
+                notesTextarea.rows = 8; 
                 notesTextarea.placeholder = "Nhập ghi chú chung, mẹo ghi nhớ (ví dụ: Mẹo: ...), hoặc ví dụ của bạn (ví dụ: VD: ...)";
                 bottomSheetContent.appendChild(notesTextarea);
 
@@ -2108,7 +2104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Nội dung`;
                 saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700', 'py-2', 'px-4', 'rounded-md', 'w-full', 'flex', 'items-center', 'justify-center');
                 saveNotesBtn.onclick = async () => {
-                    const newNotes = notesTextarea.value; // Không trim() để giữ lại xuống dòng
+                    const newNotes = notesTextarea.value; 
                     const dataToUpdate = { generalNotes: newNotes, updatedAt: serverTimestamp() };
                     let updateSuccess = false;
                     if (cardItem.isUserCard && loggedIn) {
@@ -2131,29 +2127,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                     closeBottomSheet();
                 };
                 bottomSheetContent.appendChild(saveNotesBtn);
-                hasActions = true; // Luôn có action là lưu ghi chú
+                hasActions = true; 
             } else if (viewType === 'media') {
-                bottomSheet.classList.add('bottom-sheet-media-mode'); // Class chung cho media
+                bottomSheet.classList.add('bottom-sheet-media-mode'); 
                 bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
                 if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'flex';
                 
-                // Tạo các container cho nội dung tab (nếu chưa có)
                 let youglishContainer = document.getElementById('youglish-tab-content');
                 if (!youglishContainer) {
                     youglishContainer = document.createElement('div');
                     youglishContainer.id = 'youglish-tab-content';
-                    youglishContainer.className = 'bottom-sheet-tab-content';
+                    youglishContainer.className = 'bottom-sheet-tab-content'; // Sẽ được quản lý active/hidden bởi setActiveMediaTab
                     bottomSheetContent.appendChild(youglishContainer);
                 }
                 let youtubeContainer = document.getElementById('youtube-tab-content');
                 if (!youtubeContainer) {
                     youtubeContainer = document.createElement('div');
                     youtubeContainer.id = 'youtube-tab-content';
-                    youtubeContainer.className = 'bottom-sheet-tab-content hidden'; // Ban đầu ẩn
+                    youtubeContainer.className = 'bottom-sheet-tab-content hidden'; 
                     bottomSheetContent.appendChild(youtubeContainer);
                 }
                 
-                setActiveMediaTab(initialSubView, cardItem); // Mặc định mở tab Youglish
+                setActiveMediaTab(initialSubView, cardItem); 
                 hasActions = true; 
             } else if (viewType === 'practice_options') {
                  bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2195,11 +2190,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const youtubeContent = document.getElementById('youtube-tab-content');
             let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
 
-            if (currentYouglishWidget) { // Hủy widget cũ nếu có
+            if (currentYouglishWidget) { 
                 try { currentYouglishWidget.destroy(); } catch(e) { console.warn("Error destroying Youglish widget", e); }
                 currentYouglishWidget = null;
             }
-            if (youglishContent) youglishContent.innerHTML = ''; // Xóa nội dung cũ của các tab
+            if (youglishContent) youglishContent.innerHTML = ''; 
             if (youtubeContent) youtubeContent.innerHTML = '';
 
             if (tabName === 'youglish') {
@@ -2208,14 +2203,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (youglishContent) youglishContent.classList.remove('hidden');
                 if (youtubeContent) youtubeContent.classList.add('hidden');
 
-                const widgetContainerId = 'youglish-widget-dynamic-' + Date.now();
+                const widgetContainerId = 'youglish-widget-dynamic-' + Date.now(); // ID động
                 const widgetDiv = document.createElement('div');
                 widgetDiv.id = widgetContainerId;
-                widgetDiv.className = 'video-iframe-container'; // Dùng chung class để CSS xử lý kích thước
+                widgetDiv.className = 'video-iframe-container'; 
                 if (youglishContent) youglishContent.appendChild(widgetDiv);
                 
                 const createWidget = () => {
-                    if (document.getElementById(widgetContainerId)) {
+                    if (document.getElementById(widgetContainerId)) { // Kiểm tra div còn tồn tại
                          currentYouglishWidget = new YG.Widget(widgetContainerId, {
                             width: "100%", 
                             components: 0, 
@@ -2239,9 +2234,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isYouglishApiReady && typeof YG !== "undefined" && YG.Widget) {
                     createWidget();
                 } else {
-                    console.log("Youglish API not ready, queuing widget creation.");
+                    console.log("Youglish API not ready, queuing widget creation for:", cardTerm);
                     window.processPendingYouglishWidget = createWidget; 
-                    // Script Youglish sẽ gọi onYouglishAPIReady, sau đó onYouglishAPIReady sẽ gọi createWidget
                 }
 
             } else if (tabName === 'youtube_custom') {
@@ -2276,7 +2270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         function closeBottomSheet() {
             if (!bottomSheet || !bottomSheetOverlay) return;
             
-            if (currentYouglishWidget) { // Hủy Youglish widget nếu có
+            if (currentYouglishWidget) { 
                 try { currentYouglishWidget.destroy(); } catch(e) { console.warn("Error destroying Youglish widget during close", e); }
                 currentYouglishWidget = null;
             }
@@ -2284,7 +2278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode'); 
             bottomSheetOverlay.classList.remove('active');
             bottomSheet.style.paddingBottom = ''; 
-            if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; // Ẩn tabs khi đóng
+            if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
 
             setTimeout(() => {
                 bottomSheet.classList.add('translate-y-full');
@@ -2293,7 +2287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (videoIframe) {
                     videoIframe.src = ''; 
                 }
-                bottomSheetContent.innerHTML = ''; // Xóa sạch nội dung để chuẩn bị cho lần mở tiếp theo
+                bottomSheetContent.innerHTML = ''; 
             }, 300); 
         }
         
@@ -2491,9 +2485,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const currentCard = window.currentData[window.currentIndex];
                 if (currentCard) openBottomSheet(currentCard, 'notes');
             });
-            if(actionBtnMedia) actionBtnMedia.addEventListener('click', () => { // Đã đổi ID
+            if(actionBtnMedia) actionBtnMedia.addEventListener('click', () => { 
                 const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'media', 'youglish'); // Mặc định mở tab Youglish
+                if (currentCard) openBottomSheet(currentCard, 'media', 'youglish'); 
             });
             if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
                 const currentCard = window.currentData[window.currentIndex];
