@@ -2082,17 +2082,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
             } else if (viewType === 'notes') {
-                bottomSheet.classList.add('bottom-sheet-notes-mode');
-                bottomSheetTitle.textContent = `Ghi chú cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                const notesTextarea = document.createElement('textarea');
-                notesTextarea.id = 'bottom-sheet-notes-textarea';
-                notesTextarea.value = cardItem.generalNotes || '';
-                notesTextarea.rows = 5;
-                notesTextarea.placeholder = "Nhập ghi chú của bạn ở đây...";
-                bottomSheetContent.appendChild(notesTextarea);
+    bottomSheet.classList.add('bottom-sheet-notes-mode');
+    bottomSheetTitle.textContent = `Ghi chú / Mẹo nhớ / Ví dụ cho: ${cardTerm.length > 15 ? cardTerm.substring(0,12) + '...' : cardTerm}`; // Cập nhật tiêu đề
+    const notesTextarea = document.createElement('textarea');
+    notesTextarea.id = 'bottom-sheet-notes-textarea';
+    notesTextarea.value = cardItem.generalNotes || '';
+    notesTextarea.rows = 8; // Có thể tăng số dòng mặc định
+    notesTextarea.placeholder = "Nhập ghi chú chung, mẹo ghi nhớ (ví dụ: Mẹo: ...), hoặc ví dụ của bạn (ví dụ: VD: ...)"; // Cập nhật placeholder
+    bottomSheetContent.appendChild(notesTextarea);
 
-                const saveNotesBtn = document.createElement('button');
-                saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Ghi chú`;
+    const saveNotesBtn = document.createElement('button');
+    saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Nội dung`; // Cập nhật text nút
                 saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700', 'py-2', 'px-4', 'rounded-md', 'w-full', 'flex', 'items-center', 'justify-center');
                 saveNotesBtn.onclick = async () => {
                     const newNotes = notesTextarea.value.trim();
