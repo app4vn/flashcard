@@ -58,7 +58,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
     actionBtnNotes, actionBtnVideo, actionBtnPracticeCard,
-    exitSingleCardPracticeBtn; // *** THÊM MỚI: Nút thoát luyện tập 1 thẻ ***
+    exitSingleCardPracticeBtn; 
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
@@ -81,11 +81,9 @@ let currentExampleSpeechIndex = 0;
 let isSpeakingExampleQueue = false;
 let currentEditingCardId = null;
 let currentEditingDeckId = null; 
-// *** THÊM MỚI: Biến cho chế độ luyện tập 1 thẻ ***
 let isSingleCardPracticeMode = false;
 let originalCurrentData = [];
 let originalCurrentIndex = 0;
-// *** KẾT THÚC THÊM MỚI ***
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
 
@@ -1379,7 +1377,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
         if (actionBtnVideo) actionBtnVideo.style.display = 'none'; 
-        if (exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none'; // Ẩn nút thoát mặc định
+        if (exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none'; 
 
 
         if (practiceType !== "off") {
@@ -1422,14 +1420,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 exitSingleCardPracticeBtn.style.display = 'inline-flex';
                 if(prevBtn) prevBtn.style.display = 'none';
                 if(nextBtn) nextBtn.style.display = 'none';
-                if(flipBtn) flipBtn.style.display = 'none'; // Ẩn cả nút lật
+                if(flipBtn) flipBtn.style.display = 'none'; 
             } else {
-                 if(prevBtn) prevBtn.style.display = 'inline-flex'; // Hiển thị lại nếu không phải single card practice
+                 if(prevBtn) prevBtn.style.display = 'inline-flex'; 
                  if(nextBtn) nextBtn.style.display = 'inline-flex';
                  if(flipBtn) flipBtn.style.display = 'inline-flex';
             }
 
-        } else { // Không ở chế độ luyện tập
+        } else { 
             if(practiceArea) practiceArea.style.display = 'none'; 
             if(flashcardElement) flashcardElement.classList.remove('practice-mode-front-only');
             if(pronunciationDisplay) pronunciationDisplay.style.display = 'block';
@@ -1543,7 +1541,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updateStatusButtonsUI();
             }
             updateCardInfo();
-            if (practiceType === 'off' && !isSingleCardPracticeMode) startLearningTimer(); // Chỉ start timer nếu không ở chế độ luyện tập 1 thẻ
+            if (practiceType === 'off' && !isSingleCardPracticeMode) startLearningTimer(); 
         };
 
         function updateCardInfo(){
@@ -1672,8 +1670,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const cardToPractice = isSingleCardPracticeMode ? originalCurrentData[originalCurrentIndex] : window.currentData[window.currentIndex];
             processSrsRatingWrapper(isCorrect ? 'easy' : 'again'); 
             updateCardInfo(); 
-            // Trong chế độ luyện tập một thẻ, không tự động chuyển thẻ
-            // Người dùng sẽ nhấp "Thoát Luyện tập Thẻ"
         }
         
         function switchToInputMode(mode) {
@@ -1962,7 +1958,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         function openBottomSheet(cardItem, viewType = 'default') { 
             if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
-
+            
+            let hasActions = false; // *** KHAI BÁO BIẾN hasActions ở đây ***
             bottomSheetContent.innerHTML = ''; 
             const loggedIn = getCurrentUserId();
             let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
@@ -1972,8 +1969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (viewType === 'default') {
                 bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                let hasContentForDefaultView = false;
-
+                
                 if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
                     const srsInfoDiv = document.createElement('div');
                     srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
@@ -1997,7 +1993,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     srsInfoHtml += '</ul>';
                     srsInfoDiv.innerHTML = srsInfoHtml;
                     bottomSheetContent.appendChild(srsInfoDiv);
-                    hasContentForDefaultView = true; 
+                    hasActions = true; 
                 }
 
                 if (!cardItem.isUserCard && loggedIn) {
@@ -2005,14 +2001,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
                     copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
                     bottomSheetContent.appendChild(copyBtnEl);
-                    hasContentForDefaultView = true;
+                    hasActions = true;
                 }
                 if (cardItem.isUserCard && loggedIn) {
                     const editBtnEl = document.createElement('button');
                     editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
                     editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
                     bottomSheetContent.appendChild(editBtnEl);
-                    hasContentForDefaultView = true;
+                    hasActions = true;
                 }
                 if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
                     const resetSrsBtn = document.createElement('button');
@@ -2038,7 +2034,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     };
                     bottomSheetContent.appendChild(resetSrsBtn);
-                    hasContentForDefaultView = true;
+                    hasActions = true;
                 }
                 if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
                     const suspendBtn = document.createElement('button');
@@ -2068,7 +2064,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         closeBottomSheet();
                     };
                     bottomSheetContent.appendChild(suspendBtn);
-                    hasContentForDefaultView = true;
+                    hasActions = true;
                 }
                 if (cardItem.isUserCard && loggedIn) {
                     const deleteBtnEl = document.createElement('button');
@@ -2076,9 +2072,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
                     deleteBtnEl.onclick = async () => { await handleDeleteCard(); closeBottomSheet(); };
                     bottomSheetContent.appendChild(deleteBtnEl);
-                    hasContentForDefaultView = true;
+                    hasActions = true;
                 }
-                 if (!hasContentForDefaultView) { 
+                 if (!hasActions) { 
                     console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
                     if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
                     if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
@@ -2199,18 +2195,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation}, Mode: ${practiceMode}`);
 
             isSingleCardPracticeMode = true;
-            originalCurrentData = [...window.currentData]; // Sao chép mảng
+            originalCurrentData = [...window.currentData]; 
             originalCurrentIndex = window.currentIndex;
 
-            window.currentData = [cardItem]; // Chỉ chứa thẻ hiện tại
+            window.currentData = [cardItem]; 
             window.currentIndex = 0;
             
-            practiceType = practiceMode; // Đặt chế độ luyện tập
+            practiceType = practiceMode; 
 
-            // Không cần thay đổi practiceTypeSelect.value vì nó sẽ làm trigger applyAllFilters không cần thiết
-            // thay vào đó, updateFlashcard sẽ tự xử lý isSingleCardPracticeMode
-
-            updateFlashcard(); // Cập nhật giao diện cho chế độ luyện tập một thẻ
+            updateFlashcard(); 
             showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation}`, 3000);
         }
 
@@ -2219,13 +2212,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log("Exiting single card practice mode.");
 
             isSingleCardPracticeMode = false;
-            window.currentData = [...originalCurrentData]; // Khôi phục dữ liệu gốc
-            window.currentIndex = originalCurrentIndex;   // Khôi phục chỉ số gốc
+            window.currentData = [...originalCurrentData]; 
+            window.currentIndex = originalCurrentIndex;   
             
-            practiceType = 'off'; // Tắt chế độ luyện tập
-            if (practiceTypeSelect) practiceTypeSelect.value = 'off'; // Cập nhật dropdown nếu cần
+            practiceType = 'off'; 
+            if (practiceTypeSelect) practiceTypeSelect.value = 'off'; 
 
-            updateFlashcard(); // Quay lại giao diện xem thẻ bình thường
+            updateFlashcard(); 
             showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
         }
 
