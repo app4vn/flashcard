@@ -41,12 +41,12 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     hamburgerMenuBtn, filterSidebar, closeSidebarBtn, sidebarOverlay, tagsDisplayFront, 
     typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn, 
     addEditCardModal, closeModalBtn, addEditCardForm, modalTitle, cardIdInput, 
-    cardWordInput, cardPronunciationInput, cardGeneralNotesInput, meaningBlocksContainer, 
-    addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, cardBaseVerbInput, 
-    cardTagsInput, cancelCardBtn, saveCardBtn, deckCreationHint, userDeckFilterContainer, 
-    userDeckSelect, manageDecksBtn, modalDeckAssignmentContainer, cardDeckAssignmentSelect, 
-    manageDecksModal, deckModalContent, closeDeckModalBtn, newDeckNameInput, 
-    addNewDeckBtn, existingDecksList, cardWordError, meaningBlocksGeneralError, 
+    cardWordInput, cardPronunciationInput, cardGeneralNotesInput, cardVideoUrlInput, // Thêm cardVideoUrlInput
+    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, 
+    cardBaseVerbInput, cardTagsInput, cancelCardBtn, saveCardBtn, deckCreationHint, 
+    userDeckFilterContainer, userDeckSelect, manageDecksBtn, modalDeckAssignmentContainer, 
+    cardDeckAssignmentSelect, manageDecksModal, deckModalContent, closeDeckModalBtn, 
+    newDeckNameInput, addNewDeckBtn, existingDecksList, cardWordError, meaningBlocksGeneralError, 
     manualInputModeBtn, jsonInputModeBtn, jsonInputArea, cardJsonInput, processJsonBtn, 
     jsonImportErrorMessage, jsonImportSuccessMessage, jsonCardDeckAssignmentSelect, 
     jsonDeckCreationHint, 
@@ -56,10 +56,12 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     bottomSheetOverlay, bottomSheet, bottomSheetTitle, closeBottomSheetBtn, bottomSheetContent,
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
-    srsFeedbackToastEl; 
+    srsFeedbackToastEl,
+    actionBtnNotes, actionBtnVideo, actionBtnPracticeCard; // Các nút action mới
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
+// ... (Giữ nguyên như trước) ...
 let baseVerbSuggestions = [];
 let tagSuggestions = [];
 let currentDatasetSource = 'web'; 
@@ -79,6 +81,7 @@ let currentExampleSpeechIndex = 0;
 let isSpeakingExampleQueue = false;
 let currentEditingCardId = null;
 let currentEditingDeckId = null; 
+
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
 
@@ -116,6 +119,7 @@ let appState = JSON.parse(JSON.stringify(defaultAppState));
 
 const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; 
 
+// ... (Các hàm loadAppState, saveAppState, getCategoryState, handleAuthStateChangedInApp giữ nguyên như trước) ...
 async function loadAppState() {
     const userId = getCurrentUserId(); 
     console.log("Attempting to load AppState. Current user ID:", userId);
@@ -280,7 +284,7 @@ function showToast(message, duration = 3000, type = 'info') {
 
     srsFeedbackToastEl.textContent = message;
     srsFeedbackToastEl.classList.remove('bg-slate-700', 'bg-red-600', 'bg-green-600', 'opacity-0', 'hidden'); 
-    srsFeedbackToastEl.classList.add('show'); // Kích hoạt transition CSS
+    srsFeedbackToastEl.classList.add('show'); 
 
     if (type === 'error') {
         srsFeedbackToastEl.classList.add('bg-red-600');
@@ -293,8 +297,6 @@ function showToast(message, duration = 3000, type = 'info') {
     clearTimeout(toastTimeout); 
     toastTimeout = setTimeout(() => {
         srsFeedbackToastEl.classList.remove('show');
-        // Thêm class hidden sau khi transition opacity hoàn tất (nếu cần, tùy thuộc vào CSS)
-        // setTimeout(() => srsFeedbackToastEl.classList.add('hidden'), 500); // Phù hợp với duration của transition opacity
     }, duration);
 }
 
@@ -347,6 +349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     cardWordInput = document.getElementById('card-word-input');
     cardPronunciationInput = document.getElementById('card-pronunciation-input');
     cardGeneralNotesInput = document.getElementById('card-general-notes-input');
+    cardVideoUrlInput = document.getElementById('card-video-url-input'); // Gán biến cho input video
     meaningBlocksContainer = document.getElementById('meaning-blocks-container');
     addAnotherMeaningBlockAtEndBtn = document.getElementById('add-another-meaning-block-at-end-btn');
     phrasalVerbSpecificFields = document.getElementById('phrasal-verb-specific-fields');
@@ -397,6 +400,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     authActionButtonMain = document.getElementById('auth-action-btn'); 
     userEmailDisplayMain = document.getElementById('user-email-display');
     srsFeedbackToastEl = document.getElementById('srs-feedback-toast'); 
+    actionBtnNotes = document.getElementById('action-btn-notes');
+    actionBtnVideo = document.getElementById('action-btn-video');
+    actionBtnPracticeCard = document.getElementById('action-btn-practice-card');
     
     window.wordDisplay = wordDisplay; 
     window.updateSidebarFilterVisibility = updateSidebarFilterVisibility;
@@ -446,7 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     function createClearButtonForInput(inputElement) { let clearBtn = inputElement.parentNode.querySelector('.input-clear-btn'); if (clearBtn) { clearBtn.style.display = inputElement.value ? 'block' : 'none'; return clearBtn; } clearBtn = document.createElement('button'); clearBtn.type = 'button'; clearBtn.className = 'input-clear-btn'; clearBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>`; clearBtn.setAttribute('aria-label', 'Xóa nội dung'); clearBtn.style.display = inputElement.value ? 'block' : 'none'; clearBtn.addEventListener('click', (e) => { e.stopPropagation(); const oldValue = inputElement.value; inputElement.value = ''; clearBtn.style.display = 'none'; inputElement.focus(); if (oldValue !== '') { inputElement.dispatchEvent(new Event('input', { bubbles: true })); } }); inputElement.addEventListener('input', () => { clearBtn.style.display = inputElement.value ? 'block' : 'none'; }); if(inputElement.parentNode.classList.contains('relative')) { inputElement.parentNode.appendChild(clearBtn); } return clearBtn; }
-    function initializeClearButtonsForModal() { const inputsWithClear = [ cardWordInput, cardPronunciationInput, cardBaseVerbInput, cardTagsInput, cardGeneralNotesInput ]; inputsWithClear.forEach(inputEl => { if (inputEl && inputEl.parentNode.classList.contains('relative')) { createClearButtonForInput(inputEl); } }); meaningBlocksContainer.querySelectorAll('.card-meaning-text-input, .card-meaning-notes-input').forEach(input => { if (input && input.parentNode.classList.contains('relative')) createClearButtonForInput(input); }); }
+    function initializeClearButtonsForModal() { const inputsWithClear = [ cardWordInput, cardPronunciationInput, cardBaseVerbInput, cardTagsInput, cardGeneralNotesInput, cardVideoUrlInput ]; inputsWithClear.forEach(inputEl => { if (inputEl && inputEl.parentNode.classList.contains('relative')) { createClearButtonForInput(inputEl); } }); meaningBlocksContainer.querySelectorAll('.card-meaning-text-input, .card-meaning-notes-input').forEach(input => { if (input && input.parentNode.classList.contains('relative')) createClearButtonForInput(input); }); }
     function initializeClearButtonForSearch() { if (searchInput && searchInput.parentNode.classList.contains('relative')) { createClearButtonForInput(searchInput); } }
 
     function createExampleEntryElement(exampleData = { id: generateUniqueId('ex'), eng: '', vie: '', exampleNotes: '' }) { const exampleEntryDiv = document.createElement('div'); exampleEntryDiv.className = 'example-entry space-y-1'; exampleEntryDiv.dataset.exampleId = exampleData.id || generateUniqueId('ex'); exampleEntryDiv.innerHTML = `<div class="flex justify-between items-center"><label class="block text-xs font-medium text-slate-500">Ví dụ Tiếng Anh</label><button type="button" class="remove-example-entry-btn text-red-400 hover:text-red-600 text-xs remove-entry-btn" title="Xóa ví dụ này"><i class="fas fa-times-circle"></i> Xóa</button></div><textarea rows="2" class="card-example-eng-input block w-full p-1.5 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Câu ví dụ (Tiếng Anh)">${exampleData.eng}</textarea><label class="block text-xs font-medium text-slate-500 mt-1">Nghĩa ví dụ (Tiếng Việt - tùy chọn)</label><textarea rows="1" class="card-example-vie-input block w-full p-1.5 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Nghĩa tiếng Việt của ví dụ">${exampleData.vie}</textarea><label class="block text-xs font-medium text-slate-500 mt-1">Ghi chú cho ví dụ này (tùy chọn)</label><textarea rows="1" class="card-example-notes-input block w-full p-1.5 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ghi chú cho ví dụ">${exampleData.exampleNotes || ''}</textarea>`; exampleEntryDiv.querySelector('.remove-example-entry-btn').addEventListener('click', function() { this.closest('.example-entry').remove(); }); return exampleEntryDiv; }
@@ -833,6 +839,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             cardPronunciationInput.value = cardData.pronunciation || ''; 
             cardGeneralNotesInput.value = cardData.generalNotes || ''; 
+            cardVideoUrlInput.value = cardData.videoUrl || ''; // Tải videoUrl
             if (cardData.meanings && cardData.meanings.length > 0) { 
                 cardData.meanings.forEach(meaningBlock => addMeaningBlockToEnd(meaningBlock)); 
             } else {
@@ -845,9 +852,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (mode === 'add') { 
             addMeaningBlockToEnd(); 
             cardGeneralNotesInput.value = ''; 
+            cardVideoUrlInput.value = '';
         }
         updateRemoveMeaningBlockButtonsState();
-        [cardWordInput, cardPronunciationInput, cardBaseVerbInput, cardTagsInput, cardGeneralNotesInput].forEach(input => { if (input) input.dispatchEvent(new Event('input', { bubbles: true })); });
+        [cardWordInput, cardPronunciationInput, cardBaseVerbInput, cardTagsInput, cardGeneralNotesInput, cardVideoUrlInput].forEach(input => { if (input) input.dispatchEvent(new Event('input', { bubbles: true })); });
         meaningBlocksContainer.querySelectorAll('.card-meaning-text-input, .card-meaning-notes-input').forEach(input => { if (input) input.dispatchEvent(new Event('input', { bubbles: true })); });
         addEditCardModal.classList.remove('hidden', 'opacity-0');
         addEditCardModal.querySelector('.modal-content').classList.remove('scale-95');
@@ -920,7 +928,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getWebCardGlobalId(cardItem));
                 if (firestoreStatus) {
                     return { 
-                        ...defaultCategoryState, // Có thể không cần thiết nếu firestoreStatus đã đủ
+                        ...defaultCategoryState, 
                         ...firestoreStatus,
                         status: firestoreStatus.status || 'new',
                         isSuspended: firestoreStatus.isSuspended || false
@@ -986,7 +994,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
              console.log(`All cards loaded for user ${userId}:`, cards);
         } 
-        return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false })); // Đảm bảo isSuspended tồn tại
+        return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false, videoUrl: card.videoUrl || null })); 
     }
     
     async function handleSaveCard() { 
@@ -1062,6 +1070,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pronunciation: cardPronunciationInput.value.trim(), 
             meanings: meaningsData, 
             generalNotes: cardGeneralNotesInput.value.trim(), 
+            videoUrl: cardVideoUrlInput.value.trim() || null, // Lưu videoUrl
             category: cardCategory, 
             deckId: assignedDeckId, 
             status: 'new', 
@@ -1261,6 +1270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             category: category, 
                             meanings: meaningsArray, 
                             generalNotes: card.generalNotes || card.notes || '', 
+                            videoUrl: card.videoUrl || null, // Thêm videoUrl
                             status: 'new', 
                             lastReviewed: null,
                             reviewCount: 0,
@@ -1286,6 +1296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     card.easeFactor = firestoreStatus.easeFactor || 2.5;
                                     card.repetitions = firestoreStatus.repetitions || 0;
                                     card.isSuspended = firestoreStatus.isSuspended || false;
+                                    card.videoUrl = firestoreStatus.videoUrl || card.videoUrl || null; // Ưu tiên videoUrl từ Firestore
                                 }
                             }
                             return card;
@@ -1313,7 +1324,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         interval: 0,
                         easeFactor: 2.5,
                         repetitions: 0,
-                        isSuspended: false
+                        isSuspended: false,
+                        videoUrl: card.videoUrl || null
                     })); 
                     console.log(`Đã tải dữ liệu mẫu cho '${category}'.`); 
                 } else { 
@@ -1362,6 +1374,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
+        if (actionBtnVideo) actionBtnVideo.style.display = 'none'; // Ẩn nút video ban đầu
 
 
         if (practiceType !== "off") {
@@ -1495,6 +1508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const hasActionsForBottomSheet = (item.isUserCard && userId) || (!item.isUserCard && userId);
             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = hasActionsForBottomSheet ? 'block' : 'none';
             if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = hasActionsForBottomSheet ? 'block' : 'none';
+            if (actionBtnVideo) actionBtnVideo.style.display = item.videoUrl ? 'flex' : 'none'; // Hiển thị nút video nếu có URL
 
 
             if (item.meanings && item.meanings.length > 0) { item.meanings.forEach((mObj, idx) => { const meaningBlockDiv = document.createElement('div'); meaningBlockDiv.className = `meaning-block-on-card ${idx > 0 ? "mt-4 pt-3 border-t border-blue-400 border-opacity-50" : (item.meanings.length > 1 ? "bg-black bg-opacity-10 p-3 rounded-lg" : "") }`; const meaningTextP = document.createElement('p'); meaningTextP.className = "meaning-text-on-card"; if (item.meanings.length > 1) { meaningTextP.textContent = `${idx + 1}. ${mObj.text}`; } else { meaningTextP.textContent = mObj.text; } meaningBlockDiv.appendChild(meaningTextP); if (mObj.notes) { const meaningNotesP = document.createElement('p'); meaningNotesP.className = "meaning-notes-on-card"; meaningNotesP.textContent = mObj.notes; meaningBlockDiv.appendChild(meaningNotesP); } if (mObj.examples && mObj.examples.length > 0) { const examplesContainer = document.createElement('div'); examplesContainer.className = "ml-3 mt-3"; const examplesListDiv = document.createElement('div'); examplesListDiv.className = "space-y-1.5"; examplesListDiv.dataset.meaningId = mObj.id; const maxVisibleExamples = 1; const totalExamples = mObj.examples.length; mObj.examples.forEach((ex, exIdx) => { const exD = document.createElement('div'); exD.className="example-item-on-card"; if (exIdx >= maxVisibleExamples) { exD.classList.add('hidden'); } const eP = document.createElement('p'); eP.className="example-eng-on-card"; const textSpan = document.createElement('span'); const enLabel = document.createElement('span'); enLabel.className = 'example-label'; enLabel.textContent = 'EN: '; textSpan.appendChild(enLabel); textSpan.appendChild(document.createTextNode(ex.eng)); eP.appendChild(textSpan); const copyBtn = document.createElement('button'); copyBtn.className = 'copy-example-btn'; copyBtn.title = 'Sao chép ví dụ'; const initialCopySvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>`; const copiedSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`; copyBtn.innerHTML = initialCopySvg; copyBtn.onclick = (e) => { e.stopPropagation(); navigator.clipboard.writeText(ex.eng).then(() => { copyBtn.innerHTML = copiedSvg; setTimeout(() => { copyBtn.innerHTML = initialCopySvg; }, 1500); }).catch(err => { console.error('Không thể sao chép: ', err); }); }; eP.appendChild(copyBtn); exD.appendChild(eP); if(ex.vie){ const vP = document.createElement('p');vP.className="example-vie-on-card";const vnLabel = document.createElement('span');vnLabel.className = 'example-label';vnLabel.textContent = 'VN: ';vP.appendChild(vnLabel);vP.appendChild(document.createTextNode(`(${ex.vie})`));exD.appendChild(vP); } if(ex.exampleNotes){ const nP=document.createElement('p');nP.className="example-notes-on-card";nP.textContent=`Ghi chú VD: ${ex.exampleNotes}`;exD.appendChild(nP); } examplesListDiv.appendChild(exD); }); examplesContainer.appendChild(examplesListDiv); if (totalExamples > maxVisibleExamples) { const toggleExamplesBtn = document.createElement('button'); toggleExamplesBtn.className = "toggle-examples-btn"; let hiddenCount = totalExamples - maxVisibleExamples; toggleExamplesBtn.textContent = `Xem thêm ${hiddenCount} ví dụ...`; toggleExamplesBtn.dataset.expanded = "false"; toggleExamplesBtn.onclick = (e) => { e.stopPropagation(); const isExpanded = toggleExamplesBtn.dataset.expanded === "true"; const exampleItems = examplesListDiv.querySelectorAll('.example-item-on-card'); exampleItems.forEach((item, itemIdx) => { if (itemIdx >= maxVisibleExamples) { item.classList.toggle('hidden', isExpanded); } }); if (isExpanded) { toggleExamplesBtn.textContent = `Xem thêm ${hiddenCount} ví dụ...`; toggleExamplesBtn.dataset.expanded = "false"; } else { toggleExamplesBtn.textContent = "Ẩn bớt ví dụ"; toggleExamplesBtn.dataset.expanded = "true"; } }; examplesContainer.appendChild(toggleExamplesBtn); } meaningBlockDiv.appendChild(examplesContainer); } if(meaningDisplayContainer) meaningDisplayContainer.appendChild(meaningBlockDiv); }); } 
@@ -1733,6 +1747,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         })) : []
                     })),
                     generalNotes: cardJson.generalNotes || '',
+                    videoUrl: cardJson.videoUrl || null,
                     category: cardJson.category,
                     deckId: selectedDeckId,
                     status: 'new',
@@ -1876,6 +1891,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardToCopy.easeFactor = 2.5;      
             cardToCopy.repetitions = 0;  
             cardToCopy.isSuspended = false;
+            cardToCopy.videoUrl = currentCard.videoUrl || null; // Sao chép cả videoUrl
             cardToCopy.createdAt = serverTimestamp();
             cardToCopy.updatedAt = serverTimestamp();
 
@@ -1900,174 +1916,203 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        function openBottomSheet(cardItem) {
+        function openBottomSheet(cardItem, viewType = 'default') { // Thêm viewType
             if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
             bottomSheetContent.innerHTML = ''; 
-
-            let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ hiện tại";
-            bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 25 ? cardTerm.substring(0,22) + '...' : cardTerm}`;
-
             const loggedIn = getCurrentUserId();
-            let hasActions = false;
+            let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
 
-            // --- Hiển thị thông tin SRS ---
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0)) )) { 
-                const srsInfoDiv = document.createElement('div');
-                srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
-                let srsInfoHtml = '<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập:</h4><ul class="list-inside space-y-0.5">';
-                
-                if (cardItem.nextReviewDate) {
-                    const nextReview = new Date(cardItem.nextReviewDate);
-                    const today = new Date(); today.setHours(0,0,0,0);
-                    const reviewDay = new Date(nextReview.getTime()); reviewDay.setHours(0,0,0,0);
-                    let reviewText = `Lần ôn tiếp theo: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
-                    if (reviewDay <= today) reviewText += ' <span class="font-semibold text-amber-600 dark:text-amber-400">(Đến hạn)</span>';
-                    srsInfoHtml += `<li>${reviewText}</li>`;
-                } else {
-                    srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có (thẻ mới)</li>`;
+            if (viewType === 'default') {
+                bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                let hasActions = false;
+
+                // Hiển thị thông tin SRS
+                if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
+                    const srsInfoDiv = document.createElement('div');
+                    srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
+                    let srsInfoHtml = '<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập:</h4><ul class="list-inside space-y-0.5">';
+                    if (cardItem.nextReviewDate) {
+                        const nextReview = new Date(cardItem.nextReviewDate);
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const reviewDay = new Date(nextReview.getTime()); reviewDay.setHours(0,0,0,0);
+                        let reviewText = `Lần ôn tiếp theo: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                        if (reviewDay <= today) reviewText += ' <span class="font-semibold text-amber-600 dark:text-amber-400">(Đến hạn)</span>';
+                        srsInfoHtml += `<li>${reviewText}</li>`;
+                    } else {
+                        srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có (thẻ mới)</li>`;
+                    }
+                    srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
+                    srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
+                    srsInfoHtml += `<li>Ôn đúng liên tiếp: ${cardItem.repetitions || 0}</li>`;
+                    if (cardItem.isSuspended) {
+                        srsInfoHtml += `<li class="text-orange-500 font-semibold">Trạng thái: Đang tạm ngưng</li>`;
+                    }
+                    srsInfoHtml += '</ul>';
+                    srsInfoDiv.innerHTML = srsInfoHtml;
+                    bottomSheetContent.appendChild(srsInfoDiv);
+                    hasActions = true; 
                 }
-                srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
-                srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
-                srsInfoHtml += `<li>Ôn đúng liên tiếp: ${cardItem.repetitions || 0}</li>`;
-                if (cardItem.isSuspended) {
-                    srsInfoHtml += `<li class="text-orange-500 font-semibold">Trạng thái: Đang tạm ngưng</li>`;
+
+                // Nút Sao chép
+                if (!cardItem.isUserCard && loggedIn) {
+                    const copyBtnEl = document.createElement('button');
+                    copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
+                    copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
+                    bottomSheetContent.appendChild(copyBtnEl);
+                    hasActions = true;
                 }
-                srsInfoHtml += '</ul>';
-                srsInfoDiv.innerHTML = srsInfoHtml;
-                bottomSheetContent.appendChild(srsInfoDiv);
-                hasActions = true; 
-            }
-
-
-            // --- Các nút hành động ---
-            if (!cardItem.isUserCard && loggedIn) {
-                const copyBtnEl = document.createElement('button');
-                copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
-                copyBtnEl.onclick = () => {
-                    openCopyToDeckModal();
-                    closeBottomSheet();
-                };
-                bottomSheetContent.appendChild(copyBtnEl);
-                hasActions = true;
-            }
-
-            if (cardItem.isUserCard && loggedIn) {
-                const editBtnEl = document.createElement('button');
-                editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
-                editBtnEl.onclick = async () => {
-                    await openAddEditModal('edit', cardItem);
-                    closeBottomSheet();
-                };
-                bottomSheetContent.appendChild(editBtnEl);
-                hasActions = true;
-            }
-            
-            // Nút Đặt lại Tiến độ Học
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
-                const resetSrsBtn = document.createElement('button');
-                resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
-                resetSrsBtn.onclick = async () => {
-                    if (confirm("Bạn có chắc muốn đặt lại tiến độ học cho thẻ này? Thẻ sẽ được coi như mới học.")) {
-                        const srsResetData = {
-                            status: 'new',
-                            lastReviewed: serverTimestamp(),
-                            reviewCount: 0, 
-                            nextReviewDate: serverTimestamp(), 
-                            interval: 0,
-                            easeFactor: 2.5,
-                            repetitions: 0,
-                            isSuspended: false 
-                        };
-                        
+                // Nút Sửa thẻ
+                if (cardItem.isUserCard && loggedIn) {
+                    const editBtnEl = document.createElement('button');
+                    editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
+                    editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
+                    bottomSheetContent.appendChild(editBtnEl);
+                    hasActions = true;
+                }
+                // Nút Đặt lại Tiến độ Học
+                if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
+                    const resetSrsBtn = document.createElement('button');
+                    resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
+                    resetSrsBtn.onclick = async () => {
+                        if (confirm("Bạn có chắc muốn đặt lại tiến độ học cho thẻ này? Thẻ sẽ được coi như mới học.")) {
+                            const srsResetData = {
+                                status: 'new', lastReviewed: serverTimestamp(), reviewCount: 0, 
+                                nextReviewDate: serverTimestamp(), interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false 
+                            };
+                            let updateSuccess = false;
+                            if (cardItem.isUserCard) {
+                                updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
+                            } else {
+                                const webCardGlobalId = getWebCardGlobalId(cardItem);
+                                if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, srsResetData);
+                            }
+                            if (updateSuccess) {
+                                Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() });
+                                alert("Đã đặt lại tiến độ học cho thẻ."); updateFlashcard(); applyAllFilters();
+                            }
+                            closeBottomSheet();
+                        }
+                    };
+                    bottomSheetContent.appendChild(resetSrsBtn);
+                    hasActions = true;
+                }
+                // Nút Tạm ngưng/Tiếp tục Ôn tập
+                if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
+                    const suspendBtn = document.createElement('button');
+                    suspendBtn.innerHTML = cardItem.isSuspended 
+                        ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
+                        : `<i class="fas fa-pause-circle w-5 mr-3 text-yellow-500"></i> Tạm ngưng Ôn tập`;
+                    suspendBtn.onclick = async () => {
+                        const newSuspendedState = !cardItem.isSuspended;
+                        const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                         let updateSuccess = false;
                         if (cardItem.isUserCard) {
-                            updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
+                            updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
                         } else {
                             const webCardGlobalId = getWebCardGlobalId(cardItem);
                             if (webCardGlobalId) {
-                                updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, srsResetData);
+                                const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
+                                const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
+                                for (const key in fullDataToSet) { if (fullDataToSet[key] === undefined) delete fullDataToSet[key]; }
+                                updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
                             }
                         }
-
                         if (updateSuccess) {
-                            Object.assign(cardItem, {
-                                ...srsResetData,
-                                nextReviewDate: Date.now(), 
-                                lastReviewed: Date.now()
-                            });
-                            alert("Đã đặt lại tiến độ học cho thẻ.");
-                            updateFlashcard(); 
-                            applyAllFilters(); 
+                            cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now();
+                            alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
+                            updateFlashcard(); applyAllFilters();
                         }
                         closeBottomSheet();
-                    }
-                };
-                bottomSheetContent.appendChild(resetSrsBtn);
-                hasActions = true;
-            }
-            
-            // Nút Tạm ngưng/Tiếp tục Ôn tập
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) { 
-                const suspendBtn = document.createElement('button');
-                suspendBtn.innerHTML = cardItem.isSuspended 
-                    ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
-                    : `<i class="fas fa-pause-circle w-5 mr-3 text-yellow-500"></i> Tạm ngưng Ôn tập`;
-                
-                suspendBtn.onclick = async () => {
-                    const newSuspendedState = !cardItem.isSuspended;
-                    const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
-                    let updateSuccess = false;
+                    };
+                    bottomSheetContent.appendChild(suspendBtn);
+                    hasActions = true;
+                }
+                // Nút Xóa thẻ
+                if (cardItem.isUserCard && loggedIn) {
+                    const deleteBtnEl = document.createElement('button');
+                    deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
+                    deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
+                    deleteBtnEl.onclick = async () => { await handleDeleteCard(); closeBottomSheet(); };
+                    bottomSheetContent.appendChild(deleteBtnEl);
+                    hasActions = true;
+                }
+            } else if (viewType === 'notes') {
+                bottomSheetTitle.textContent = `Ghi chú cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                const notesTextarea = document.createElement('textarea');
+                notesTextarea.id = 'bottom-sheet-notes-textarea';
+                notesTextarea.value = cardItem.generalNotes || '';
+                notesTextarea.rows = 5;
+                notesTextarea.placeholder = "Nhập ghi chú của bạn ở đây...";
+                bottomSheetContent.appendChild(notesTextarea);
 
-                    if (cardItem.isUserCard) {
+                const saveNotesBtn = document.createElement('button');
+                saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Ghi chú`;
+                saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700');
+                saveNotesBtn.onclick = async () => {
+                    const newNotes = notesTextarea.value.trim();
+                    const dataToUpdate = { generalNotes: newNotes, updatedAt: serverTimestamp() };
+                    let updateSuccess = false;
+                    if (cardItem.isUserCard && loggedIn) {
                         updateSuccess = await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
-                    } else {
+                    } else if (loggedIn) { // Thẻ web
                         const webCardGlobalId = getWebCardGlobalId(cardItem);
-                        if (webCardGlobalId) {
+                         if (webCardGlobalId) {
                             const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
-                            const fullDataToSet = {
-                                ...existingWebStatus, 
-                                originalCategory: cardItem.category,
-                                originalWordOrPhrase: cardItem.category === 'phrasalVerbs' ? cardItem.phrasalVerb : (cardItem.category === 'collocations' ? cardItem.collocation : cardItem.word),
-                                isSuspended: newSuspendedState,
-                                updatedAt: serverTimestamp() 
-                            };
-                            for (const key in fullDataToSet) {
-                                if (fullDataToSet[key] === undefined) {
-                                    delete fullDataToSet[key];
-                                }
-                            }
+                            const fullDataToSet = { ...existingWebStatus, generalNotes: newNotes, updatedAt: serverTimestamp() };
                             updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
                         }
                     }
-
                     if (updateSuccess) {
-                        cardItem.isSuspended = newSuspendedState;
-                        cardItem.updatedAt = Date.now();
-                        alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
-                        updateFlashcard(); 
-                        applyAllFilters(); 
+                        cardItem.generalNotes = newNotes;
+                        alert("Đã lưu ghi chú.");
+                        updateFlashcard(); // Cập nhật hiển thị ghi chú trên thẻ nếu có
+                    } else if (loggedIn) { // Chỉ báo lỗi nếu đã đăng nhập mà không lưu được
+                        alert("Lỗi lưu ghi chú.");
                     }
                     closeBottomSheet();
                 };
-                bottomSheetContent.appendChild(suspendBtn);
+                bottomSheetContent.appendChild(saveNotesBtn);
                 hasActions = true;
-            }
 
-            if (cardItem.isUserCard && loggedIn) {
-                const deleteBtnEl = document.createElement('button');
-                deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
-                deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
-                deleteBtnEl.onclick = async () => {
-                    await handleDeleteCard(); 
-                    closeBottomSheet();
-                };
-                bottomSheetContent.appendChild(deleteBtnEl);
-                hasActions = true;
+            } else if (viewType === 'video') {
+                bottomSheetTitle.textContent = `Video cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                if (cardItem.videoUrl) {
+                    // Logic để nhúng video YouTube
+                    const videoId = extractYouTubeVideoId(cardItem.videoUrl);
+                    if (videoId) {
+                        const iframe = document.createElement('iframe');
+                        iframe.width = "100%"; // Hoặc kích thước cố định
+                        iframe.height = "315";
+                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                        iframe.title = "YouTube video player";
+                        iframe.frameborder = "0";
+                        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                        iframe.allowfullscreen = true;
+                        bottomSheetContent.appendChild(iframe);
+                    } else {
+                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Link video không hợp lệ.</p>';
+                    }
+                } else {
+                    bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400">Không có video cho thẻ này.</p>';
+                }
+                hasActions = true; // Vẫn coi là có action để mở sheet
+            } else if (viewType === 'practice_options') {
+                 bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+                 const practiceMeaningBtn = document.createElement('button');
+                 practiceMeaningBtn.innerHTML = `<i class="fas fa-list-alt w-5 mr-3 text-purple-500"></i> Luyện Nghĩa (Thẻ này)`;
+                 practiceMeaningBtn.onclick = () => { console.log("Luyện nghĩa cho thẻ:", cardItem); showToast("Tính năng luyện tập riêng thẻ này đang phát triển.", 3000); closeBottomSheet(); };
+                 bottomSheetContent.appendChild(practiceMeaningBtn);
+
+                 const practiceTypingBtn = document.createElement('button');
+                 practiceTypingBtn.innerHTML = `<i class="fas fa-keyboard w-5 mr-3 text-teal-500"></i> Luyện Gõ Từ (Thẻ này)`;
+                 practiceTypingBtn.onclick = () => { console.log("Luyện gõ từ cho thẻ:", cardItem); showToast("Tính năng luyện tập riêng thẻ này đang phát triển.", 3000); closeBottomSheet(); };
+                 bottomSheetContent.appendChild(practiceTypingBtn);
+                 hasActions = true;
             }
             
-            if (!hasActions) {
-                 console.log("Không có hành động nào cho thẻ này trong bottom sheet.");
+            if (!hasActions && viewType === 'default') { // Chỉ không mở nếu là view default mà không có action nào
+                 console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
                  if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
                  if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
                  return; 
@@ -2088,7 +2133,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTimeout(() => {
                 bottomSheet.classList.add('translate-y-full');
                 bottomSheetOverlay.classList.add('hidden');
+                 // Xóa nội dung video để dừng phát khi đóng
+                const videoIframe = bottomSheetContent.querySelector('iframe');
+                if (videoIframe) {
+                    videoIframe.src = ''; // Hoặc remove()
+                }
             }, 300); 
+        }
+        
+        function extractYouTubeVideoId(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
         }
 
 
@@ -2226,13 +2283,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (cardOptionsMenuBtn) {
                 cardOptionsMenuBtn.addEventListener('click', () => {
                     const currentCard = window.currentData[window.currentIndex];
-                    if (currentCard) openBottomSheet(currentCard);
+                    if (currentCard) openBottomSheet(currentCard, 'default'); // Mở view mặc định
                 });
             }
             if (cardOptionsMenuBtnBack) {
                  cardOptionsMenuBtnBack.addEventListener('click', () => {
                     const currentCard = window.currentData[window.currentIndex];
-                    if (currentCard) openBottomSheet(currentCard);
+                    if (currentCard) openBottomSheet(currentCard, 'default'); // Mở view mặc định
                 });
             }
             if (closeBottomSheetBtn) {
@@ -2241,6 +2298,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (bottomSheetOverlay) {
                 bottomSheetOverlay.addEventListener('click', closeBottomSheet);
             }
+            
+            // Event listeners cho các nút action mới
+            if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if (currentCard) openBottomSheet(currentCard, 'notes');
+            });
+            if(actionBtnVideo) actionBtnVideo.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if (currentCard) openBottomSheet(currentCard, 'video');
+            });
+            if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
+                const currentCard = window.currentData[window.currentIndex];
+                if (currentCard) openBottomSheet(currentCard, 'practice_options');
+            });
 
 
             if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';if(cat==='phrasalVerbs' || cat === 'collocations'){st.tag='all';if(tagSelect)tagSelect.value='all';st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';} const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}st.filterMarked='all_study';if(filterCardStatusSelect)filterCardStatusSelect.value='all_study';st.currentIndex=0;applyAllFilters();closeSidebar();});
