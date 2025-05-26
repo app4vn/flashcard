@@ -1,0 +1,134 @@
+{
+  "idioms": [
+    {
+      "idiom": "Kick the bucket",
+      "category": "idioms",
+      "pronunciation": "/kɪk ðə ˈbʌkɪt/",
+      "meanings": [
+        {
+          "id": "m_idiom_web_1_1",
+          "text": "Chết (nghĩa lóng)",
+          "notes": "Thường dùng không trang trọng",
+          "examples": [
+            {
+              "id": "ex_idiom_web_1_1_1",
+              "eng": "The old man finally kicked the bucket after a long illness.",
+              "vie": "Ông lão cuối cùng cũng qua đời sau một thời gian dài bệnh tật."
+            },
+            {
+              "id": "ex_idiom_web_1_1_2",
+              "eng": "I hope I can travel the world before I kick the bucket.",
+              "vie": "Tôi hy vọng mình có thể đi du lịch vòng quanh thế giới trước khi chết."
+            }
+          ]
+        }
+      ],
+      "tags": ["death", "informal"],
+      "generalNotes": "Một thành ngữ phổ biến."
+    },
+    {
+      "idiom": "Break a leg",
+      "category": "idioms",
+      "pronunciation": "/breɪk ə lɛg/",
+      "meanings": [
+        {
+          "id": "m_idiom_web_2_1",
+          "text": "Chúc may mắn (đặc biệt trong biểu diễn)",
+          "notes": "",
+          "examples": [
+            {
+              "id": "ex_idiom_web_2_1_1",
+              "eng": "Break a leg in your performance tonight!",
+              "vie": "Chúc bạn may mắn trong buổi biểu diễn tối nay!"
+            },
+            {
+              "id": "ex_idiom_web_2_1_2",
+              "eng": "She shouted \"Break a leg!\" to her son before he went on stage.",
+              "vie": "Cô ấy hét \"Chúc may mắn!\" với con trai mình trước khi cậu bé lên sân khấu."
+            }
+          ]
+        }
+      ],
+      "tags": ["luck", "performance"],
+      "generalNotes": ""
+    },
+    {
+      "idiom": "Hit the sack",
+      "category": "idioms",
+      "pronunciation": "/hɪt ðə sæk/",
+      "meanings": [
+        {
+          "id": "m_idiom_web_3_1",
+          "text": "Đi ngủ",
+          "notes": "Cách nói thân mật",
+          "examples": [
+            {
+              "id": "ex_idiom_web_3_1_1",
+              "eng": "I'm really tired, I think I'm going to hit the sack.",
+              "vie": "Tôi mệt quá, chắc tôi đi ngủ đây."
+            },
+            {
+              "id": "ex_idiom_web_3_1_2",
+              "eng": "It's almost midnight, time to hit the sack.",
+              "vie": "Gần nửa đêm rồi, đến giờ đi ngủ thôi."
+            }
+          ]
+        }
+      ],
+      "tags": ["sleep", "daily_routine"],
+      "generalNotes": ""
+    },
+    {
+      "idiom": "Spill the beans",
+      "category": "idioms",
+      "pronunciation": "/spɪl ðə biːnz/",
+      "meanings": [
+        {
+          "id": "m_idiom_web_4_1",
+          "text": "Tiết lộ bí mật",
+          "notes": "",
+          "examples": [
+            {
+              "id": "ex_idiom_web_4_1_1",
+              "eng": "Come on, spill the beans! Who told you about the surprise party?",
+              "vie": "Thôi nào, nói ra đi! Ai đã nói cho bạn biết về bữa tiệc bất ngờ?"
+            },
+            {
+              "id": "ex_idiom_web_4_1_2",
+              "eng": "He spilled the beans about their new project, even though it was supposed to be confidential.",
+              "vie": "Anh ấy đã tiết lộ bí mật về dự án mới của họ, mặc dù nó được cho là bí mật."
+            }
+          ]
+        }
+      ],
+      "tags": ["secrets", "communication"],
+      "generalNotes": ""
+    },
+    {
+      "idiom": "Piece of cake",
+      "category": "idioms",
+      "pronunciation": "/piːs əv keɪk/",
+      "meanings": [
+        {
+          "id": "m_idiom_web_5_1",
+          "text": "Rất dễ dàng",
+          "notes": "",
+          "examples": [
+            {
+              "id": "ex_idiom_web_5_1_1",
+              "eng": "The exam was a piece of cake.",
+              "vie": "Bài kiểm tra đó quá dễ."
+            },
+            {
+              "id": "ex_idiom_web_5_1_2",
+              "eng": "Don't worry about the presentation, it'll be a piece of cake for you.",
+              "vie": "Đừng lo về bài thuyết trình, nó sẽ rất dễ dàng đối với bạn."
+            }
+          ]
+        }
+      ],
+      "tags": ["easy", "effortless"],
+      "generalNotes": ""
+    }
+  ]
+}
