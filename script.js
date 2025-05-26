@@ -97,7 +97,7 @@ let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
 
 // UID Admin - QUAN TRỌNG: BẠN CẦN THAY THẾ BẰNG UID THỰC CỦA TÀI KHOẢN ADMIN FIREBASE CỦA BẠN
-const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Ví dụ: "firebaseUserUid123abc"
+const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Ví dụ: "abcdef123456xyz7890ghijk"
 
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
@@ -286,8 +286,7 @@ async function handleAuthStateChangedInApp(user) {
     if (typeof setupInitialCategoryAndSource === 'function') {
         await setupInitialCategoryAndSource(); 
         
-        // Sử dụng requestAnimationFrame để đảm bảo DOM đã được cập nhật trước khi gọi updateFlashcard
-        requestAnimationFrame(() => {
+        requestAnimationFrame(() => { // Sử dụng requestAnimationFrame để đảm bảo DOM được cập nhật
             if (window.currentData && window.currentData.length > 0 && window.currentIndex < window.currentData.length && typeof window.updateFlashcard === 'function') {
                  console.log("Auth Change: RAF explicit updateFlashcard for current card index:", window.currentIndex);
                  window.updateFlashcard(); 
@@ -804,6 +803,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentEditingDeckId = null;
     }
 
+    // Đổi tên hàm này để dùng chung cho cả lecture ID
     function getCardIdentifier(item){ 
         if(!item) return null;
         let keyPart;
@@ -2509,8 +2509,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         const contentTextarea = document.createElement('textarea');
                         contentTextarea.id = 'lecture-content-html-input';
-                        contentTextarea.rows = 15; // Tăng số dòng cho dễ soạn thảo
-                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]'; // Thêm min-h
+                        contentTextarea.rows = 15; 
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]'; 
                         contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
                         contentTextarea.value = lectureData?.contentHTML || '';
                         bottomSheetContent.appendChild(contentTextarea);
@@ -2526,11 +2526,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 alert("Tiêu đề bài giảng không được để trống.");
                                 return;
                             }
-                            // Cho phép lưu nội dung trống để có thể xóa bài giảng
-                            // if (!newContentHTML) {
-                            //     alert("Nội dung bài giảng không được để trống.");
-                            //     return;
-                            // }
                             saveLectureBtn.disabled = true;
                             saveLectureBtn.textContent = 'Đang lưu...';
                             const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
@@ -2548,22 +2543,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else { 
                         if (lectureData && lectureData.contentHTML) {
                             bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
-                            // Thêm class để có thể style nội dung HTML từ CSS
                             bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
                         } else {
                             bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
                         }
                     }
                 })
-                .catch(error => {
+                .catch(error => { // Xử lý lỗi của Promise getLectureContent
                     console.error("Lỗi khi tải bài giảng:", error);
                     bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
                 });
-            } else {
-                bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Không thể xác định thẻ để tải bài giảng.</p>';
-            }
             hasActions = true; 
-
         } else if (viewType === 'media') {
             bottomSheet.classList.add('bottom-sheet-media-mode');
             bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
