@@ -13,7 +13,7 @@ import {
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
-import * as FirestoreService from './firestoreService.js'; 
+import * as FirestoreService from './firestoreService.js';
 import { initializeSrsModule, processSrsRatingWrapper } from './srs.js';
 
 const firebaseConfig = {
@@ -42,8 +42,9 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn,
     addEditCardModal, closeModalBtn, addEditCardForm, modalTitle, cardIdInput,
     cardWordInput, cardPronunciationInput, cardGeneralNotesInput, cardVideoUrlInput,
-    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields,
-    cardBaseVerbInput, cardTagsInput, cancelCardBtn, saveCardBtn, deckCreationHint,
+    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, // This will be reused/controlled for idioms too
+    cardBaseVerbInput, cardTagsInput, cardWordLabel, // Added cardWordLabel
+    cancelCardBtn, saveCardBtn, deckCreationHint,
     userDeckFilterContainer, userDeckSelect, manageDecksBtn, modalDeckAssignmentContainer,
     cardDeckAssignmentSelect, manageDecksModal, deckModalContent, closeDeckModalBtn,
     newDeckNameInput, addNewDeckBtn, existingDecksList, cardWordError, meaningBlocksGeneralError,
@@ -57,7 +58,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
-    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, 
+    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard,
     exitSingleCardPracticeBtn,
     bottomSheetTabsContainer, tabBtnYouTube,
     flipIconFront, flipIconBack, cardFrontElement;
@@ -89,11 +90,11 @@ let touchStartX = 0;
 let touchEndX = 0;
 let touchStartY = 0;
 let touchEndY = 0;
-const swipeThreshold = 50; 
-const swipeMaxVerticalOffset = 75; 
+const swipeThreshold = 50;
+const swipeMaxVerticalOffset = 75;
 
 // Biến và key cho tốc độ phát âm ví dụ
-let currentExampleSpeechRate = 1.0; 
+let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
 
 // UID Admin - QUAN TRỌNG: BẠN CẦN THAY THẾ BẰNG UID THỰC CỦA TÀI KHOẢN ADMIN FIREBASE CỦA BẠN
@@ -111,6 +112,10 @@ const sampleData = {
     "adjectives": [ { "word": "Happy", "category": "adjectives", "pronunciation": "/ˈhæpi/", "meanings": [ { "id": "m_adj_sample_1_1", "text": "Cảm thấy hoặc thể hiện sự vui vẻ, hài lòng."}], "generalNotes": "" } ],
     "collocations": [
         { "collocation": "take a break", "baseVerb": "take", "category": "collocations", "pronunciation": "/teɪk ə breɪk/", "meanings": [ { "id": "m_col_sample_1_1", "text": "Nghỉ giải lao, nghỉ ngơi một lát", "notes": "Thường dùng trong công việc hoặc học tập", "examples": [ { "id": "ex_col_sample_1_1_1", "eng": "Let's take a break for 10 minutes.", "vie": "Chúng ta hãy nghỉ giải lao 10 phút." }, { "id": "ex_col_sample_1_1_2", "eng": "She's been working all day, she needs to take a break.", "vie": "Cô ấy đã làm việc cả ngày, cô ấy cần nghỉ ngơi." } ]}], "tags": ["daily_routine", "work_business"], "generalNotes": "Một collocation phổ biến với động từ 'take'." },
+    ],
+    "idioms": [ // Added sample data for idioms
+        { "idiom": "Kick the bucket", "category": "idioms", "pronunciation": "/kɪk ðə ˈbʌkɪt/", "meanings": [ { "id": "m_idiom_sample_1_1", "text": "Chết (nghĩa lóng)", "notes": "Thường dùng không trang trọng", "examples": [ { "id": "ex_idiom_sample_1_1_1", "eng": "The old man finally kicked the bucket after a long illness.", "vie": "Ông lão cuối cùng cũng qua đời sau một thời gian dài bệnh tật." } ]}], "tags": ["death", "informal"], "generalNotes": "Một thành ngữ phổ biến." },
+        { "idiom": "Break a leg", "category": "idioms", "pronunciation": "/breɪk ə lɛg/", "meanings": [ { "id": "m_idiom_sample_2_1", "text": "Chúc may mắn (đặc biệt trong biểu diễn)", "notes": "", "examples": [ { "id": "ex_idiom_sample_2_1_1", "eng": "Break a leg in your performance tonight!", "vie": "Chúc bạn may mắn trong buổi biểu diễn tối nay!" } ]}], "tags": ["luck", "performance"], "generalNotes": "" }
     ]
 };
 
@@ -184,16 +189,16 @@ async function loadAppState() {
             if (appState.userPreferences && typeof appState.userPreferences.exampleSpeechRate === 'number') {
                 currentExampleSpeechRate = appState.userPreferences.exampleSpeechRate;
             } else {
-                loadExampleSpeechRate(); 
+                loadExampleSpeechRate();
             }
             console.log("AppState loaded from localStorage and merged with defaults:", JSON.parse(JSON.stringify(appState)));
-            if (userId) { 
+            if (userId) {
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
             }
         } else {
             console.log("No AppState in localStorage, using defaults.");
             appState = JSON.parse(JSON.stringify(defaultAppState));
-            loadExampleSpeechRate(); 
+            loadExampleSpeechRate();
              if (userId) {
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
             } else {
@@ -212,6 +217,7 @@ async function loadAppState() {
 
 async function saveAppState(){
     if (!categorySelect || !filterCardStatusSelect || !userDeckSelect || !baseVerbSelect || !tagSelect) {
+        // DOM elements might not be ready yet, especially during initial load
     } else {
         const currentCategoryValue = categorySelect.value;
         const stateForCategory = getCategoryState(currentDatasetSource, currentCategoryValue);
@@ -221,14 +227,18 @@ async function saveAppState(){
         if (currentDatasetSource === 'user') {
             stateForCategory.deckId = userDeckSelect.value;
         }
-        if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations') {
-            stateForCategory.baseVerb = baseVerbSelect.value;
-            stateForCategory.tag = tagSelect.value;
+        if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations' || currentCategoryValue === 'idioms') { // Added idioms
+            if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations') { // Base verb only for PV and Collocations
+                 stateForCategory.baseVerb = baseVerbSelect.value;
+            } else {
+                stateForCategory.baseVerb = 'all'; // Reset for idioms
+            }
+            stateForCategory.tag = tagSelect.value; // Tags for PV, Collocations, Idioms
         }
         appState.lastSelectedCategory = currentCategoryValue;
         appState.lastSelectedSource = currentDatasetSource;
         appState.lastSelectedDeckId = (currentDatasetSource === 'user') ? userDeckSelect.value : 'all_user_cards';
-        
+
         appState.userPreferences = appState.userPreferences || {};
         appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
     }
@@ -260,9 +270,9 @@ function getCategoryState(src, cat) {
 }
 
 async function handleAuthStateChangedInApp(user) {
-    await loadAppState(); 
+    await loadAppState();
 
-    if (user) { 
+    if (user) {
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email || "Người dùng";
         if(userEmailDisplayMain) userEmailDisplayMain.classList.remove('hidden');
         if(authActionButtonMain) {
@@ -271,7 +281,7 @@ async function handleAuthStateChangedInApp(user) {
             authActionButtonMain.classList.replace('bg-indigo-500', 'bg-red-500');
             authActionButtonMain.classList.replace('hover:bg-indigo-600', 'hover:bg-red-600');
         }
-    } else { 
+    } else {
         if(userEmailDisplayMain) userEmailDisplayMain.classList.add('hidden');
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = '';
         if(authActionButtonMain) {
@@ -284,16 +294,16 @@ async function handleAuthStateChangedInApp(user) {
     }
 
     if (typeof setupInitialCategoryAndSource === 'function') {
-        await setupInitialCategoryAndSource(); 
-        
+        await setupInitialCategoryAndSource();
+
         requestAnimationFrame(() => { // Sử dụng requestAnimationFrame để đảm bảo DOM được cập nhật
             if (window.currentData && window.currentData.length > 0 && window.currentIndex < window.currentData.length && typeof window.updateFlashcard === 'function') {
                  console.log("Auth Change: RAF explicit updateFlashcard for current card index:", window.currentIndex);
-                 window.updateFlashcard(); 
+                 window.updateFlashcard();
             } else {
                 console.log("Auth Change: RAF - Conditions not met for forcing updateFlashcard. Data length:", window.currentData?.length, "Index:", window.currentIndex);
-                 if (typeof updateStatusButtonsUI === 'function') updateStatusButtonsUI(); 
-                 if (typeof updateCardInfo === 'function') updateCardInfo(); 
+                 if (typeof updateStatusButtonsUI === 'function') updateStatusButtonsUI();
+                 if (typeof updateCardInfo === 'function') updateCardInfo();
             }
         });
     }
@@ -307,7 +317,7 @@ function showToast(message, duration = 3000, type = 'info') {
     if (!srsFeedbackToastEl) return;
     srsFeedbackToastEl.textContent = message;
     srsFeedbackToastEl.className = 'fixed bottom-5 right-5 text-white text-sm py-3 px-5 rounded-lg shadow-md opacity-0 transition-opacity duration-500 ease-in-out z-[1010]'; // Reset classes
-    srsFeedbackToastEl.classList.add('show'); 
+    srsFeedbackToastEl.classList.add('show');
 
     if (type === 'error') srsFeedbackToastEl.classList.add('bg-red-600');
     else if (type === 'success') srsFeedbackToastEl.classList.add('bg-green-600');
@@ -322,7 +332,7 @@ function loadExampleSpeechRate() {
     const savedRate = localStorage.getItem(EXAMPLE_SPEECH_RATE_KEY);
     if (savedRate) {
         const rate = parseFloat(savedRate);
-        if (!isNaN(rate) && rate >= 0.5 && rate <= 2.0) { 
+        if (!isNaN(rate) && rate >= 0.5 && rate <= 2.0) {
              currentExampleSpeechRate = rate;
         }
     }
@@ -333,7 +343,7 @@ function saveExampleSpeechRate() {
     if (getCurrentUserId() && appState) {
         appState.userPreferences = appState.userPreferences || {};
         appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
-        saveAppState(); 
+        saveAppState();
     }
 }
 
@@ -381,7 +391,7 @@ function speakExample(text, spansMeta) {
         utterance.lang = 'en-US';
         utterance.rate = currentExampleSpeechRate; // Use specific rate for examples
         utterance.pitch = 1.0;
-        window.speechSynthesis.cancel(); 
+        window.speechSynthesis.cancel();
 
         if (spansMeta && spansMeta.length > 0) {
             utterance.onstart = () => spansMeta.forEach(m => m.element.classList.remove('highlighted-word'));
@@ -421,11 +431,11 @@ function speakExample(text, spansMeta) {
 // --- END: Speech Synthesis Functions ---
 
 // --- START: Lecture Functions ---
-function generateCardLectureId(cardItem) { 
+function generateCardLectureId(cardItem) {
     if (!cardItem) return `unknown-lecture-${generateUniqueId('uid')}`;
     let keyPart;
     const category = cardItem.category || 'unknown';
-    
+
     switch(category) {
         case 'phrasalVerbs':
             keyPart = cardItem.phrasalVerb;
@@ -433,15 +443,18 @@ function generateCardLectureId(cardItem) {
         case 'collocations':
             keyPart = cardItem.collocation;
             break;
-        default: 
+        case 'idioms': // Added idioms
+            keyPart = cardItem.idiom;
+            break;
+        default:
             keyPart = cardItem.word;
     }
     if (!keyPart) return `${category}-unknown-${generateUniqueId('lecturekey')}`;
-    
+
     const sanitizedKeyPart = String(keyPart).toLowerCase()
-                                .replace(/\s+/g, '-') 
-                                .replace(/[().,/?!"':]/g, '')   
-                                .replace(/[^a-z0-9-]/g, ''); 
+                                .replace(/\s+/g, '-')
+                                .replace(/[().,/?!"':]/g, '')
+                                .replace(/[^a-z0-9-]/g, '');
     return `${category}-${sanitizedKeyPart}`;
 }
 // --- END: Lecture Functions ---
@@ -453,18 +466,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     cardSourceSelect = document.getElementById('card-source-select');
     categorySelect = document.getElementById('category');
     flashcardElement = document.getElementById('flashcard');
-    cardFrontElement = flashcardElement.querySelector('.card-front'); 
+    cardFrontElement = flashcardElement.querySelector('.card-front');
     wordDisplay = document.getElementById('word-display');
     pronunciationDisplay = document.getElementById('pronunciation-display');
     meaningDisplayContainer = document.getElementById('meaning-display-container');
-    notesDisplay = document.getElementById('notes-display'); 
+    notesDisplay = document.getElementById('notes-display');
     prevBtn = document.getElementById('prev-btn');
     flipBtn = document.getElementById('flip-btn');
     nextBtn = document.getElementById('next-btn');
     currentCardIndexDisplay = document.getElementById('current-card-index');
     totalCardsDisplay = document.getElementById('total-cards');
     speakerBtn = document.getElementById('speaker-btn');
-    speakerExampleBtn = document.getElementById('speaker-example-btn'); 
+    speakerExampleBtn = document.getElementById('speaker-example-btn');
     tagFilterContainer = document.getElementById('tag-filter-container');
     tagSelect = document.getElementById('tags');
     searchInput = document.getElementById('search-input');
@@ -493,6 +506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     addEditCardForm = document.getElementById('add-edit-card-form');
     modalTitle = document.getElementById('modal-title');
     cardIdInput = document.getElementById('card-id-input');
+    cardWordLabel = document.querySelector('label[for="card-word-input"]'); // Get the label
     cardWordInput = document.getElementById('card-word-input');
     cardPronunciationInput = document.getElementById('card-pronunciation-input');
     cardGeneralNotesInput = document.getElementById('card-general-notes-input');
@@ -567,7 +581,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getCardIdentifier, 
+        utilGetWebCardGlobalIdFunc: getCardIdentifier,
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
@@ -577,14 +591,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         uiShowToastFunc: showToast
     });
 
-    loadExampleSpeechRate(); 
+    loadExampleSpeechRate();
 
     if (!getCurrentUserId()) {
         await loadAppState();
     }
 
     setupInitialCategoryAndSource();
-    setupEventListeners(); 
+    setupEventListeners();
 
     function generateUniqueId(prefix = 'id') {
         return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`;
@@ -804,11 +818,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Đổi tên hàm này để dùng chung cho cả lecture ID
-    function getCardIdentifier(item){ 
+    function getCardIdentifier(item){
         if(!item) return null;
         let keyPart;
         const category = item.category || 'unknown';
-    
+
         switch(category) {
             case 'phrasalVerbs':
                 keyPart = item.phrasalVerb;
@@ -816,15 +830,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             case 'collocations':
                 keyPart = item.collocation;
                 break;
-            default: 
+            case 'idioms': // Added idioms
+                keyPart = item.idiom;
+                break;
+            default:
                 keyPart = item.word;
         }
         if (!keyPart) return `${category}-unknown-${generateUniqueId('cardkey')}`;
-        
+
         const sanitizedKeyPart = String(keyPart).toLowerCase()
-                                .replace(/\s+/g, '-') 
-                                .replace(/[().,/?!"':]/g, '')   
-                                .replace(/[^a-z0-9-]/g, ''); 
+                                .replace(/\s+/g, '-')
+                                .replace(/[().,/?!"':]/g, '')
+                                .replace(/[^a-z0-9-]/g, '');
         return `${category}-${sanitizedKeyPart}`;
     }
 
@@ -837,6 +854,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (sampleData.collocations) {
             sampleData.collocations.forEach(card => {if (card.baseVerb) allBaseVerbs.add(card.baseVerb.trim())});
         }
+        // Idioms typically don't have a "base verb" in the same structural sense, so we might not need to scan them here for this specific filter.
 
         const userCards = await loadUserCards();
         if (Array.isArray(userCards)) {
@@ -852,7 +870,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     async function getAllUniqueTags() {
         const allTags = new Set();
-        const categoriesWithTags = ['phrasalVerbs', 'collocations'];
+        // Include idioms in categories that can have tags
+        const categoriesWithTags = ['phrasalVerbs', 'collocations', 'idioms'];
 
         categoriesWithTags.forEach(category => {
             if (sampleData[category]) {
@@ -886,8 +905,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateSidebarFilterVisibility (){
         const cat=categorySelect.value;
         const isPVOrCollocation = cat === 'phrasalVerbs' || cat === 'collocations';
-        baseVerbFilterContainer.style.display = isPVOrCollocation ?'block':'none';
-        tagFilterContainer.style.display = isPVOrCollocation ?'block':'none';
+        const isIdiom = cat === 'idioms';
+
+        // Base verb filter only for Phrasal Verbs and Collocations
+        baseVerbFilterContainer.style.display = isPVOrCollocation ? 'block' : 'none';
+        // Tag filter for Phrasal Verbs, Collocations, and Idioms
+        tagFilterContainer.style.display = (isPVOrCollocation || isIdiom) ? 'block' : 'none';
+
 
         const isUserSource = cardSourceSelect.value === 'user';
         const userId = getCurrentUserId();
@@ -943,12 +967,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         meaningBlocksContainer.innerHTML = '';
         const currentCategoryForForm = cardData ? cardData.category : categorySelect.value;
-        const isPVOrCollocation = currentCategoryForForm === 'phrasalVerbs' || currentCategoryForForm === 'collocations';
-        phrasalVerbSpecificFields.style.display = isPVOrCollocation ? 'block' : 'none';
 
-        if (isPVOrCollocation) {
-            baseVerbSuggestions = await getAllUniqueBaseVerbs();
-            tagSuggestions = await getAllUniqueTags();
+        // Update label for cardWordInput based on category
+        if (cardWordLabel) {
+            if (currentCategoryForForm === 'idioms') {
+                cardWordLabel.innerHTML = 'Thành ngữ (Idiom) <span class="text-red-500">*</span>';
+            } else if (currentCategoryForForm === 'phrasalVerbs' || currentCategoryForForm === 'collocations') {
+                cardWordLabel.innerHTML = 'Cụm từ (Tiếng Anh) <span class="text-red-500">*</span>';
+            } else {
+                cardWordLabel.innerHTML = 'Từ (Tiếng Anh) <span class="text-red-500">*</span>';
+            }
+        }
+
+
+        const isPVOrCollocation = currentCategoryForForm === 'phrasalVerbs' || currentCategoryForForm === 'collocations';
+        const isIdiom = currentCategoryForForm === 'idioms';
+
+        // Show base verb input only for PV/Collocations
+        const baseVerbField = phrasalVerbSpecificFields.querySelector('#card-base-verb-input').closest('.relative'); // Assuming this structure
+        if (baseVerbField) baseVerbField.style.display = isPVOrCollocation ? 'block' : 'none';
+
+        // Show tags input for PV, Collocations, and Idioms
+        const tagsField = phrasalVerbSpecificFields.querySelector('#card-tags-input').closest('.relative'); // Assuming this structure
+        if (tagsField) tagsField.style.display = (isPVOrCollocation || isIdiom) ? 'block' : 'none';
+
+        // Overall visibility of the specific fields container
+        phrasalVerbSpecificFields.style.display = (isPVOrCollocation || isIdiom) ? 'block' : 'none';
+
+
+        if (isPVOrCollocation || isIdiom) { // Load suggestions if relevant
+            if (isPVOrCollocation) baseVerbSuggestions = await getAllUniqueBaseVerbs();
+            tagSuggestions = await getAllUniqueTags(); // Tags for PV, Collocations, Idioms
         } else {
             hideAutocompleteSuggestions(cardBaseVerbInput);
             hideAutocompleteSuggestions(cardTagsInput);
@@ -996,6 +1045,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let wordOrPhrase = '';
             if (cardData.category === 'phrasalVerbs') wordOrPhrase = cardData.phrasalVerb;
             else if (cardData.category === 'collocations') wordOrPhrase = cardData.collocation;
+            else if (cardData.category === 'idioms') wordOrPhrase = cardData.idiom; // Added idioms
             else wordOrPhrase = cardData.word;
             cardWordInput.value = wordOrPhrase || '';
 
@@ -1009,6 +1059,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (cardData.category === 'phrasalVerbs' || cardData.category === 'collocations') {
                 cardBaseVerbInput.value = cardData.baseVerb || '';
+                cardTagsInput.value = Array.isArray(cardData.tags) ? cardData.tags.filter(t => t && t !== 'all' && !t.startsWith('particle_')).join(', ') : '';
+            } else if (cardData.category === 'idioms') {
+                cardBaseVerbInput.value = ''; // Idioms don't have base verbs
                 cardTagsInput.value = Array.isArray(cardData.tags) ? cardData.tags.filter(t => t && t !== 'all' && !t.startsWith('particle_')).join(', ') : '';
             }
         } else if (mode === 'add') {
@@ -1082,17 +1135,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         } else {
             if (userId) {
-                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem)); 
+                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem));
                 if (firestoreStatus) {
                     return {
-                        ...defaultCategoryState, 
+                        ...defaultCategoryState,
                         ...firestoreStatus,
                         status: firestoreStatus.status || 'new',
                         isSuspended: firestoreStatus.isSuspended || false
                     };
                 }
             }
-            const webCardGlobalId = getCardIdentifier(cardItem); 
+            const webCardGlobalId = getCardIdentifier(cardItem);
             const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
             if (!webCardGlobalId) return defaultStatus;
             try {
@@ -1150,8 +1203,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
              console.log(`All cards loaded for user ${userId}:`, cards);
-        } else if (selectedDeckId === 'unassigned_cards') { 
-            cards = await FirestoreService.loadUserCardsFromFirestore(userId, null); 
+        } else if (selectedDeckId === 'unassigned_cards') {
+            cards = await FirestoreService.loadUserCardsFromFirestore(userId, null);
         }
         return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false, videoUrl: card.videoUrl || null }));
     }
@@ -1167,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let isValid = true;
         const cardCategory = categorySelect.value;
         const wordValue = cardWordInput.value.trim();
-        if (!wordValue) { displayFieldError(cardWordInput, cardWordError, "Từ/Cụm từ không được để trống."); isValid = false; }
+        if (!wordValue) { displayFieldError(cardWordInput, cardWordError, "Từ/Cụm từ/Thành ngữ không được để trống."); isValid = false; }
 
         const meaningBlockElements = meaningBlocksContainer.querySelectorAll('.meaning-block');
         let hasAtLeastOneValidMeaning = false;
@@ -1231,19 +1284,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             generalNotes: cardGeneralNotesInput.value.trim(),
             videoUrl: cardVideoUrlInput.value.trim() || null,
             category: cardCategory,
-            deckId: assignedDeckId, 
+            deckId: assignedDeckId,
             status: 'new',
-            lastReviewed: null, 
+            lastReviewed: null,
             reviewCount: 0,
-            nextReviewDate: serverTimestamp(), 
+            nextReviewDate: serverTimestamp(),
             interval: 0,
             easeFactor: 2.5,
             repetitions: 0,
             isSuspended: false,
             updatedAt: serverTimestamp()
         };
-         if (!assignedDeckId && cardSourceSelect.value === 'user') { 
-            cardDataToSave.deckId = null; 
+         if (!assignedDeckId && cardSourceSelect.value === 'user') {
+            cardDataToSave.deckId = null;
         }
 
 
@@ -1251,6 +1304,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (cardCategory === 'phrasalVerbs') cardDataToSave.phrasalVerb = wordValue;
             if (cardCategory === 'collocations') cardDataToSave.collocation = wordValue;
             cardDataToSave.baseVerb = cardBaseVerbInput.value.trim() || null;
+            cardDataToSave.tags = cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_'));
+        } else if (cardCategory === 'idioms') { // Added idioms
+            cardDataToSave.idiom = wordValue;
+            cardDataToSave.baseVerb = null; // Idioms don't have base verbs
             cardDataToSave.tags = cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_'));
         } else {
             cardDataToSave.word = wordValue;
@@ -1264,7 +1321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert(editingCardId ? "Đã cập nhật thẻ!" : "Đã thêm thẻ mới!");
             closeAddEditModal();
             if (currentDatasetSource === 'user') {
-                await loadVocabularyData(categorySelect.value); 
+                await loadVocabularyData(categorySelect.value);
             }
         }
         currentEditingCardId = null;
@@ -1283,13 +1340,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const cardToDelete = window.currentData[window.currentIndex];
         const cardIdToDelete = cardToDelete.id;
-        const deckIdOfCard = cardToDelete.deckId; 
+        const deckIdOfCard = cardToDelete.deckId;
 
-        if (!cardIdToDelete) { 
+        if (!cardIdToDelete) {
             alert("Không thể xác định thẻ để xóa. Thiếu ID thẻ.");
             return;
         }
-        const cardIdentifierText = cardToDelete.word || cardToDelete.phrasalVerb || cardToDelete.collocation || "Thẻ không tên";
+        const cardIdentifierText = cardToDelete.word || cardToDelete.phrasalVerb || cardToDelete.collocation || cardToDelete.idiom || "Thẻ không tên";
         if(!confirm(`Bạn có chắc chắn muốn xóa thẻ "${cardIdentifierText}"? Hành động này không thể hoàn tác.`))return;
 
         const success = await FirestoreService.deleteCardFromFirestore(userId, deckIdOfCard, cardIdToDelete);
@@ -1303,11 +1360,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 newIndex = 0;
             }
 
-            await loadVocabularyData(categorySelect.value); 
+            await loadVocabularyData(categorySelect.value);
 
             if(window.currentData.length > 0){
                 window.currentIndex = Math.min(newIndex, window.currentData.length - 1);
-                window.currentIndex = Math.max(0, window.currentIndex); 
+                window.currentIndex = Math.max(0, window.currentIndex);
             } else {
                 window.currentIndex = 0;
             }
@@ -1317,13 +1374,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     function shuffleArray(arr){const nA=[...arr];for(let i=nA.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nA[i],nA[j]]=[nA[j],nA[i]];}return nA;}
-    function speakText(txt,meta=[],cb=null){if(!txt||!txt.trim()){if(cb)cb();return;}if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(txt);u.lang='en-US';u.rate=1.0;u.pitch=1;window.speechSynthesis.cancel();if(meta.length>0){u.onstart=()=>meta.forEach(m=>m.element.classList.remove('highlighted-word'));u.onboundary=e=>{meta.forEach(m=>m.element.classList.remove('highlighted-word'));let f=false;for(const m of meta){if(e.charIndex>=m.start&&e.charIndex<m.start+m.length){m.element.classList.add('highlighted-word');f=true;break;}}if(!f&&meta.length>0){for(let i=meta.length-1;i>=0;i--){const m=meta[i];if(e.charIndex>=m.start){if((i===meta.length-1)||(e.charIndex<meta[i+1].start)){m.element.classList.add('highlighted-word');break;}}}}};u.onend=()=>{meta.forEach(m=>m.element.classList.remove('highlighted-word'));if(cb)cb();};u.onerror=e=>{meta.forEach(m=>m.element.classList.remove('highlighted-word'));console.error("Lỗi phát âm:", e);if(cb)cb();};}else{u.onend=()=>{if(cb)cb();};u.onerror=e=>{console.error("Lỗi phát âm:", e);if(cb)cb();};}window.speechSynthesis.speak(u);}else{console.warn("Trình duyệt không hỗ trợ Speech Synthesis.");if(cb)cb();}}
     function populateBaseVerbFilter(arr){const bV=new Set();arr.forEach(i=>{if(i.baseVerb)bV.add(i.baseVerb);});baseVerbSelect.innerHTML='';const oA=document.createElement('option');oA.value='all';oA.textContent='Tất cả từ gốc';baseVerbSelect.appendChild(oA);const sBV=Array.from(bV).sort((a,b)=>a.localeCompare(b,'en'));sBV.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v.charAt(0).toUpperCase()+v.slice(1);baseVerbSelect.appendChild(o);});}
     function populateTagFilter(arr){const tT=new Set();arr.forEach(i=>{if(i.tags&&Array.isArray(i.tags)){i.tags.forEach(t=>{if(tagDisplayNames[t]&&t!=='all'&&!t.startsWith('particle_'))tT.add(t);});}});tagSelect.innerHTML='';const oA=document.createElement('option');oA.value='all';oA.textContent=tagDisplayNames["all"]||'Tất cả chủ đề';tagSelect.appendChild(oA);const sTK=Array.from(tT).sort((a,b)=>(tagDisplayNames[a]||a).localeCompare(tagDisplayNames[b]||b,'vi'));sTK.forEach(tK=>{const o=document.createElement('option');o.value=tK;o.textContent=tagDisplayNames[tK]||(tK.charAt(0).toUpperCase()+tK.slice(1));tagSelect.appendChild(o);});}
 
     async function applyAllFilters(fromLoad=false){
         const userId = getCurrentUserId();
-        clearLearningTimer();const cCV=categorySelect.value;const sFCSC=getCategoryState(currentDatasetSource,cCV);let cST=searchInput.value.trim().toLowerCase();if(!fromLoad){if(cCV==='phrasalVerbs' || cCV === 'collocations'){sFCSC.baseVerb=baseVerbSelect.value;sFCSC.tag=tagSelect.value;}if(currentDatasetSource==='user' && userId)sFCSC.deckId=userDeckSelect.value;sFCSC.filterMarked=filterCardStatusSelect.value;sFCSC.currentIndex=0;}let lTP=[...activeMasterList];if(currentDatasetSource==='user' && userId){const sDI=sFCSC.deckId||userDeckSelect.value;if(sDI&&sDI!=='all_user_cards'){if(sDI==='unassigned_cards')lTP=lTP.filter(i=>!i.deckId);else lTP=lTP.filter(i=>i.deckId===sDI);}}if(currentDatasetSource==='user' && userId)lTP=lTP.filter(i=>i.category===cCV);if(cCV==='phrasalVerbs' || cCV === 'collocations'){if(sFCSC.baseVerb&&sFCSC.baseVerb!=='all')lTP=lTP.filter(i=>i.baseVerb===sFCSC.baseVerb);if(sFCSC.tag&&sFCSC.tag!=='all')lTP=lTP.filter(i=>i.tags&&i.tags.includes(sFCSC.tag));}if(cST){lTP=lTP.filter(i=>{const wOP=(i.category==='phrasalVerbs'?i.phrasalVerb:(i.category === 'collocations' ? i.collocation : i.word))||'';if(wOP.toLowerCase().includes(cST))return true;if(i.meanings&&i.meanings.some(m=>m.text.toLowerCase().includes(cST)))return true;if(i.meanings){for(const meaning of i.meanings){if(meaning.examples && meaning.examples.some(ex => ex.eng.toLowerCase().includes(cST) || (ex.vie && ex.vie.toLowerCase().includes(cST)) )) return true;}}return false;});}
+        clearLearningTimer();const cCV=categorySelect.value;const sFCSC=getCategoryState(currentDatasetSource,cCV);let cST=searchInput.value.trim().toLowerCase();if(!fromLoad){if(cCV==='phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms'){ // Added idioms
+            if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
+                sFCSC.baseVerb=baseVerbSelect.value;
+            } else {
+                sFCSC.baseVerb = 'all'; // Reset for idioms
+            }
+            sFCSC.tag=tagSelect.value;
+        }if(currentDatasetSource==='user' && userId)sFCSC.deckId=userDeckSelect.value;sFCSC.filterMarked=filterCardStatusSelect.value;sFCSC.currentIndex=0;}let lTP=[...activeMasterList];if(currentDatasetSource==='user' && userId){const sDI=sFCSC.deckId||userDeckSelect.value;if(sDI&&sDI!=='all_user_cards'){if(sDI==='unassigned_cards')lTP=lTP.filter(i=>!i.deckId);else lTP=lTP.filter(i=>i.deckId===sDI);}}if(currentDatasetSource==='user' && userId)lTP=lTP.filter(i=>i.category===cCV);
+        if(cCV==='phrasalVerbs' || cCV === 'collocations'){ // Base verb filter only for these
+            if(sFCSC.baseVerb&&sFCSC.baseVerb!=='all')lTP=lTP.filter(i=>i.baseVerb===sFCSC.baseVerb);
+        }
+        if(cCV==='phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms'){ // Tag filter for these
+            if(sFCSC.tag&&sFCSC.tag!=='all')lTP=lTP.filter(i=>i.tags&&i.tags.includes(sFCSC.tag));
+        }
+        if(cST){lTP=lTP.filter(i=>{const wOP=(i.category==='phrasalVerbs'?i.phrasalVerb:(i.category === 'collocations' ? i.collocation : (i.category === 'idioms' ? i.idiom : i.word)))||'';if(wOP.toLowerCase().includes(cST))return true;if(i.meanings&&i.meanings.some(m=>m.text.toLowerCase().includes(cST)))return true;if(i.meanings){for(const meaning of i.meanings){if(meaning.examples && meaning.examples.some(ex => ex.eng.toLowerCase().includes(cST) || (ex.vie && ex.vie.toLowerCase().includes(cST)) )) return true;}}return false;});}
 
         const sFV = sFCSC.filterMarked;
         if (sFV === 'review_today') {
@@ -1429,9 +1499,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         return {
                             ...card,
-                            id: getCardIdentifier(card), 
+                            id: getCardIdentifier(card), // Use existing item structure for ID generation
                             isUserCard: false,
-                            category: category,
+                            category: category, // Ensure category is set from the filename
                             meanings: meaningsArray,
                             generalNotes: card.generalNotes || card.notes || '',
                             videoUrl: card.videoUrl || null,
@@ -1448,7 +1518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (userId && webCards.length > 0) {
                         const statusPromises = webCards.map(async (card) => {
-                            const webId = card.id; 
+                            const webId = card.id;
                             if (webId) {
                                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
                                 if (firestoreStatus) {
@@ -1478,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (sampleData[category] && sampleData[category].length > 0) {
                     activeMasterList = sampleData[category].map(card => ({
                         ...card,
-                        id: getCardIdentifier({category: category, word: card.word, phrasalVerb: card.phrasalVerb, collocation: card.collocation}),
+                        id: getCardIdentifier({category: category, word: card.word, phrasalVerb: card.phrasalVerb, collocation: card.collocation, idiom: card.idiom}), // Added idiom
                         isUserCard: false,
                         category: category,
                         status: 'new',
@@ -1500,17 +1570,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         window.updateSidebarFilterVisibility();
         baseVerbSelect.innerHTML = ''; tagSelect.innerHTML = '';
-        if (category !== 'phrasalVerbs' && category !== 'collocations') {
+        if (category !== 'phrasalVerbs' && category !== 'collocations' && category !== 'idioms') { // Adjusted condition
             stateForCurrentSourceCategory.baseVerb = 'all';
             stateForCurrentSourceCategory.tag = 'all';
         }
 
         activeMasterList = shuffleArray(activeMasterList);
         const relevantCardsForFilters = (currentDatasetSource === 'web' || !userId) ? activeMasterList : activeMasterList.filter(card => card.category === category);
-        if ((category === 'phrasalVerbs' || category === 'collocations') && relevantCardsForFilters.length > 0) {
+
+        if ((category === 'phrasalVerbs' || category === 'collocations') && relevantCardsForFilters.length > 0) { // Base verb only for these
             populateBaseVerbFilter(relevantCardsForFilters);
-            populateTagFilter(relevantCardsForFilters);
             baseVerbSelect.value = stateForCurrentSourceCategory.baseVerb || 'all';
+        }
+        if ((category === 'phrasalVerbs' || category === 'collocations' || category === 'idioms') && relevantCardsForFilters.length > 0) { // Tags for these
+            populateTagFilter(relevantCardsForFilters);
             tagSelect.value = stateForCurrentSourceCategory.tag || 'all';
         }
         applyAllFilters(true);
@@ -1530,9 +1603,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(pronunciationDisplay) pronunciationDisplay.textContent = '';
         if(tagsDisplayFront) tagsDisplayFront.textContent = '';
         if(meaningDisplayContainer) meaningDisplayContainer.innerHTML = '';
-        
+
         const notesSectionOnCard = document.getElementById('notes-section');
-        if (notesSectionOnCard) notesSectionOnCard.style.display = 'none'; 
+        if (notesSectionOnCard) notesSectionOnCard.style.display = 'none';
         if (notesDisplay) notesDisplay.innerHTML = '';
 
 
@@ -1545,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
         if (actionBtnMedia) actionBtnMedia.style.display = 'flex';
         if (exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none';
-        if (speakerExampleBtn) speakerExampleBtn.style.display = 'none'; 
+        if (speakerExampleBtn) speakerExampleBtn.style.display = 'none';
 
 
         if (practiceType !== "off") {
@@ -1559,6 +1632,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const cI = window.currentData[window.currentIndex];
                     if (cI.category === 'phrasalVerbs') currentCorrectAnswerForPractice = cI.phrasalVerb || '';
                     else if (cI.category === 'collocations') currentCorrectAnswerForPractice = cI.collocation || '';
+                    else if (cI.category === 'idioms') currentCorrectAnswerForPractice = cI.idiom || ''; // Added idioms
                     else currentCorrectAnswerForPractice = cI.word || '';
                 } else {
                     if(typingInputContainer) typingInputContainer.innerHTML = '<p class="text-slate-500 italic">Không có thẻ để luyện tập.</p>';
@@ -1591,7 +1665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                  if(prevBtn) prevBtn.style.display = 'inline-flex';
                  if(nextBtn) nextBtn.style.display = 'inline-flex';
-                 if(flipBtn) flipBtn.style.display = 'inline-flex'; 
+                 if(flipBtn) flipBtn.style.display = 'inline-flex';
             }
 
         } else {
@@ -1647,14 +1721,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(flipIconBack) flipIconBack.style.display = (practiceType === "off") ? 'block' : 'none';
 
 
-            currentWordSpansMeta = []; let accCC = 0; 
+            currentWordSpansMeta = []; let accCC = 0;
             const iCV = item.category;
             const firstMeaningText = (item.meanings && item.meanings.length > 0) ? item.meanings[0].text : '';
-            let textForTTS; 
+            let textForTTS;
             let mainTermToDisplay = '';
 
             if (iCV === 'phrasalVerbs') mainTermToDisplay = item.phrasalVerb || '';
             else if (iCV === 'collocations') mainTermToDisplay = item.collocation || '';
+            else if (iCV === 'idioms') mainTermToDisplay = item.idiom || ''; // Added idioms
             else mainTermToDisplay = item.word || '';
 
             if (practiceType === 'word_quiz') {
@@ -1674,7 +1749,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const iD = p.startsWith('(') && p.endsWith(')');
                     const cS = document.createElement('span');
                     cS.className = iD ? 'text-xl opacity-80 ml-1' : 'text-3xl sm:text-4xl font-bold';
-                    const segs = p.split(/(\s+)/); 
+                    const segs = p.split(/(\s+)/);
                     segs.forEach(s => {
                         bTFM += s;
                         if (s.trim() !== '') {
@@ -1683,7 +1758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             cS.appendChild(wS);
                             currentWordSpansMeta.push({ element: wS, start: bTFM.length - s.length, length: s.length });
                         } else {
-                            cS.appendChild(document.createTextNode(s)); 
+                            cS.appendChild(document.createTextNode(s));
                         }
                     });
                     if(wordDisplay) wordDisplay.appendChild(cS);
@@ -1699,7 +1774,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if(wordDisplay) wordDisplay.dataset.ttsText = textForTTS;
             if(pronunciationDisplay) pronunciationDisplay.textContent = item.pronunciation || '';
-            if ((iCV === 'phrasalVerbs' || iCV === 'collocations') && item.tags && practiceType !== 'word_quiz') {
+            if ((iCV === 'phrasalVerbs' || iCV === 'collocations' || iCV === 'idioms') && item.tags && practiceType !== 'word_quiz') { // Added idioms
                 const dT = item.tags.filter(t => t && t !== 'all' && !t.startsWith('particle_') && tagDisplayNames[t]).map(t => tagDisplayNames[t]);
                 if(tagsDisplayFront) {tagsDisplayFront.textContent = dT.join(' | '); tagsDisplayFront.style.display = dT.length > 0 ? 'block' : 'none';}
             } else {
@@ -1747,7 +1822,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // --- START: Example Speech Rate Dropdown ---
                     const rateControlContainer = document.createElement('div');
                     rateControlContainer.className = 'example-speech-rate-dropdown-container flex items-center space-x-2 mb-2 ml-3';
-                    
+
                     const rateLabel = document.createElement('span');
                     rateLabel.className = 'text-xs text-sky-200';
                     rateLabel.textContent = 'Tốc độ VD:';
@@ -1776,26 +1851,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (mObj.examples && mObj.examples.length > 0) {
                         const examplesContainer = document.createElement('div');
-                        examplesContainer.className = "ml-3 mt-1"; 
+                        examplesContainer.className = "ml-3 mt-1";
                         const examplesListDiv = document.createElement('div');
                         examplesListDiv.className = "space-y-1.5";
                         examplesListDiv.dataset.meaningId = mObj.id;
 
-                        const maxVisibleExamples = 2; 
+                        const maxVisibleExamples = 2;
                         const totalExamples = mObj.examples.length;
 
                         mObj.examples.forEach((ex, exIdx) => {
                             const exD = document.createElement('div');
                             exD.className="example-item-on-card";
-                            if (exIdx >= maxVisibleExamples) { 
+                            if (exIdx >= maxVisibleExamples) {
                                 exD.classList.add('hidden');
                             }
 
                             const eP = document.createElement('p');
                             eP.className="example-eng-on-card";
 
-                            const textContentDiv = document.createElement('div'); 
-                            textContentDiv.className = 'text-content flex-grow'; 
+                            const textContentDiv = document.createElement('div');
+                            textContentDiv.className = 'text-content flex-grow';
 
                             const enLabel = document.createElement('span');
                             enLabel.className = 'example-label';
@@ -1805,24 +1880,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const exampleText = ex.eng.trim();
                             let exampleAccCC = 0;
                             if (exampleText) {
-                                const exampleWords = exampleText.split(/(\s+)/); 
+                                const exampleWords = exampleText.split(/(\s+)/);
                                 exampleWords.forEach(wordPart => {
                                     if (wordPart.trim() !== '') {
                                         const wordSpan = document.createElement('span');
                                         wordSpan.textContent = wordPart;
                                         textContentDiv.appendChild(wordSpan);
                                     } else {
-                                        textContentDiv.appendChild(document.createTextNode(wordPart)); 
+                                        textContentDiv.appendChild(document.createTextNode(wordPart));
                                     }
                                     exampleAccCC += wordPart.length;
                                 });
                             } else {
-                                textContentDiv.appendChild(document.createTextNode(exampleText)); 
+                                textContentDiv.appendChild(document.createTextNode(exampleText));
                             }
                             eP.appendChild(textContentDiv);
-                            
-                            const controlsDiv = document.createElement('div'); 
-                            controlsDiv.className = 'flex items-center ml-2 flex-shrink-0'; 
+
+                            const controlsDiv = document.createElement('div');
+                            controlsDiv.className = 'flex items-center ml-2 flex-shrink-0';
 
                             if (ex.eng && ex.eng.trim()) {
                                 const playSingleExBtn = document.createElement('button');
@@ -1830,7 +1905,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 playSingleExBtn.innerHTML = '<i class="fas fa-play"></i>';
                                 playSingleExBtn.title = 'Phát âm ví dụ này';
                                 playSingleExBtn.dataset.textToSpeak = ex.eng.trim();
-                                
+
                                 playSingleExBtn.addEventListener('click', (e) => {
                                     e.stopPropagation();
                                     const text = e.currentTarget.dataset.textToSpeak;
@@ -1841,7 +1916,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     if (clickedExampleTextContentDiv && text) {
                                         const childNodes = Array.from(clickedExampleTextContentDiv.childNodes);
                                         childNodes.forEach(node => {
-                                            if (node.nodeType === Node.TEXT_NODE) { 
+                                            if (node.nodeType === Node.TEXT_NODE) {
                                                 localAccCC += node.textContent.length;
                                             } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN' && !node.classList.contains('example-label')) {
                                                 localExampleSpansMeta.push({element: node, start: localAccCC, length: node.textContent.length});
@@ -1850,7 +1925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         });
                                     }
                                     if (text) {
-                                        speakExample(text, localExampleSpansMeta); 
+                                        speakExample(text, localExampleSpansMeta);
                                     }
                                 });
                                 controlsDiv.appendChild(playSingleExBtn);
@@ -1873,7 +1948,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 });
                             };
                             controlsDiv.appendChild(copyBtn);
-                            eP.appendChild(controlsDiv); 
+                            eP.appendChild(controlsDiv);
                             exD.appendChild(eP);
 
 
@@ -1930,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if(meaningDisplayContainer) meaningDisplayContainer.innerHTML = '<p class="text-slate-400 italic">Chưa có nghĩa.</p>';
 
             const notesSectionEl = document.getElementById('notes-section');
-            if (notesSectionEl) notesSectionEl.style.display = 'none'; 
+            if (notesSectionEl) notesSectionEl.style.display = 'none';
             if (notesDisplay) notesDisplay.innerHTML = '';
 
 
@@ -1979,7 +2054,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const numberOfOptions = 4;
 
         if (practiceType === 'meaning_quiz') {
-            questionText = sourceCard.category === 'phrasalVerbs' ? sourceCard.phrasalVerb : (sourceCard.category === 'collocations' ? sourceCard.collocation : sourceCard.word);
+            questionText = sourceCard.category === 'phrasalVerbs' ? sourceCard.phrasalVerb : (sourceCard.category === 'collocations' ? sourceCard.collocation : (sourceCard.category === 'idioms' ? sourceCard.idiom : sourceCard.word)); // Added idioms
             correctAnswerText = sourceCard.meanings[0].text;
             options.push(correctAnswerText);
 
@@ -1999,7 +2074,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } else if (practiceType === 'word_quiz') {
             questionText = sourceCard.meanings[0].text;
-            correctAnswerText = sourceCard.category === 'phrasalVerbs' ? sourceCard.phrasalVerb : (sourceCard.category === 'collocations' ? sourceCard.collocation : sourceCard.word);
+            correctAnswerText = sourceCard.category === 'phrasalVerbs' ? sourceCard.phrasalVerb : (sourceCard.category === 'collocations' ? sourceCard.collocation : (sourceCard.category === 'idioms' ? sourceCard.idiom : sourceCard.word)); // Added idioms
             options.push(correctAnswerText);
 
             let wrongOptionsCount = 0;
@@ -2009,7 +2084,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
             shuffleArray(otherCards);
             for (const otherCard of otherCards) {
-                const wrongOption = otherCard.category === 'phrasalVerbs' ? otherCard.phrasalVerb : (otherCard.category === 'collocations' ? otherCard.collocation : otherCard.word);
+                const wrongOption = otherCard.category === 'phrasalVerbs' ? otherCard.phrasalVerb : (otherCard.category === 'collocations' ? otherCard.collocation : (otherCard.category === 'idioms' ? otherCard.idiom : otherCard.word)); // Added idioms
                 if (wrongOptionsCount < (numberOfOptions - 1) && wrongOption !== correctAnswerText) {
                     options.push(wrongOption);
                     wrongOptionsCount++;
@@ -2158,14 +2233,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         let errorMessages = [];
 
         for (const cardJson of cardsToProcess) {
-            let mainTerm = cardJson.word || cardJson.phrasalVerb || cardJson.collocation || 'Thẻ không tên';
+            let mainTerm = cardJson.word || cardJson.phrasalVerb || cardJson.collocation || cardJson.idiom || 'Thẻ không tên'; // Added idiom
             if (!cardJson.category ||
                 !mainTerm ||
                 !Array.isArray(cardJson.meanings) || cardJson.meanings.length === 0 ||
                 !cardJson.meanings[0].text
             ) {
                 errorCount++;
-                errorMessages.push(`Thẻ "${mainTerm}" thiếu thông tin bắt buộc (category, từ/cụm từ, hoặc nghĩa chính).`);
+                errorMessages.push(`Thẻ "${mainTerm}" thiếu thông tin bắt buộc (category, từ/cụm từ/thành ngữ, hoặc nghĩa chính).`);
                 continue;
             }
 
@@ -2206,6 +2281,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (cardJson.category === 'collocations') {
                 cardDataToSave.collocation = cardJson.collocation;
                 cardDataToSave.baseVerb = cardJson.baseVerb || null;
+                cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
+            } else if (cardJson.category === 'idioms') { // Added idioms
+                cardDataToSave.idiom = cardJson.idiom;
+                cardDataToSave.baseVerb = null; // Idioms typically don't have a base verb
                 cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
             } else {
                 cardDataToSave.word = cardJson.word;
@@ -2301,9 +2380,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const createdDeck = await createDeck(newDeckName);
             if (createdDeck && createdDeck.id) {
                 targetDeckId = createdDeck.id;
-                await loadUserDecks(); 
-                copyToDeckSelect.value = targetDeckId; 
-                populateDeckSelects(); 
+                await loadUserDecks();
+                copyToDeckSelect.value = targetDeckId;
+                populateDeckSelects();
             } else {
                 copyNewDeckError.textContent = "Không thể tạo bộ thẻ mới. Vui lòng thử lại.";
                 copyNewDeckError.classList.remove('hidden');
@@ -2316,11 +2395,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const cardToCopy = { ...currentCard };
-        delete cardToCopy.id; 
+        delete cardToCopy.id;
         cardToCopy.isUserCard = true;
         cardToCopy.deckId = targetDeckId;
         cardToCopy.status = 'new';
-        cardToCopy.lastReviewed = null; 
+        cardToCopy.lastReviewed = null;
         cardToCopy.reviewCount = 0;
         cardToCopy.nextReviewDate = serverTimestamp();
         cardToCopy.interval = 0;
@@ -2331,19 +2410,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardToCopy.createdAt = serverTimestamp();
         cardToCopy.updatedAt = serverTimestamp();
 
-        delete cardToCopy.webCardGlobalId; 
+        delete cardToCopy.webCardGlobalId;
+
+        // Ensure the correct field (word, phrasalVerb, collocation, idiom) is copied
+        if (currentCard.category === 'phrasalVerbs') cardToCopy.phrasalVerb = currentCard.phrasalVerb;
+        else if (currentCard.category === 'collocations') cardToCopy.collocation = currentCard.collocation;
+        else if (currentCard.category === 'idioms') cardToCopy.idiom = currentCard.idiom;
+        else cardToCopy.word = currentCard.word;
+
 
         const newCardId = await FirestoreService.saveCardToFirestore(userId, targetDeckId, cardToCopy);
 
         if (newCardId) {
             console.log("Web card copied to user deck. New card ID:", newCardId);
-            copyToDeckSuccessMessage.textContent = `Đã sao chép thẻ "${cardToCopy.word || cardToCopy.phrasalVerb || cardToCopy.collocation}" vào bộ thẻ đã chọn!`;
+            copyToDeckSuccessMessage.textContent = `Đã sao chép thẻ "${cardToCopy.word || cardToCopy.phrasalVerb || cardToCopy.collocation || cardToCopy.idiom}" vào bộ thẻ đã chọn!`;
             copyToDeckSuccessMessage.classList.remove('hidden');
 
             setTimeout(async () => {
                 closeCopyToDeckModal();
                 if (cardSourceSelect.value === 'user' && userDeckSelect.value === targetDeckId) {
-                    await loadVocabularyData(categorySelect.value); 
+                    await loadVocabularyData(categorySelect.value);
                 }
             }, 2000);
         } else {
@@ -2352,19 +2438,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function openBottomSheet(cardItem, viewType = 'default', subView = 'youtube_custom') { 
+    async function openBottomSheet(cardItem, viewType = 'default', subView = 'youtube_custom') {
         if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
         let hasActions = false;
         bottomSheetContent.innerHTML = '';
-        const loggedInUserId = getCurrentUserId(); 
-        const isAdmin = loggedInUserId === ADMIN_UID; 
-        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
+        const loggedInUserId = getCurrentUserId();
+        const isAdmin = loggedInUserId === ADMIN_UID;
+        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "Thẻ"; // Added idiom
 
         bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
         bottomSheet.style.paddingBottom = '';
-        
-        if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
+
+        if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
 
 
         if (viewType === 'default') {
@@ -2423,11 +2509,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (cardItem.isUserCard) {
                             updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, srsResetData, cardItem.id);
                         } else {
-                            const webCardGlobalId = getCardIdentifier(cardItem); 
+                            const webCardGlobalId = getCardIdentifier(cardItem);
                             if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, srsResetData);
                         }
                         if (updateSuccess) {
-                            Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); 
+                            Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() });
                             alert("Đã đặt lại tiến độ học cho thẻ."); updateFlashcard(); applyAllFilters();
                         }
                         closeBottomSheet();
@@ -2448,7 +2534,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (cardItem.isUserCard) {
                         updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataToUpdate, cardItem.id);
                     } else {
-                        const webCardGlobalId = getCardIdentifier(cardItem); 
+                        const webCardGlobalId = getCardIdentifier(cardItem);
                         if (webCardGlobalId) {
                             const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {};
                             const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
@@ -2457,7 +2543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                     if (updateSuccess) {
-                        cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now(); 
+                        cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now();
                         alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
                         updateFlashcard(); applyAllFilters();
                     }
@@ -2475,9 +2561,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hasActions = true;
             }
 
-        } else if (viewType === 'lecture') { 
-            bottomSheet.classList.add('bottom-sheet-lecture-mode'); 
-            
+        } else if (viewType === 'lecture') {
+            bottomSheet.classList.add('bottom-sheet-lecture-mode');
+
             const cardLectureId = generateCardLectureId(cardItem);
             const lectureTitlePrefix = "Bài giảng: ";
             bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2485,9 +2571,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             FirestoreService.getLectureContent(cardLectureId)
                 .then(lectureData => {
-                    if (isAdmin) { 
-                        bottomSheetContent.innerHTML = ''; 
-                        
+                    if (isAdmin) {
+                        bottomSheetContent.innerHTML = '';
+
                         const titleLabel = document.createElement('label');
                         titleLabel.htmlFor = 'lecture-title-input';
                         titleLabel.textContent = 'Tiêu đề Bài giảng:';
@@ -2506,11 +2592,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         contentLabel.textContent = 'Nội dung HTML Bài giảng:';
                         contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
                         bottomSheetContent.appendChild(contentLabel);
-                        
+
                         const contentTextarea = document.createElement('textarea');
                         contentTextarea.id = 'lecture-content-html-input';
-                        contentTextarea.rows = 15; 
-                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]'; 
+                        contentTextarea.rows = 15;
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]';
                         contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
                         contentTextarea.value = lectureData?.contentHTML || '';
                         bottomSheetContent.appendChild(contentTextarea);
@@ -2521,7 +2607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
                         saveLectureBtn.onclick = async () => {
                             const newTitle = titleInput.value.trim();
-                            const newContentHTML = contentTextarea.value; 
+                            const newContentHTML = contentTextarea.value;
                             if (!newTitle) {
                                 alert("Tiêu đề bài giảng không được để trống.");
                                 return;
@@ -2540,7 +2626,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         };
                         bottomSheetContent.appendChild(saveLectureBtn);
 
-                    } else { 
+                    } else {
                         if (lectureData && lectureData.contentHTML) {
                             bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
                             bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
@@ -2553,21 +2639,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.error("Lỗi khi tải bài giảng:", error);
                     bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
                 });
-            hasActions = true; 
+            hasActions = true;
         } else if (viewType === 'media') {
             bottomSheet.classList.add('bottom-sheet-media-mode');
             bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-            
-            if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
 
-            let youtubeContentDiv = document.getElementById('youtube-tab-content'); 
+            if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
+
+            let youtubeContentDiv = document.getElementById('youtube-tab-content');
             if (!youtubeContentDiv) {
                 youtubeContentDiv = document.createElement('div');
-                youtubeContentDiv.id = 'youtube-tab-content'; 
-                youtubeContentDiv.className = 'bottom-sheet-tab-content'; 
+                youtubeContentDiv.id = 'youtube-tab-content';
+                youtubeContentDiv.className = 'bottom-sheet-tab-content';
                 bottomSheetContent.appendChild(youtubeContentDiv);
             }
-            setActiveMediaTab('youtube_custom', cardItem); 
+            setActiveMediaTab('youtube_custom', cardItem);
             hasActions = true;
         } else if (viewType === 'practice_options') {
              bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2593,28 +2679,28 @@ document.addEventListener('DOMContentLoaded', async () => {
              console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
              if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
              if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
-             return; 
+             return;
         }
 
         bottomSheetOverlay.classList.remove('hidden');
         bottomSheet.classList.remove('translate-y-full');
         requestAnimationFrame(() => {
-            bottomSheetOverlay.classList.add('active'); 
+            bottomSheetOverlay.classList.add('active');
             bottomSheet.classList.add('active');
         });
     }
 
     function setActiveMediaTab(tabName, cardItem) {
         const youtubeContentDiv = document.getElementById('youtube-tab-content');
-        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "";
+        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; // Added idiom
 
-        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
-        if (tabBtnYouTube) tabBtnYouTube.classList.remove('active'); 
-        
-        if (tabName === 'youtube_custom') { 
+        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden');
+        if (tabBtnYouTube) tabBtnYouTube.classList.remove('active');
+
+        if (tabName === 'youtube_custom') {
             if (youtubeContentDiv) {
                 youtubeContentDiv.classList.remove('hidden');
-                youtubeContentDiv.innerHTML = ''; 
+                youtubeContentDiv.innerHTML = '';
 
                 if (cardItem.videoUrl) {
                     const videoId = extractYouTubeVideoId(cardItem.videoUrl);
@@ -2622,7 +2708,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const iframeContainer = document.createElement('div');
                         iframeContainer.className = 'video-iframe-container w-full';
                         const iframe = document.createElement('iframe');
-                        iframe.src = `https://www.youtube.com/embed/${videoId}`; 
+                        iframe.src = `https://www.youtube.com/embed/$${videoId}`;
                         iframe.title = "YouTube video player";
                         iframe.frameBorder = "0";
                         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
@@ -2634,20 +2720,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 } else {
                      const searchButtonContainer = document.createElement('div');
-                     searchButtonContainer.className = 'p-4 text-center'; 
+                     searchButtonContainer.className = 'p-4 text-center';
 
                      const pMessage = document.createElement('p');
-                     pMessage.className = 'text-slate-500 dark:text-slate-400 mb-3'; 
+                     pMessage.className = 'text-slate-500 dark:text-slate-400 mb-3';
                      pMessage.textContent = 'Chưa có video YouTube nào được gán. Bạn có thể thêm link khi sửa thẻ, hoặc:';
                      searchButtonContainer.appendChild(pMessage);
 
                      const searchButton = document.createElement('button');
-                     searchButton.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm flex items-center justify-center mx-auto'; 
-                     const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "";
-                     const youtubeSearchTerm = `học từ ${baseSearchTerm}`; 
+                     searchButton.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm flex items-center justify-center mx-auto';
+                     const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; // Added idiom
+                     const youtubeSearchTerm = `học từ ${baseSearchTerm}`;
                      searchButton.innerHTML = `<i class="fab fa-youtube mr-2"></i> Tìm trên YouTube với từ khóa "${baseSearchTerm}"`;
                      searchButton.onclick = () => {
-                         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank');
+                         window.open(`https://www.youtube.com/results?search_query=$${encodeURIComponent(youtubeSearchTerm)}`, '_blank');
                      };
                      searchButtonContainer.appendChild(searchButton);
                      youtubeContentDiv.appendChild(searchButtonContainer);
@@ -2661,18 +2747,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!bottomSheet || !bottomSheetOverlay) return;
         bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
         bottomSheetOverlay.classList.remove('active');
-        bottomSheet.style.paddingBottom = ''; 
-        if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
+        bottomSheet.style.paddingBottom = '';
+        if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
 
         setTimeout(() => {
             bottomSheet.classList.add('translate-y-full');
             bottomSheetOverlay.classList.add('hidden');
             const videoIframe = bottomSheetContent.querySelector('iframe');
             if (videoIframe) {
-                videoIframe.src = ''; 
+                videoIframe.src = '';
             }
-            bottomSheetContent.innerHTML = ''; 
-        }, 300); 
+            bottomSheetContent.innerHTML = '';
+        }, 300);
     }
 
     function extractYouTubeVideoId(url) {
@@ -2684,7 +2770,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function startSingleCardPractice(cardItem, practiceMode) {
         if (!cardItem) return;
-        console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation}, Mode: ${practiceMode}`);
+        console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}, Mode: ${practiceMode}`); // Added idiom
 
         isSingleCardPracticeMode = true;
         originalCurrentData = [...window.currentData];
@@ -2693,10 +2779,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.currentData = [cardItem];
         window.currentIndex = 0;
 
-        practiceType = practiceMode; 
+        practiceType = practiceMode;
 
-        updateFlashcard(); 
-        showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation}`, 3000);
+        updateFlashcard();
+        showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}`, 3000); // Added idiom
     }
 
     function exitSingleCardPractice() {
@@ -2707,10 +2793,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.currentData = [...originalCurrentData];
         window.currentIndex = originalCurrentIndex;
 
-        practiceType = 'off'; 
-        if (practiceTypeSelect) practiceTypeSelect.value = 'off'; 
+        practiceType = 'off';
+        if (practiceTypeSelect) practiceTypeSelect.value = 'off';
 
-        updateFlashcard(); 
+        updateFlashcard();
         showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
     }
 
@@ -2721,8 +2807,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         touchStartX = event.touches[0].clientX;
         touchStartY = event.touches[0].clientY;
-        touchEndX = touchStartX; 
-        touchEndY = touchStartY; 
+        touchEndX = touchStartX;
+        touchEndY = touchStartY;
     }
 
     function handleTouchMove(event) {
@@ -2742,12 +2828,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const verticalDiff = touchEndY - touchStartY;
 
         if (Math.abs(horizontalDiff) > Math.abs(verticalDiff) && Math.abs(horizontalDiff) > swipeThreshold) {
-            event.preventDefault(); 
-            if (horizontalDiff > 0) { 
+            event.preventDefault();
+            if (horizontalDiff > 0) {
                 if (prevBtn && !prevBtn.disabled) {
                     prevBtn.click();
                 }
-            } else { 
+            } else {
                 if (nextBtn && !nextBtn.disabled) {
                     nextBtn.click();
                 }
@@ -2766,25 +2852,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
         if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-        if (cardFrontElement) { 
-            cardFrontElement.addEventListener('touchstart', handleTouchStart, { passive: true }); 
+        if (cardFrontElement) {
+            cardFrontElement.addEventListener('touchstart', handleTouchStart, { passive: true });
             cardFrontElement.addEventListener('touchmove', handleTouchMove, { passive: true });
-            cardFrontElement.addEventListener('touchend', handleTouchEnd, false); 
+            cardFrontElement.addEventListener('touchend', handleTouchEnd, false);
         }
-        
+
         if(cardSourceSelect) cardSourceSelect.addEventListener('change', async (e)=>{
             currentDatasetSource=e.target.value;
             const userId = getCurrentUserId();
             if (currentDatasetSource === 'user' && !userId) {
                 openAuthModalFromAuth('login');
-                window.currentData = []; 
-                window.updateFlashcard(); 
-                window.updateSidebarFilterVisibility(); 
+                window.currentData = [];
+                window.updateFlashcard();
+                window.updateSidebarFilterVisibility();
                 return;
             }
-            if(practiceTypeSelect) practiceTypeSelect.value="off"; 
+            if(practiceTypeSelect) practiceTypeSelect.value="off";
             practiceType="off";
-            if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards'; 
+            if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards';
             await loadVocabularyData(categorySelect.value);
             window.updateSidebarFilterVisibility();
             window.updateMainHeaderTitle();
@@ -2792,13 +2878,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if(userDeckSelect) userDeckSelect.addEventListener('change', async ()=>{
             const userId = getCurrentUserId();
-            if(!userId) return; 
+            if(!userId) return;
             const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
             stateForCurrentCategory.deckId = userDeckSelect.value;
             appState.lastSelectedDeckId = userDeckSelect.value;
             saveAppState();
-            activeMasterList = await loadUserCards(userDeckSelect.value); 
-            applyAllFilters(false); 
+            activeMasterList = await loadUserCards(userDeckSelect.value);
+            applyAllFilters(false);
         });
 
         if(manageDecksBtn) manageDecksBtn.addEventListener('click', async ()=>{
@@ -2808,7 +2894,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 openAuthModalFromAuth('login');
                 return;
             }
-            await loadUserDecks(); 
+            await loadUserDecks();
             renderExistingDecksList();
             manageDecksModal.classList.remove('hidden','opacity-0');
             if (deckModalContent) deckModalContent.classList.remove('scale-95');
@@ -2838,19 +2924,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const createdDeck = await createDeck(deckName); 
+            const createdDeck = await createDeck(deckName);
 
             if(createdDeck){
-                newDeckNameInput.value = ''; 
+                newDeckNameInput.value = '';
                 if(currentDatasetSource === 'user'){
                     appState.lastSelectedDeckId = createdDeck.id;
                     const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
                     stateForCurrentCategory.deckId = createdDeck.id;
                     saveAppState();
-                    userDeckSelect.value = createdDeck.id; 
-                    activeMasterList = await loadUserCards(createdDeck.id); 
-                    applyAllFilters(false); 
-                    updateMainHeaderTitle(); 
+                    userDeckSelect.value = createdDeck.id;
+                    activeMasterList = await loadUserCards(createdDeck.id);
+                    applyAllFilters(false);
+                    updateMainHeaderTitle();
                 }
             }
         });
@@ -2916,13 +3002,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             bottomSheetOverlay.addEventListener('click', closeBottomSheet);
         }
 
-        if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => { 
+        if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'lecture'); 
+            if (currentCard) openBottomSheet(currentCard, 'lecture');
         });
         if(actionBtnMedia) actionBtnMedia.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'media', 'youtube_custom'); 
+            if (currentCard) openBottomSheet(currentCard, 'media', 'youtube_custom');
         });
         if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
@@ -2930,19 +3016,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.addEventListener('click', exitSingleCardPractice);
 
-        if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => { 
+        if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
             if(currentCard) setActiveMediaTab('youtube_custom', currentCard);
         });
 
 
-        if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';if(cat==='phrasalVerbs' || cat === 'collocations'){st.tag='all';if(tagSelect)tagSelect.value='all';st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';} const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}st.filterMarked='all_study';if(filterCardStatusSelect)filterCardStatusSelect.value='all_study';st.currentIndex=0;applyAllFilters();closeSidebar();});
+        if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';
+            if(cat==='phrasalVerbs' || cat === 'collocations' || cat === 'idioms'){ // Added idioms
+                if (cat === 'phrasalVerbs' || cat === 'collocations') { // Base verb only for PV and Collocations
+                    st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';
+                }
+                st.tag='all';if(tagSelect)tagSelect.value='all';
+            } const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}st.filterMarked='all_study';if(filterCardStatusSelect)filterCardStatusSelect.value='all_study';st.currentIndex=0;applyAllFilters();closeSidebar();});
         if(categorySelect) categorySelect.addEventListener('change', async (e)=>{
             clearLearningTimer();
             const selCat=e.target.value;
-            if(practiceTypeSelect)practiceTypeSelect.value="off"; 
+            if(practiceTypeSelect)practiceTypeSelect.value="off";
             practiceType="off";
-            searchInput.value=''; 
+            searchInput.value='';
             await loadVocabularyData(selCat);
             window.updateMainHeaderTitle();
         });
@@ -2978,10 +3070,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         if(nextBtn) nextBtn.addEventListener('click', ()=>{
-            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.cancel();
             if(nextBtn.disabled)return;clearLearningTimer();if(window.currentIndex<window.currentData.length-1){window.currentIndex++;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}else if(practiceType!=="off"&&currentAnswerChecked&&window.currentIndex>=window.currentData.length-1)applyAllFilters();});
         if(prevBtn) prevBtn.addEventListener('click', ()=>{
-            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.cancel();
             clearLearningTimer();if(window.currentIndex>0){window.currentIndex--;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}});
         if(speakerBtn) speakerBtn.addEventListener('click', (e)=>{
             e.stopPropagation();
@@ -3016,14 +3108,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (targetSelect) {
                     currentExampleSpeechRate = parseFloat(targetSelect.value);
                     saveExampleSpeechRate();
-                    updateAllExampleSpeechRateDropdownsUI(); 
+                    updateAllExampleSpeechRateDropdownsUI();
                 }
             });
         }
     }
 
     async function setupInitialCategoryAndSource() {
-        if (!getCurrentUserId()) { 
+        if (!getCurrentUserId()) {
             await loadAppState();
         }
 
