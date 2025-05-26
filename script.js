@@ -13,7 +13,7 @@ import {
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
-import * as FirestoreService from './firestoreService.js'; // Đã có getLectureContent
+import * as FirestoreService from './firestoreService.js'; 
 import { initializeSrsModule, processSrsRatingWrapper } from './srs.js';
 
 const firebaseConfig = {
@@ -57,7 +57,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
-    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, // actionBtnNotes sẽ là nút "Bài giảng"
+    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, 
     exitSingleCardPracticeBtn,
     bottomSheetTabsContainer, tabBtnYouTube,
     flipIconFront, flipIconBack, cardFrontElement;
@@ -96,20 +96,21 @@ const swipeMaxVerticalOffset = 75;
 let currentExampleSpeechRate = 1.0; 
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
 
+// UID Admin - QUAN TRỌNG: BẠN CẦN THAY THẾ BẰNG UID THỰC CỦA TÀI KHOẢN ADMIN FIREBASE CỦA BẠN
+const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Ví dụ: "firebaseUserUid123abc"
+
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
 
 const sampleData = {
     "phrasalVerbs": [
         { "phrasalVerb": "Look up", "baseVerb": "look", "category": "phrasalVerbs", "pronunciation": "/lʊk ʌp/", "meanings": [ { "id": "m_pv_sample_1_1", "text": "Tra cứu (thông tin)", "notes": "Trong từ điển, danh bạ...", "examples": [ { "id": "ex_pv_sample_1_1_1", "eng": "I need to look up this word in the dictionary.", "vie": "Tôi cần tra từ này trong từ điển." }, { "id": "ex_pv_sample_1_1_2", "eng": "Can you look up the train times for me?", "vie": "Bạn có thể tra giờ tàu cho tôi được không?" } ]}], "tags": ["learning_information", "actions_tasks"], "generalNotes": "Một cụm động từ phổ biến." },
-        { "phrasalVerb": "Give up", "baseVerb": "give", "category": "phrasalVerbs", "pronunciation": "/ɡɪv ʌp/", "meanings": [ { "id": "m_pv_sample_2_1", "text": "Từ bỏ", "notes": "Ngừng cố gắng làm gì đó.", "examples": [ { "id": "ex_pv_sample_2_1_1", "eng": "Don't give up on your dreams.", "vie": "Đừng từ bỏ ước mơ của bạn." }, { "id": "ex_pv_sample_2_1_2", "eng": "He gave up smoking last year.", "vie": "Anh ấy đã bỏ hút thuốc vào năm ngoái." } ]}], "tags": ["effort_achievement", "health_wellbeing"], "generalNotes": "" },
     ],
     "nouns": [ { "word": "Solution", "category": "nouns", "pronunciation": "/səˈluːʃən/", "meanings": [ { "id": "m_noun_sample_1_1", "text": "Giải pháp cho một vấn đề."}], "generalNotes": "Danh từ đếm được." } ],
     "verbs": [ { "word": "Set", "category": "verbs", "pronunciation": "/set/", "meanings": [ { "id": "m_verb_sample_1_1", "text": "Đặt, để một cái gì đó ở một vị trí cụ thể."}], "generalNotes": "Một động từ có nhiều nghĩa." } ],
     "adjectives": [ { "word": "Happy", "category": "adjectives", "pronunciation": "/ˈhæpi/", "meanings": [ { "id": "m_adj_sample_1_1", "text": "Cảm thấy hoặc thể hiện sự vui vẻ, hài lòng."}], "generalNotes": "" } ],
     "collocations": [
         { "collocation": "take a break", "baseVerb": "take", "category": "collocations", "pronunciation": "/teɪk ə breɪk/", "meanings": [ { "id": "m_col_sample_1_1", "text": "Nghỉ giải lao, nghỉ ngơi một lát", "notes": "Thường dùng trong công việc hoặc học tập", "examples": [ { "id": "ex_col_sample_1_1_1", "eng": "Let's take a break for 10 minutes.", "vie": "Chúng ta hãy nghỉ giải lao 10 phút." }, { "id": "ex_col_sample_1_1_2", "eng": "She's been working all day, she needs to take a break.", "vie": "Cô ấy đã làm việc cả ngày, cô ấy cần nghỉ ngơi." } ]}], "tags": ["daily_routine", "work_business"], "generalNotes": "Một collocation phổ biến với động từ 'take'." },
-        { "collocation": "make an effort", "baseVerb": "make", "category": "collocations", "pronunciation": "/meɪk ən ˈefərt/", "meanings": [ { "id": "m_col_sample_2_1", "text": "Nỗ lực, cố gắng", "examples": [ { "id": "ex_col_sample_2_1_1", "eng": "You need to make an effort to improve your grades.", "vie": "Bạn cần phải nỗ lực để cải thiện điểm số của mình." } ]}], "tags": ["effort_achievement"], "generalNotes": "" }
     ]
 };
 
@@ -285,16 +286,17 @@ async function handleAuthStateChangedInApp(user) {
     if (typeof setupInitialCategoryAndSource === 'function') {
         await setupInitialCategoryAndSource(); 
         
-        setTimeout(() => { 
+        // Sử dụng requestAnimationFrame để đảm bảo DOM đã được cập nhật trước khi gọi updateFlashcard
+        requestAnimationFrame(() => {
             if (window.currentData && window.currentData.length > 0 && window.currentIndex < window.currentData.length && typeof window.updateFlashcard === 'function') {
-                 console.log("Auth Change: Delayed explicit updateFlashcard for current card index:", window.currentIndex);
+                 console.log("Auth Change: RAF explicit updateFlashcard for current card index:", window.currentIndex);
                  window.updateFlashcard(); 
             } else {
-                console.log("Auth Change: Delayed call - Conditions not met for forcing updateFlashcard. Data length:", window.currentData?.length, "Index:", window.currentIndex);
+                console.log("Auth Change: RAF - Conditions not met for forcing updateFlashcard. Data length:", window.currentData?.length, "Index:", window.currentIndex);
                  if (typeof updateStatusButtonsUI === 'function') updateStatusButtonsUI(); 
                  if (typeof updateCardInfo === 'function') updateCardInfo(); 
             }
-        }, 100); 
+        });
     }
 
     if (typeof updateSidebarFilterVisibility === 'function') updateSidebarFilterVisibility();
@@ -420,14 +422,10 @@ function speakExample(text, spansMeta) {
 // --- END: Speech Synthesis Functions ---
 
 // --- START: Lecture Functions ---
-function generateCardLectureId(cardItem) {
-    if (!cardItem) return null;
+function generateCardLectureId(cardItem) { 
+    if (!cardItem) return `unknown-lecture-${generateUniqueId('uid')}`;
     let keyPart;
     const category = cardItem.category || 'unknown';
-
-    if (cardItem.isUserCard && cardItem.id) { // Ưu tiên ID của thẻ người dùng nếu có
-        return `usercard-${cardItem.id}`;
-    }
     
     switch(category) {
         case 'phrasalVerbs':
@@ -436,13 +434,15 @@ function generateCardLectureId(cardItem) {
         case 'collocations':
             keyPart = cardItem.collocation;
             break;
-        default: // verbs, nouns, adjectives
+        default: 
             keyPart = cardItem.word;
     }
-    if (!keyPart) return `${category}-unknown-${generateUniqueId('uid')}`;
+    if (!keyPart) return `${category}-unknown-${generateUniqueId('lecturekey')}`;
     
-    // Chuẩn hóa: viết thường, thay khoảng trắng bằng gạch nối, loại bỏ ký tự đặc biệt
-    const sanitizedKeyPart = String(keyPart).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const sanitizedKeyPart = String(keyPart).toLowerCase()
+                                .replace(/\s+/g, '-') 
+                                .replace(/[().,/?!"':]/g, '')   
+                                .replace(/[^a-z0-9-]/g, ''); 
     return `${category}-${sanitizedKeyPart}`;
 }
 // --- END: Lecture Functions ---
@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     wordDisplay = document.getElementById('word-display');
     pronunciationDisplay = document.getElementById('pronunciation-display');
     meaningDisplayContainer = document.getElementById('meaning-display-container');
-    notesDisplay = document.getElementById('notes-display'); // Sẽ bị ẩn/thay thế
+    notesDisplay = document.getElementById('notes-display'); 
     prevBtn = document.getElementById('prev-btn');
     flipBtn = document.getElementById('flip-btn');
     nextBtn = document.getElementById('next-btn');
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     authActionButtonMain = document.getElementById('auth-action-btn');
     userEmailDisplayMain = document.getElementById('user-email-display');
     srsFeedbackToastEl = document.getElementById('srs-feedback-toast');
-    actionBtnNotes = document.getElementById('action-btn-notes'); // Sẽ là nút "Bài giảng"
+    actionBtnNotes = document.getElementById('action-btn-notes');
     actionBtnMedia = document.getElementById('action-btn-media');
     actionBtnPracticeCard = document.getElementById('action-btn-practice-card');
     exitSingleCardPracticeBtn = document.getElementById('exit-single-card-practice-btn');
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getWebCardGlobalId,
+        utilGetWebCardGlobalIdFunc: getCardIdentifier, 
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
@@ -804,55 +804,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentEditingDeckId = null;
     }
 
-    function getWebCardGlobalId(cardItem) {
-        if (!cardItem || cardItem.isUserCard) return null;
+    function getCardIdentifier(item){ 
+        if(!item) return null;
         let keyPart;
-        switch(cardItem.category) {
-            case 'phrasalVerbs':
-                keyPart = cardItem.phrasalVerb;
-                break;
-            case 'collocations':
-                keyPart = cardItem.collocation;
-                break;
-            default:
-                keyPart = cardItem.word;
-        }
-        if (!keyPart) return `unknown-${generateUniqueId('uid')}`;
-        const sanitizedKeyPart = String(keyPart).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        return `${cardItem.category}-${sanitizedKeyPart}`;
-    }
-
-    // --- START: Lecture Functions ---
-    function generateCardLectureId(cardItem) { // Đổi tên từ getWebCardGlobalId để rõ ràng hơn
-        if (!cardItem) return null;
-        let keyPart;
-        const category = cardItem.category || 'unknown';
-    
-        // Nếu là thẻ người dùng và có ID, sử dụng ID đó để đảm bảo tính duy nhất cao hơn
-        // Tuy nhiên, để đồng bộ với cách admin tạo bài giảng, có thể vẫn nên dựa trên nội dung.
-        // Quyết định: Ưu tiên dựa trên nội dung để admin dễ dàng tạo bài giảng cho cả thẻ web và thẻ người dùng (nếu thẻ người dùng có nội dung giống thẻ web).
-        // Nếu thẻ người dùng có ID và bạn muốn bài giảng riêng cho thẻ đó, bạn cần logic khác.
-        // Hiện tại, chúng ta sẽ tạo ID dựa trên category và term.
+        const category = item.category || 'unknown';
     
         switch(category) {
             case 'phrasalVerbs':
-                keyPart = cardItem.phrasalVerb;
+                keyPart = item.phrasalVerb;
                 break;
             case 'collocations':
-                keyPart = cardItem.collocation;
+                keyPart = item.collocation;
                 break;
-            default: // verbs, nouns, adjectives
-                keyPart = cardItem.word;
+            default: 
+                keyPart = item.word;
         }
-        if (!keyPart) return `${category}-unknown-${generateUniqueId('lectureuid')}`;
+        if (!keyPart) return `${category}-unknown-${generateUniqueId('cardkey')}`;
         
         const sanitizedKeyPart = String(keyPart).toLowerCase()
-                                .replace(/\s+/g, '-') // Thay khoảng trắng bằng gạch nối
-                                .replace(/[().,]/g, '')   // Loại bỏ dấu ngoặc đơn, chấm, phẩy
-                                .replace(/[^a-z0-9-]/g, ''); // Loại bỏ các ký tự đặc biệt khác
+                                .replace(/\s+/g, '-') 
+                                .replace(/[().,/?!"':]/g, '')   
+                                .replace(/[^a-z0-9-]/g, ''); 
         return `${category}-${sanitizedKeyPart}`;
     }
-    // --- END: Lecture Functions ---
 
 
     async function getAllUniqueBaseVerbs() {
@@ -1091,31 +1065,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateCardInfo();
     }
 
-    function getCardIdentifier(item){ // Đổi tên hàm này để rõ ràng hơn, vì nó cũng dùng cho lecture
-        if(!item) return null;
-        // Giữ logic tạo ID như getWebCardGlobalId để nhất quán, vì bài giảng có thể áp dụng cho cả thẻ web
-        let keyPart;
-        const category = item.category || 'unknown';
-
-        switch(category) {
-            case 'phrasalVerbs':
-                keyPart = item.phrasalVerb;
-                break;
-            case 'collocations':
-                keyPart = item.collocation;
-                break;
-            default: 
-                keyPart = item.word;
-        }
-        if (!keyPart) return `${category}-unknown-${generateUniqueId('lecturekey')}`;
-        
-        const sanitizedKeyPart = String(keyPart).toLowerCase()
-                                .replace(/\s+/g, '-') 
-                                .replace(/[().,]/g, '')   
-                                .replace(/[^a-z0-9-]/g, ''); 
-        return `${category}-${sanitizedKeyPart}`;
-    }
-
     async function getCardStatus(cardItem){
         if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
         const userId = getCurrentUserId();
@@ -1133,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         } else {
             if (userId) {
-                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem)); // Sử dụng getCardIdentifier
+                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem)); 
                 if (firestoreStatus) {
                     return {
                         ...defaultCategoryState, 
@@ -1143,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     };
                 }
             }
-            const webCardGlobalId = getCardIdentifier(cardItem); // Sử dụng getCardIdentifier
+            const webCardGlobalId = getCardIdentifier(cardItem); 
             const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
             if (!webCardGlobalId) return defaultStatus;
             try {
@@ -1480,7 +1429,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         return {
                             ...card,
-                            id: getCardIdentifier(card), // Sử dụng getCardIdentifier thay vì getWebCardGlobalId
+                            id: getCardIdentifier(card), 
                             isUserCard: false,
                             category: category,
                             meanings: meaningsArray,
@@ -1499,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (userId && webCards.length > 0) {
                         const statusPromises = webCards.map(async (card) => {
-                            const webId = card.id; // ID này đã được tạo bởi getCardIdentifier
+                            const webId = card.id; 
                             if (webId) {
                                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
                                 if (firestoreStatus) {
@@ -1582,9 +1531,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(tagsDisplayFront) tagsDisplayFront.textContent = '';
         if(meaningDisplayContainer) meaningDisplayContainer.innerHTML = '';
         
-        // Ẩn phần ghi chú cũ trên thẻ
         const notesSectionOnCard = document.getElementById('notes-section');
-        if (notesSectionOnCard) notesSectionOnCard.style.display = 'none';
+        if (notesSectionOnCard) notesSectionOnCard.style.display = 'none'; 
         if (notesDisplay) notesDisplay.innerHTML = '';
 
 
@@ -1982,7 +1930,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if(meaningDisplayContainer) meaningDisplayContainer.innerHTML = '<p class="text-slate-400 italic">Chưa có nghĩa.</p>';
 
             const notesSectionEl = document.getElementById('notes-section');
-            // Tạm thời ẩn phần ghi chú cũ trên thẻ, vì đã có nút "Bài giảng"
             if (notesSectionEl) notesSectionEl.style.display = 'none'; 
             if (notesDisplay) notesDisplay.innerHTML = '';
 
@@ -2409,8 +2356,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
         let hasActions = false;
-        bottomSheetContent.innerHTML = ''; // Xóa nội dung cũ
-        const loggedIn = getCurrentUserId();
+        bottomSheetContent.innerHTML = '';
+        const loggedInUserId = getCurrentUserId(); 
+        const isAdmin = loggedInUserId === ADMIN_UID; 
         let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
 
         bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
@@ -2422,7 +2370,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (viewType === 'default') {
             bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             // ... (logic cho viewType 'default' giữ nguyên)
-             if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+             if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const srsInfoDiv = document.createElement('div');
                 srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
                 let srsInfoHtml = '<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập:</h4><ul class="list-inside space-y-0.5">';
@@ -2448,21 +2396,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hasActions = true;
             }
 
-            if (!cardItem.isUserCard && loggedIn) {
+            if (!cardItem.isUserCard && loggedInUserId) {
                 const copyBtnEl = document.createElement('button');
                 copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
                 copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
                 bottomSheetContent.appendChild(copyBtnEl);
                 hasActions = true;
             }
-            if (cardItem.isUserCard && loggedIn) {
+            if (cardItem.isUserCard && loggedInUserId) {
                 const editBtnEl = document.createElement('button');
                 editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
                 editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
                 bottomSheetContent.appendChild(editBtnEl);
                 hasActions = true;
             }
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const resetSrsBtn = document.createElement('button');
                 resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
                 resetSrsBtn.onclick = async () => {
@@ -2473,10 +2421,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         };
                         let updateSuccess = false;
                         if (cardItem.isUserCard) {
-                            updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
+                            updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, srsResetData, cardItem.id);
                         } else {
-                            const webCardGlobalId = getCardIdentifier(cardItem); // Sử dụng hàm chung
-                            if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, srsResetData);
+                            const webCardGlobalId = getCardIdentifier(cardItem); 
+                            if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, srsResetData);
                         }
                         if (updateSuccess) {
                             Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); 
@@ -2488,7 +2436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetContent.appendChild(resetSrsBtn);
                 hasActions = true;
             }
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const suspendBtn = document.createElement('button');
                 suspendBtn.innerHTML = cardItem.isSuspended
                     ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
@@ -2498,14 +2446,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                     let updateSuccess = false;
                     if (cardItem.isUserCard) {
-                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
+                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataToUpdate, cardItem.id);
                     } else {
-                        const webCardGlobalId = getCardIdentifier(cardItem); // Sử dụng hàm chung
+                        const webCardGlobalId = getCardIdentifier(cardItem); 
                         if (webCardGlobalId) {
-                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
+                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {};
                             const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                             for (const key in fullDataToSet) { if (fullDataToSet[key] === undefined) delete fullDataToSet[key]; }
-                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
+                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, fullDataToSet);
                         }
                     }
                     if (updateSuccess) {
@@ -2518,7 +2466,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetContent.appendChild(suspendBtn);
                 hasActions = true;
             }
-            if (cardItem.isUserCard && loggedIn) {
+            if (cardItem.isUserCard && loggedInUserId) {
                 const deleteBtnEl = document.createElement('button');
                 deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
                 deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
@@ -2527,28 +2475,94 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hasActions = true;
             }
 
-        } else if (viewType === 'lecture') { // Thay 'notes' bằng 'lecture'
-            bottomSheet.classList.add('bottom-sheet-lecture-mode'); // Class mới cho CSS
-            bottomSheetTitle.textContent = `Bài giảng: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+        } else if (viewType === 'lecture') { 
+            bottomSheet.classList.add('bottom-sheet-lecture-mode'); 
             
             const cardLectureId = generateCardLectureId(cardItem);
-            if (cardLectureId) {
-                bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
-                FirestoreService.getLectureContent(cardLectureId).then(lectureData => {
-                    if (lectureData && lectureData.contentHTML) {
-                        bottomSheetTitle.textContent = lectureData.title || `Bài giảng: ${cardTerm}`;
-                        bottomSheetContent.innerHTML = `<div class="lecture-html-content p-1">${lectureData.contentHTML}</div>`; // Thêm class để style
-                    } else {
-                        bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
+            const lectureTitlePrefix = "Bài giảng: ";
+            bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+            bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
+
+            FirestoreService.getLectureContent(cardLectureId)
+                .then(lectureData => {
+                    if (isAdmin) { 
+                        bottomSheetContent.innerHTML = ''; 
+                        
+                        const titleLabel = document.createElement('label');
+                        titleLabel.htmlFor = 'lecture-title-input';
+                        titleLabel.textContent = 'Tiêu đề Bài giảng:';
+                        titleLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(titleLabel);
+
+                        const titleInput = document.createElement('input');
+                        titleInput.type = 'text';
+                        titleInput.id = 'lecture-title-input';
+                        titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
+                        titleInput.value = lectureData?.title || `${lectureTitlePrefix}${cardTerm}`;
+                        bottomSheetContent.appendChild(titleInput);
+
+                        const contentLabel = document.createElement('label');
+                        contentLabel.htmlFor = 'lecture-content-html-input';
+                        contentLabel.textContent = 'Nội dung HTML Bài giảng:';
+                        contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(contentLabel);
+                        
+                        const contentTextarea = document.createElement('textarea');
+                        contentTextarea.id = 'lecture-content-html-input';
+                        contentTextarea.rows = 15; // Tăng số dòng cho dễ soạn thảo
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]'; // Thêm min-h
+                        contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
+                        contentTextarea.value = lectureData?.contentHTML || '';
+                        bottomSheetContent.appendChild(contentTextarea);
+
+                        const saveLectureBtn = document.createElement('button');
+                        saveLectureBtn.id = 'save-lecture-btn';
+                        saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                        saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
+                        saveLectureBtn.onclick = async () => {
+                            const newTitle = titleInput.value.trim();
+                            const newContentHTML = contentTextarea.value; 
+                            if (!newTitle) {
+                                alert("Tiêu đề bài giảng không được để trống.");
+                                return;
+                            }
+                            // Cho phép lưu nội dung trống để có thể xóa bài giảng
+                            // if (!newContentHTML) {
+                            //     alert("Nội dung bài giảng không được để trống.");
+                            //     return;
+                            // }
+                            saveLectureBtn.disabled = true;
+                            saveLectureBtn.textContent = 'Đang lưu...';
+                            const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
+                            if (success) {
+                                showToast("Đã lưu bài giảng!", 2000, 'success');
+                                closeBottomSheet();
+                            } else {
+                                showToast("Lỗi: Không thể lưu bài giảng.", 3000, 'error');
+                            }
+                            saveLectureBtn.disabled = false;
+                            saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                        };
+                        bottomSheetContent.appendChild(saveLectureBtn);
+
+                    } else { 
+                        if (lectureData && lectureData.contentHTML) {
+                            bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
+                            // Thêm class để có thể style nội dung HTML từ CSS
+                            bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
+                        } else {
+                            bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
+                        }
                     }
-                }).catch(error => {
-                    console.error("Error fetching lecture:", error);
+                })
+                .catch(error => {
+                    console.error("Lỗi khi tải bài giảng:", error);
                     bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
                 });
             } else {
                 bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Không thể xác định thẻ để tải bài giảng.</p>';
             }
-            hasActions = true; // Coi như có action là hiển thị nội dung
+            hasActions = true; 
 
         } else if (viewType === 'media') {
             bottomSheet.classList.add('bottom-sheet-media-mode');
@@ -2926,7 +2940,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.addEventListener('click', exitSingleCardPractice);
 
-        // Không còn tab Youglish, chỉ có tab YouTube (nếu cần)
         if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => { 
             const currentCard = window.currentData[window.currentIndex];
             if(currentCard) setActiveMediaTab('youtube_custom', currentCard);
