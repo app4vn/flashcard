@@ -286,16 +286,17 @@ async function handleAuthStateChangedInApp(user) {
     if (typeof setupInitialCategoryAndSource === 'function') {
         await setupInitialCategoryAndSource(); 
         
-        setTimeout(() => { 
+        // Sử dụng requestAnimationFrame để đảm bảo DOM đã được cập nhật trước khi gọi updateFlashcard
+        requestAnimationFrame(() => {
             if (window.currentData && window.currentData.length > 0 && window.currentIndex < window.currentData.length && typeof window.updateFlashcard === 'function') {
-                 console.log("Auth Change: Delayed explicit updateFlashcard for current card index:", window.currentIndex);
+                 console.log("Auth Change: RAF explicit updateFlashcard for current card index:", window.currentIndex);
                  window.updateFlashcard(); 
             } else {
-                console.log("Auth Change: Delayed call - Conditions not met for forcing updateFlashcard. Data length:", window.currentData?.length, "Index:", window.currentIndex);
+                console.log("Auth Change: RAF - Conditions not met for forcing updateFlashcard. Data length:", window.currentData?.length, "Index:", window.currentIndex);
                  if (typeof updateStatusButtonsUI === 'function') updateStatusButtonsUI(); 
                  if (typeof updateCardInfo === 'function') updateCardInfo(); 
             }
-        }, 100); 
+        });
     }
 
     if (typeof updateSidebarFilterVisibility === 'function') updateSidebarFilterVisibility();
@@ -803,20 +804,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentEditingDeckId = null;
     }
 
-    function getWebCardGlobalId(cardItem) { // Đổi tên hàm này để dùng chung cho cả lecture ID
-        if (!cardItem) return null;
+    function getCardIdentifier(item){ 
+        if(!item) return null;
         let keyPart;
-        const category = cardItem.category || 'unknown';
+        const category = item.category || 'unknown';
     
         switch(category) {
             case 'phrasalVerbs':
-                keyPart = cardItem.phrasalVerb;
+                keyPart = item.phrasalVerb;
                 break;
             case 'collocations':
-                keyPart = cardItem.collocation;
+                keyPart = item.collocation;
                 break;
             default: 
-                keyPart = cardItem.word;
+                keyPart = item.word;
         }
         if (!keyPart) return `${category}-unknown-${generateUniqueId('cardkey')}`;
         
@@ -2478,7 +2479,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             bottomSheet.classList.add('bottom-sheet-lecture-mode'); 
             
             const cardLectureId = generateCardLectureId(cardItem);
-            bottomSheetTitle.textContent = `Bài giảng: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+            const lectureTitlePrefix = "Bài giảng: ";
+            bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
 
             FirestoreService.getLectureContent(cardLectureId)
@@ -2496,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         titleInput.type = 'text';
                         titleInput.id = 'lecture-title-input';
                         titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
-                        titleInput.value = lectureData?.title || `Bài giảng chi tiết: ${cardTerm}`;
+                        titleInput.value = lectureData?.title || `${lectureTitlePrefix}${cardTerm}`;
                         bottomSheetContent.appendChild(titleInput);
 
                         const contentLabel = document.createElement('label');
@@ -2507,9 +2509,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         const contentTextarea = document.createElement('textarea');
                         contentTextarea.id = 'lecture-content-html-input';
-                        contentTextarea.rows = 10; // Có thể tăng thêm nếu cần
-                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[200px]'; // Thêm min-h
-                        contentTextarea.placeholder = 'Dán mã HTML của bài giảng vào đây...';
+                        contentTextarea.rows = 15; // Tăng số dòng cho dễ soạn thảo
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]'; // Thêm min-h
+                        contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
                         contentTextarea.value = lectureData?.contentHTML || '';
                         bottomSheetContent.appendChild(contentTextarea);
 
@@ -2524,10 +2526,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 alert("Tiêu đề bài giảng không được để trống.");
                                 return;
                             }
-                            if (!newContentHTML) {
-                                alert("Nội dung bài giảng không được để trống.");
-                                return;
-                            }
+                            // Cho phép lưu nội dung trống để có thể xóa bài giảng
+                            // if (!newContentHTML) {
+                            //     alert("Nội dung bài giảng không được để trống.");
+                            //     return;
+                            // }
                             saveLectureBtn.disabled = true;
                             saveLectureBtn.textContent = 'Đang lưu...';
                             const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
@@ -2544,7 +2547,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     } else { 
                         if (lectureData && lectureData.contentHTML) {
-                            bottomSheetTitle.textContent = lectureData.title || `Bài giảng: ${cardTerm}`;
+                            bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
+                            // Thêm class để có thể style nội dung HTML từ CSS
                             bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
                         } else {
                             bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
