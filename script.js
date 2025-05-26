@@ -97,7 +97,7 @@ let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
 
 // UID Admin - QUAN TRỌNG: BẠN CẦN THAY THẾ BẰNG UID THỰC CỦA TÀI KHOẢN ADMIN FIREBASE CỦA BẠN
-const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Ví dụ: "abcdef123456xyz7890ghijk"
+const ADMIN_UID = "xPLCuTRXnvNb9Uqa2ezFpOcyQmz2"; // Ví dụ: "abcdef123456xyz7890ghijk"
 
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
