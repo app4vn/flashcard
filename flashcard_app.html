@@ -71,7 +71,7 @@
                     <option value="nouns">Danh từ</option>
                     <option value="phrasalVerbs">Cụm động từ</option>
                     <option value="collocations">Collocations</option>
-                </select>
+                    <option value="idioms">Thành ngữ (Idioms)</option> </select>
             </div>
             <div id="base-verb-filter-container" style="display:none;"><label for="base-verb-filter" class="block text-sm font-medium text-slate-600 mb-1">Lọc theo từ gốc:</label><select id="base-verb-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"></select></div>
             <div id="tag-filter-container" style="display:none;"><label for="tags" class="block text-sm font-medium text-slate-600 mb-1">Lọc theo chủ đề:</label><select id="tags" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"></select></div>
@@ -234,8 +234,7 @@
                         <textarea id="card-general-notes-input" rows="2" class="mt-1 block w-full p-2 pr-8 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
                     </div>
                 </div>
-                <div id="phrasal-verb-specific-fields" style="display: none;" class="border-t pt-4 mt-4">
-                    <div class="relative">
+                <div id="phrasal-verb-specific-fields" style="display: none;" class="border-t pt-4 mt-4"> <div class="relative">
                         <label for="card-base-verb-input" class="block text-sm font-medium text-slate-600">Động từ gốc:</label>
                         <input type="text" id="card-base-verb-input" class="mt-1 block w-full p-2 pr-8 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
@@ -251,13 +250,13 @@
                     <label for="card-json-input" class="block text-sm font-medium text-slate-600">Dán mã JSON (một thẻ hoặc một mảng thẻ):</label>
                     <textarea id="card-json-input" rows="10" class="mt-1 block w-full p-2 border border-slate-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder='Ví dụ cho một thẻ:
 {
-  "category": "collocations",
-  "collocation": "make progress",
-  "baseVerb": "make",
+  "category": "idioms",
+  "idiom": "kick the bucket",
+  "pronunciation": "/kɪk ðə ˈbʌkɪt/",
   "meanings": [
-    { "text": "Tiến bộ", "examples": [{ "eng": "He is making good progress." }] }
+    { "text": "Chết", "examples": [{ "eng": "The old man finally kicked the bucket." }] }
   ],
-  "tags": ["development"]
+  "tags": ["death", "informal"]
 }
 Hoặc một mảng thẻ:
 [ {thẻ 1}, {thẻ 2} ]'></textarea>
