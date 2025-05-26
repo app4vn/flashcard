@@ -13,7 +13,7 @@ import {
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
-import * as FirestoreService from './firestoreService.js';
+import * as FirestoreService from './firestoreService.js'; 
 import { initializeSrsModule, processSrsRatingWrapper } from './srs.js';
 
 const firebaseConfig = {
@@ -57,7 +57,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
     srsFeedbackToastEl,
-    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard,
+    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, 
     exitSingleCardPracticeBtn,
     bottomSheetTabsContainer, tabBtnYouTube,
     flipIconFront, flipIconBack, cardFrontElement;
@@ -93,8 +93,11 @@ const swipeThreshold = 50;
 const swipeMaxVerticalOffset = 75; 
 
 // Biến và key cho tốc độ phát âm ví dụ
-let currentExampleSpeechRate = 1.0; // Tốc độ mặc định
+let currentExampleSpeechRate = 1.0; 
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
+
+// UID Admin - QUAN TRỌNG: BẠN CẦN THAY THẾ BẰNG UID THỰC CỦA TÀI KHOẢN ADMIN FIREBASE CỦA BẠN
+const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Ví dụ: "firebaseUserUid123abc"
 
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
@@ -102,14 +105,12 @@ const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "H�
 const sampleData = {
     "phrasalVerbs": [
         { "phrasalVerb": "Look up", "baseVerb": "look", "category": "phrasalVerbs", "pronunciation": "/lʊk ʌp/", "meanings": [ { "id": "m_pv_sample_1_1", "text": "Tra cứu (thông tin)", "notes": "Trong từ điển, danh bạ...", "examples": [ { "id": "ex_pv_sample_1_1_1", "eng": "I need to look up this word in the dictionary.", "vie": "Tôi cần tra từ này trong từ điển." }, { "id": "ex_pv_sample_1_1_2", "eng": "Can you look up the train times for me?", "vie": "Bạn có thể tra giờ tàu cho tôi được không?" } ]}], "tags": ["learning_information", "actions_tasks"], "generalNotes": "Một cụm động từ phổ biến." },
-        { "phrasalVerb": "Give up", "baseVerb": "give", "category": "phrasalVerbs", "pronunciation": "/ɡɪv ʌp/", "meanings": [ { "id": "m_pv_sample_2_1", "text": "Từ bỏ", "notes": "Ngừng cố gắng làm gì đó.", "examples": [ { "id": "ex_pv_sample_2_1_1", "eng": "Don't give up on your dreams.", "vie": "Đừng từ bỏ ước mơ của bạn." }, { "id": "ex_pv_sample_2_1_2", "eng": "He gave up smoking last year.", "vie": "Anh ấy đã bỏ hút thuốc vào năm ngoái." } ]}], "tags": ["effort_achievement", "health_wellbeing"], "generalNotes": "" },
     ],
     "nouns": [ { "word": "Solution", "category": "nouns", "pronunciation": "/səˈluːʃən/", "meanings": [ { "id": "m_noun_sample_1_1", "text": "Giải pháp cho một vấn đề."}], "generalNotes": "Danh từ đếm được." } ],
     "verbs": [ { "word": "Set", "category": "verbs", "pronunciation": "/set/", "meanings": [ { "id": "m_verb_sample_1_1", "text": "Đặt, để một cái gì đó ở một vị trí cụ thể."}], "generalNotes": "Một động từ có nhiều nghĩa." } ],
     "adjectives": [ { "word": "Happy", "category": "adjectives", "pronunciation": "/ˈhæpi/", "meanings": [ { "id": "m_adj_sample_1_1", "text": "Cảm thấy hoặc thể hiện sự vui vẻ, hài lòng."}], "generalNotes": "" } ],
     "collocations": [
         { "collocation": "take a break", "baseVerb": "take", "category": "collocations", "pronunciation": "/teɪk ə breɪk/", "meanings": [ { "id": "m_col_sample_1_1", "text": "Nghỉ giải lao, nghỉ ngơi một lát", "notes": "Thường dùng trong công việc hoặc học tập", "examples": [ { "id": "ex_col_sample_1_1_1", "eng": "Let's take a break for 10 minutes.", "vie": "Chúng ta hãy nghỉ giải lao 10 phút." }, { "id": "ex_col_sample_1_1_2", "eng": "She's been working all day, she needs to take a break.", "vie": "Cô ấy đã làm việc cả ngày, cô ấy cần nghỉ ngơi." } ]}], "tags": ["daily_routine", "work_business"], "generalNotes": "Một collocation phổ biến với động từ 'take'." },
-        { "collocation": "make an effort", "baseVerb": "make", "category": "collocations", "pronunciation": "/meɪk ən ˈefərt/", "meanings": [ { "id": "m_col_sample_2_1", "text": "Nỗ lực, cố gắng", "examples": [ { "id": "ex_col_sample_2_1_1", "eng": "You need to make an effort to improve your grades.", "vie": "Bạn cần phải nỗ lực để cải thiện điểm số của mình." } ]}], "tags": ["effort_achievement"], "generalNotes": "" }
     ]
 };
 
@@ -151,6 +152,9 @@ async function loadAppState() {
                     searchTerm: appState.categoryStates[k]?.searchTerm || ''
                 };
             });
+            if (appState.userPreferences && typeof appState.userPreferences.exampleSpeechRate === 'number') {
+                currentExampleSpeechRate = appState.userPreferences.exampleSpeechRate;
+            }
             console.log("AppState loaded from Firestore and merged with defaults:", JSON.parse(JSON.stringify(appState)));
             localStorage.setItem(appStateStorageKey, JSON.stringify(appState));
             return;
@@ -177,13 +181,19 @@ async function loadAppState() {
                     searchTerm: appState.categoryStates[k]?.searchTerm || ''
                 };
             });
+            if (appState.userPreferences && typeof appState.userPreferences.exampleSpeechRate === 'number') {
+                currentExampleSpeechRate = appState.userPreferences.exampleSpeechRate;
+            } else {
+                loadExampleSpeechRate(); 
+            }
             console.log("AppState loaded from localStorage and merged with defaults:", JSON.parse(JSON.stringify(appState)));
-            if (userId) {
+            if (userId) { 
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
             }
         } else {
             console.log("No AppState in localStorage, using defaults.");
             appState = JSON.parse(JSON.stringify(defaultAppState));
+            loadExampleSpeechRate(); 
              if (userId) {
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
             } else {
@@ -193,6 +203,7 @@ async function loadAppState() {
     } catch (e) {
         console.error("Lỗi load appState từ localStorage, using defaults:", e);
         appState = JSON.parse(JSON.stringify(defaultAppState));
+        loadExampleSpeechRate();
         if (userId) {
             await FirestoreService.saveAppStateToFirestoreService(userId, appState);
         }
@@ -217,6 +228,9 @@ async function saveAppState(){
         appState.lastSelectedCategory = currentCategoryValue;
         appState.lastSelectedSource = currentDatasetSource;
         appState.lastSelectedDeckId = (currentDatasetSource === 'user') ? userDeckSelect.value : 'all_user_cards';
+        
+        appState.userPreferences = appState.userPreferences || {};
+        appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
     }
 
     try{
@@ -246,36 +260,27 @@ function getCategoryState(src, cat) {
 }
 
 async function handleAuthStateChangedInApp(user) {
-    const userIdFromAuth = getCurrentUserId();
     await loadAppState(); 
 
     if (user) { 
-        if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email ? user.email : (userIdFromAuth && !user.isAnonymous ? "Người dùng" : "Khách");
+        if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email || "Người dùng";
         if(userEmailDisplayMain) userEmailDisplayMain.classList.remove('hidden');
-
         if(authActionButtonMain) {
-            authActionButtonMain.classList.remove('bg-indigo-500', 'hover:bg-indigo-600');
-            authActionButtonMain.classList.add('bg-red-500', 'hover:bg-red-600');
-            authActionButtonMain.innerHTML = `
-                <i class="fas fa-sign-out-alt"></i>
-                <span class="hidden sm:inline ml-1 sm:ml-2">Đăng xuất</span>
-            `;
+            authActionButtonMain.innerHTML = `<i class="fas fa-sign-out-alt"></i><span class="hidden sm:inline ml-1 sm:ml-2">Đăng xuất</span>`;
             authActionButtonMain.title = "Đăng xuất";
+            authActionButtonMain.classList.replace('bg-indigo-500', 'bg-red-500');
+            authActionButtonMain.classList.replace('hover:bg-indigo-600', 'hover:bg-red-600');
         }
     } else { 
         if(userEmailDisplayMain) userEmailDisplayMain.classList.add('hidden');
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = '';
-
         if(authActionButtonMain) {
-            authActionButtonMain.classList.remove('bg-red-500', 'hover:bg-red-600');
-            authActionButtonMain.classList.add('bg-indigo-500', 'hover:bg-indigo-600');
-            authActionButtonMain.innerHTML = `
-                <i class="fas fa-sign-in-alt"></i>
-                <span class="hidden sm:inline ml-1 sm:ml-2">Đăng nhập</span>
-            `;
+            authActionButtonMain.innerHTML = `<i class="fas fa-sign-in-alt"></i><span class="hidden sm:inline ml-1 sm:ml-2">Đăng nhập</span>`;
             authActionButtonMain.title = "Đăng nhập";
+            authActionButtonMain.classList.replace('bg-red-500', 'bg-indigo-500');
+            authActionButtonMain.classList.replace('hover:bg-red-600', 'hover:bg-indigo-600');
         }
-        console.log("User logged out or not logged in. AppState may have been reset or loaded from localStorage.");
+        console.log("User signed out. AppState loaded from localStorage or defaults.");
     }
 
     if (typeof setupInitialCategoryAndSource === 'function') {
@@ -290,37 +295,26 @@ async function handleAuthStateChangedInApp(user) {
                  if (typeof updateStatusButtonsUI === 'function') updateStatusButtonsUI(); 
                  if (typeof updateCardInfo === 'function') updateCardInfo(); 
             }
-        }, 0); 
+        }, 100); 
     }
 
-    if (typeof updateSidebarFilterVisibility === 'function') {
-        updateSidebarFilterVisibility();
-    }
-    if (typeof updateMainHeaderTitle === 'function') {
-       updateMainHeaderTitle();
-    }
+    if (typeof updateSidebarFilterVisibility === 'function') updateSidebarFilterVisibility();
+    if (typeof updateMainHeaderTitle === 'function') updateMainHeaderTitle();
 }
 
 let toastTimeout;
 function showToast(message, duration = 3000, type = 'info') {
     if (!srsFeedbackToastEl) return;
-
     srsFeedbackToastEl.textContent = message;
-    srsFeedbackToastEl.classList.remove('bg-slate-700', 'bg-red-600', 'bg-green-600', 'opacity-0', 'hidden');
+    srsFeedbackToastEl.className = 'fixed bottom-5 right-5 text-white text-sm py-3 px-5 rounded-lg shadow-md opacity-0 transition-opacity duration-500 ease-in-out z-[1010]'; // Reset classes
     srsFeedbackToastEl.classList.add('show'); 
 
-    if (type === 'error') {
-        srsFeedbackToastEl.classList.add('bg-red-600');
-    } else if (type === 'success') {
-        srsFeedbackToastEl.classList.add('bg-green-600');
-    } else {
-        srsFeedbackToastEl.classList.add('bg-slate-700');
-    }
+    if (type === 'error') srsFeedbackToastEl.classList.add('bg-red-600');
+    else if (type === 'success') srsFeedbackToastEl.classList.add('bg-green-600');
+    else srsFeedbackToastEl.classList.add('bg-slate-700');
 
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-        srsFeedbackToastEl.classList.remove('show');
-    }, duration);
+    toastTimeout = setTimeout(() => { srsFeedbackToastEl.classList.remove('show'); }, duration);
 }
 
 // --- START: Speech Rate Functions for Examples ---
@@ -328,17 +322,15 @@ function loadExampleSpeechRate() {
     const savedRate = localStorage.getItem(EXAMPLE_SPEECH_RATE_KEY);
     if (savedRate) {
         const rate = parseFloat(savedRate);
-        if (!isNaN(rate) && rate >= 0.5 && rate <= 2.0) { // Giới hạn tốc độ hợp lý
+        if (!isNaN(rate) && rate >= 0.5 && rate <= 2.0) { 
              currentExampleSpeechRate = rate;
         }
     }
-    // Việc cập nhật UI cho dropdown sẽ được xử lý trong updateFlashcard
 }
 
 function saveExampleSpeechRate() {
     localStorage.setItem(EXAMPLE_SPEECH_RATE_KEY, currentExampleSpeechRate.toString());
-    const userId = getCurrentUserId();
-    if (userId && appState) { 
+    if (getCurrentUserId() && appState) {
         appState.userPreferences = appState.userPreferences || {};
         appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
         saveAppState(); 
@@ -361,7 +353,7 @@ function speakText(txt, meta = [], cb = null) {
     if ('speechSynthesis' in window) {
         const u = new SpeechSynthesisUtterance(txt);
         u.lang = 'en-US';
-        u.rate = 1.0; // Tốc độ mặc định cho từ chính
+        u.rate = 1.0; // Default rate for main word/phrase
         u.pitch = 1;
         window.speechSynthesis.cancel();
         if (meta.length > 0) {
@@ -387,7 +379,7 @@ function speakExample(text, spansMeta) {
     if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
-        utterance.rate = currentExampleSpeechRate; // Sử dụng tốc độ riêng cho ví dụ
+        utterance.rate = currentExampleSpeechRate; // Use specific rate for examples
         utterance.pitch = 1.0;
         window.speechSynthesis.cancel(); 
 
@@ -428,6 +420,32 @@ function speakExample(text, spansMeta) {
 }
 // --- END: Speech Synthesis Functions ---
 
+// --- START: Lecture Functions ---
+function generateCardLectureId(cardItem) { 
+    if (!cardItem) return `unknown-lecture-${generateUniqueId('uid')}`;
+    let keyPart;
+    const category = cardItem.category || 'unknown';
+    
+    switch(category) {
+        case 'phrasalVerbs':
+            keyPart = cardItem.phrasalVerb;
+            break;
+        case 'collocations':
+            keyPart = cardItem.collocation;
+            break;
+        default: 
+            keyPart = cardItem.word;
+    }
+    if (!keyPart) return `${category}-unknown-${generateUniqueId('lecturekey')}`;
+    
+    const sanitizedKeyPart = String(keyPart).toLowerCase()
+                                .replace(/\s+/g, '-') 
+                                .replace(/[().,/?!"':]/g, '')   
+                                .replace(/[^a-z0-9-]/g, ''); 
+    return `${category}-${sanitizedKeyPart}`;
+}
+// --- END: Lecture Functions ---
+
 
 // Logic chính của ứng dụng
 document.addEventListener('DOMContentLoaded', async () => {
@@ -439,7 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     wordDisplay = document.getElementById('word-display');
     pronunciationDisplay = document.getElementById('pronunciation-display');
     meaningDisplayContainer = document.getElementById('meaning-display-container');
-    notesDisplay = document.getElementById('notes-display');
+    notesDisplay = document.getElementById('notes-display'); 
     prevBtn = document.getElementById('prev-btn');
     flipBtn = document.getElementById('flip-btn');
     nextBtn = document.getElementById('next-btn');
@@ -549,7 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getWebCardGlobalId,
+        utilGetWebCardGlobalIdFunc: getCardIdentifier, 
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
@@ -785,23 +803,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentEditingDeckId = null;
     }
 
-    function getWebCardGlobalId(cardItem) {
-        if (!cardItem || cardItem.isUserCard) return null;
+    function getWebCardGlobalId(cardItem) { // Đổi tên hàm này để dùng chung cho cả lecture ID
+        if (!cardItem) return null;
         let keyPart;
-        switch(cardItem.category) {
+        const category = cardItem.category || 'unknown';
+    
+        switch(category) {
             case 'phrasalVerbs':
                 keyPart = cardItem.phrasalVerb;
                 break;
             case 'collocations':
                 keyPart = cardItem.collocation;
                 break;
-            default:
+            default: 
                 keyPart = cardItem.word;
         }
-        if (!keyPart) return `unknown-${generateUniqueId('uid')}`;
-        const sanitizedKeyPart = keyPart.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        return `${cardItem.category}-${sanitizedKeyPart}`;
+        if (!keyPart) return `${category}-unknown-${generateUniqueId('cardkey')}`;
+        
+        const sanitizedKeyPart = String(keyPart).toLowerCase()
+                                .replace(/\s+/g, '-') 
+                                .replace(/[().,/?!"':]/g, '')   
+                                .replace(/[^a-z0-9-]/g, ''); 
+        return `${category}-${sanitizedKeyPart}`;
     }
+
 
     async function getAllUniqueBaseVerbs() {
         const allBaseVerbs = new Set();
@@ -1039,11 +1064,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateCardInfo();
     }
 
-    function getCardIdentifier(item){
-        if(!item) return null;
-        return item.id;
-    }
-
     async function getCardStatus(cardItem){
         if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
         const userId = getCurrentUserId();
@@ -1061,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         } else {
             if (userId) {
-                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getWebCardGlobalId(cardItem));
+                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem)); 
                 if (firestoreStatus) {
                     return {
                         ...defaultCategoryState, 
@@ -1071,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     };
                 }
             }
-            const webCardGlobalId = getWebCardGlobalId(cardItem);
+            const webCardGlobalId = getCardIdentifier(cardItem); 
             const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
             if (!webCardGlobalId) return defaultStatus;
             try {
@@ -1408,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         return {
                             ...card,
-                            id: getWebCardGlobalId(card),
+                            id: getCardIdentifier(card), 
                             isUserCard: false,
                             category: category,
                             meanings: meaningsArray,
@@ -1427,7 +1447,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (userId && webCards.length > 0) {
                         const statusPromises = webCards.map(async (card) => {
-                            const webId = card.id;
+                            const webId = card.id; 
                             if (webId) {
                                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
                                 if (firestoreStatus) {
@@ -1457,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (sampleData[category] && sampleData[category].length > 0) {
                     activeMasterList = sampleData[category].map(card => ({
                         ...card,
-                        id: getWebCardGlobalId({category: category, word: card.word, phrasalVerb: card.phrasalVerb, collocation: card.collocation}),
+                        id: getCardIdentifier({category: category, word: card.word, phrasalVerb: card.phrasalVerb, collocation: card.collocation}),
                         isUserCard: false,
                         category: category,
                         status: 'new',
@@ -1509,7 +1529,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(pronunciationDisplay) pronunciationDisplay.textContent = '';
         if(tagsDisplayFront) tagsDisplayFront.textContent = '';
         if(meaningDisplayContainer) meaningDisplayContainer.innerHTML = '';
-        if(notesDisplay) notesDisplay.innerHTML = '';
+        
+        const notesSectionOnCard = document.getElementById('notes-section');
+        if (notesSectionOnCard) notesSectionOnCard.style.display = 'none'; 
+        if (notesDisplay) notesDisplay.innerHTML = '';
+
+
         if(flashcardElement) flashcardElement.classList.remove('flipped');
 
         const oldOriginalTermOnBack = flashcardElement.querySelector('.original-term-on-back');
@@ -1738,7 +1763,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const option = document.createElement('option');
                         option.value = r.value.toString();
                         option.textContent = r.text;
-                        if (r.value === currentExampleSpeechRate) {
+                        if (parseFloat(option.value) === currentExampleSpeechRate) {
                             option.selected = true;
                         }
                         rateSelect.appendChild(option);
@@ -1904,8 +1929,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if(meaningDisplayContainer) meaningDisplayContainer.innerHTML = '<p class="text-slate-400 italic">Chưa có nghĩa.</p>';
 
             const notesSectionEl = document.getElementById('notes-section');
-            if (item.generalNotes) { if(notesDisplay) notesDisplay.innerHTML = `Ghi chú chung: ${item.generalNotes}`; if(notesSectionEl) notesSectionEl.style.display = 'block'; }
-            else { if(notesDisplay) notesDisplay.innerHTML = ''; if(notesSectionEl) notesSectionEl.style.display = 'none'; }
+            if (notesSectionEl) notesSectionEl.style.display = 'none'; 
+            if (notesDisplay) notesDisplay.innerHTML = '';
+
 
             if(speakerBtn) speakerBtn.disabled = !textForTTS.trim() || (practiceType === 'word_quiz');
             updateStatusButtonsUI();
@@ -2325,15 +2351,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function openBottomSheet(cardItem, viewType = 'default', subView = 'youtube_custom') { 
+    async function openBottomSheet(cardItem, viewType = 'default', subView = 'youtube_custom') { 
         if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
         let hasActions = false;
         bottomSheetContent.innerHTML = '';
-        const loggedIn = getCurrentUserId();
+        const loggedInUserId = getCurrentUserId(); 
+        const isAdmin = loggedInUserId === ADMIN_UID; 
         let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "Thẻ";
 
-        bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode');
+        bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
         bottomSheet.style.paddingBottom = '';
         
         if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
@@ -2341,8 +2368,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (viewType === 'default') {
             bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+            // ... (logic cho viewType 'default' giữ nguyên)
+             if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const srsInfoDiv = document.createElement('div');
                 srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
                 let srsInfoHtml = '<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập:</h4><ul class="list-inside space-y-0.5">';
@@ -2368,21 +2395,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hasActions = true;
             }
 
-            if (!cardItem.isUserCard && loggedIn) {
+            if (!cardItem.isUserCard && loggedInUserId) {
                 const copyBtnEl = document.createElement('button');
                 copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
                 copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
                 bottomSheetContent.appendChild(copyBtnEl);
                 hasActions = true;
             }
-            if (cardItem.isUserCard && loggedIn) {
+            if (cardItem.isUserCard && loggedInUserId) {
                 const editBtnEl = document.createElement('button');
                 editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
                 editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
                 bottomSheetContent.appendChild(editBtnEl);
                 hasActions = true;
             }
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const resetSrsBtn = document.createElement('button');
                 resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
                 resetSrsBtn.onclick = async () => {
@@ -2393,13 +2420,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         };
                         let updateSuccess = false;
                         if (cardItem.isUserCard) {
-                            updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, srsResetData, cardItem.id);
+                            updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, srsResetData, cardItem.id);
                         } else {
-                            const webCardGlobalId = getWebCardGlobalId(cardItem);
-                            if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, srsResetData);
+                            const webCardGlobalId = getCardIdentifier(cardItem); 
+                            if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, srsResetData);
                         }
                         if (updateSuccess) {
-                            Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); // Cập nhật client-side
+                            Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); 
                             alert("Đã đặt lại tiến độ học cho thẻ."); updateFlashcard(); applyAllFilters();
                         }
                         closeBottomSheet();
@@ -2408,7 +2435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetContent.appendChild(resetSrsBtn);
                 hasActions = true;
             }
-            if (loggedIn && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const suspendBtn = document.createElement('button');
                 suspendBtn.innerHTML = cardItem.isSuspended
                     ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
@@ -2418,18 +2445,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                     let updateSuccess = false;
                     if (cardItem.isUserCard) {
-                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
+                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataToUpdate, cardItem.id);
                     } else {
-                        const webCardGlobalId = getWebCardGlobalId(cardItem);
+                        const webCardGlobalId = getCardIdentifier(cardItem); 
                         if (webCardGlobalId) {
-                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
+                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {};
                             const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                             for (const key in fullDataToSet) { if (fullDataToSet[key] === undefined) delete fullDataToSet[key]; }
-                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
+                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, fullDataToSet);
                         }
                     }
                     if (updateSuccess) {
-                        cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now(); // Cập nhật client-side
+                        cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now(); 
                         alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
                         updateFlashcard(); applyAllFilters();
                     }
@@ -2438,7 +2465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetContent.appendChild(suspendBtn);
                 hasActions = true;
             }
-            if (cardItem.isUserCard && loggedIn) {
+            if (cardItem.isUserCard && loggedInUserId) {
                 const deleteBtnEl = document.createElement('button');
                 deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
                 deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
@@ -2446,59 +2473,107 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetContent.appendChild(deleteBtnEl);
                 hasActions = true;
             }
-        } else if (viewType === 'notes') {
-            bottomSheet.classList.add('bottom-sheet-notes-mode');
-            bottomSheetTitle.textContent = `Ghi chú cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-            const notesTextarea = document.createElement('textarea');
-            notesTextarea.id = 'bottom-sheet-notes-textarea';
-            notesTextarea.value = cardItem.generalNotes || '';
-            notesTextarea.rows = 8;
-            notesTextarea.placeholder = "Nhập ghi chú chung, mẹo ghi nhớ (ví dụ: Mẹo: ...), hoặc ví dụ của bạn (ví dụ: VD: ...)";
-            bottomSheetContent.appendChild(notesTextarea);
 
-            const saveNotesBtn = document.createElement('button');
-            saveNotesBtn.innerHTML = `<i class="fas fa-save w-5 mr-3 text-indigo-500"></i> Lưu Nội dung`;
-            saveNotesBtn.classList.add('mt-2', 'bg-indigo-500', 'text-white', 'hover:bg-indigo-600', 'dark:bg-indigo-600', 'dark:hover:bg-indigo-700', 'py-2', 'px-4', 'rounded-md', 'w-full', 'flex', 'items-center', 'justify-center');
-            saveNotesBtn.onclick = async () => {
-                const newNotes = notesTextarea.value;
-                const dataToUpdate = { generalNotes: newNotes, updatedAt: serverTimestamp() };
-                let updateSuccess = false;
-                if (cardItem.isUserCard && loggedIn) {
-                    updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedIn, cardItem.deckId, dataToUpdate, cardItem.id);
-                } else if (loggedIn) { // Thẻ web, đã đăng nhập
-                    const webCardGlobalId = getWebCardGlobalId(cardItem);
-                     if (webCardGlobalId) {
-                        const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedIn, webCardGlobalId) || {};
-                        const fullDataToSet = { ...existingWebStatus, generalNotes: newNotes, updatedAt: serverTimestamp() }; // Giữ lại các trường khác
-                        updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedIn, webCardGlobalId, cardItem, fullDataToSet);
+        } else if (viewType === 'lecture') { 
+            bottomSheet.classList.add('bottom-sheet-lecture-mode'); 
+            
+            const cardLectureId = generateCardLectureId(cardItem);
+            bottomSheetTitle.textContent = `Bài giảng: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+            bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
+
+            FirestoreService.getLectureContent(cardLectureId)
+                .then(lectureData => {
+                    if (isAdmin) { 
+                        bottomSheetContent.innerHTML = ''; 
+                        
+                        const titleLabel = document.createElement('label');
+                        titleLabel.htmlFor = 'lecture-title-input';
+                        titleLabel.textContent = 'Tiêu đề Bài giảng:';
+                        titleLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(titleLabel);
+
+                        const titleInput = document.createElement('input');
+                        titleInput.type = 'text';
+                        titleInput.id = 'lecture-title-input';
+                        titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
+                        titleInput.value = lectureData?.title || `Bài giảng chi tiết: ${cardTerm}`;
+                        bottomSheetContent.appendChild(titleInput);
+
+                        const contentLabel = document.createElement('label');
+                        contentLabel.htmlFor = 'lecture-content-html-input';
+                        contentLabel.textContent = 'Nội dung HTML Bài giảng:';
+                        contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(contentLabel);
+                        
+                        const contentTextarea = document.createElement('textarea');
+                        contentTextarea.id = 'lecture-content-html-input';
+                        contentTextarea.rows = 10; // Có thể tăng thêm nếu cần
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[200px]'; // Thêm min-h
+                        contentTextarea.placeholder = 'Dán mã HTML của bài giảng vào đây...';
+                        contentTextarea.value = lectureData?.contentHTML || '';
+                        bottomSheetContent.appendChild(contentTextarea);
+
+                        const saveLectureBtn = document.createElement('button');
+                        saveLectureBtn.id = 'save-lecture-btn';
+                        saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                        saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
+                        saveLectureBtn.onclick = async () => {
+                            const newTitle = titleInput.value.trim();
+                            const newContentHTML = contentTextarea.value; 
+                            if (!newTitle) {
+                                alert("Tiêu đề bài giảng không được để trống.");
+                                return;
+                            }
+                            if (!newContentHTML) {
+                                alert("Nội dung bài giảng không được để trống.");
+                                return;
+                            }
+                            saveLectureBtn.disabled = true;
+                            saveLectureBtn.textContent = 'Đang lưu...';
+                            const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
+                            if (success) {
+                                showToast("Đã lưu bài giảng!", 2000, 'success');
+                                closeBottomSheet();
+                            } else {
+                                showToast("Lỗi: Không thể lưu bài giảng.", 3000, 'error');
+                            }
+                            saveLectureBtn.disabled = false;
+                            saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                        };
+                        bottomSheetContent.appendChild(saveLectureBtn);
+
+                    } else { 
+                        if (lectureData && lectureData.contentHTML) {
+                            bottomSheetTitle.textContent = lectureData.title || `Bài giảng: ${cardTerm}`;
+                            bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
+                        } else {
+                            bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
+                        }
                     }
-                }
-                if (updateSuccess) {
-                    cardItem.generalNotes = newNotes; // Cập nhật client-side
-                    alert("Đã lưu ghi chú.");
-                    updateFlashcard(); // Cập nhật hiển thị thẻ
-                } else if (loggedIn) { // Chỉ báo lỗi nếu đã đăng nhập mà không lưu được
-                    alert("Lỗi lưu ghi chú.");
-                }
-                closeBottomSheet();
-            };
-            bottomSheetContent.appendChild(saveNotesBtn);
-            hasActions = true;
+                })
+                .catch(error => {
+                    console.error("Lỗi khi tải bài giảng:", error);
+                    bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
+                });
+            } else {
+                bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Không thể xác định thẻ để tải bài giảng.</p>';
+            }
+            hasActions = true; 
+
         } else if (viewType === 'media') {
             bottomSheet.classList.add('bottom-sheet-media-mode');
             bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             
-            // Không cần hiển thị tabs nữa vì chỉ có YouTube
             if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
 
             let youtubeContentDiv = document.getElementById('youtube-tab-content'); 
             if (!youtubeContentDiv) {
                 youtubeContentDiv = document.createElement('div');
                 youtubeContentDiv.id = 'youtube-tab-content'; 
-                youtubeContentDiv.className = 'bottom-sheet-tab-content'; // Luôn hiển thị, không cần class hidden
+                youtubeContentDiv.className = 'bottom-sheet-tab-content'; 
                 bottomSheetContent.appendChild(youtubeContentDiv);
             }
-            setActiveMediaTab('youtube_custom', cardItem); // Mặc định là youtube
+            setActiveMediaTab('youtube_custom', cardItem); 
             hasActions = true;
         } else if (viewType === 'practice_options') {
              bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2539,8 +2614,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const youtubeContentDiv = document.getElementById('youtube-tab-content');
         let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || "";
 
-        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); // Ẩn trước
-        // Không còn tab Youglish để xử lý active class
+        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
+        if (tabBtnYouTube) tabBtnYouTube.classList.remove('active'); 
         
         if (tabName === 'youtube_custom') { 
             if (youtubeContentDiv) {
@@ -2553,7 +2628,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const iframeContainer = document.createElement('div');
                         iframeContainer.className = 'video-iframe-container w-full';
                         const iframe = document.createElement('iframe');
-                        iframe.src = `https://www.youtube.com/embed/${videoId}`; // URL nhúng chuẩn
+                        iframe.src = `https://www.youtube.com/embed/${videoId}`; 
                         iframe.title = "YouTube video player";
                         iframe.frameBorder = "0";
                         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
@@ -2590,8 +2665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function closeBottomSheet() {
         if (!bottomSheet || !bottomSheetOverlay) return;
-        // Không còn logic Youglish
-        bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode');
+        bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
         bottomSheetOverlay.classList.remove('active');
         bottomSheet.style.paddingBottom = ''; 
         if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
@@ -2848,9 +2922,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             bottomSheetOverlay.addEventListener('click', closeBottomSheet);
         }
 
-        if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
+        if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => { 
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'notes');
+            if (currentCard) openBottomSheet(currentCard, 'lecture'); 
         });
         if(actionBtnMedia) actionBtnMedia.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
@@ -2862,7 +2936,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.addEventListener('click', exitSingleCardPractice);
 
-        // Chỉ còn event listener cho tab YouTube (nếu tabBtnYouTube còn được sử dụng)
         if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => { 
             const currentCard = window.currentData[window.currentIndex];
             if(currentCard) setActiveMediaTab('youtube_custom', currentCard);
@@ -2949,7 +3022,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (targetSelect) {
                     currentExampleSpeechRate = parseFloat(targetSelect.value);
                     saveExampleSpeechRate();
-                    updateAllExampleSpeechRateDropdownsUI(); // Cập nhật tất cả dropdown trên thẻ
+                    updateAllExampleSpeechRateDropdownsUI(); 
                 }
             });
         }
