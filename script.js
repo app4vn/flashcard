@@ -42,8 +42,8 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn,
     addEditCardModal, closeModalBtn, addEditCardForm, modalTitle, cardIdInput,
     cardWordInput, cardPronunciationInput, cardGeneralNotesInput, cardVideoUrlInput,
-    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, // This will be reused/controlled for idioms too
-    cardBaseVerbInput, cardTagsInput, cardWordLabel, // Added cardWordLabel
+    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, 
+    cardBaseVerbInput, cardTagsInput, cardWordLabel, 
     cancelCardBtn, saveCardBtn, deckCreationHint,
     userDeckFilterContainer, userDeckSelect, manageDecksBtn, modalDeckAssignmentContainer,
     cardDeckAssignmentSelect, manageDecksModal, deckModalContent, closeDeckModalBtn,
@@ -62,7 +62,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     exitSingleCardPracticeBtn,
     bottomSheetTabsContainer, tabBtnYouTube,
     flipIconFront, flipIconBack, cardFrontElement,
-    recentlyViewedListElement, noRecentCardsMessageElement; // Added for Recently Viewed
+    recentlyViewedListElement, noRecentCardsMessageElement; 
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
@@ -86,7 +86,6 @@ let isSingleCardPracticeMode = false;
 let originalCurrentData = [];
 let originalCurrentIndex = 0;
 
-// Biến cho chức năng vuốt thẻ
 let touchStartX = 0;
 let touchEndX = 0;
 let touchStartY = 0;
@@ -94,13 +93,11 @@ let touchEndY = 0;
 const swipeThreshold = 50;
 const swipeMaxVerticalOffset = 75;
 
-// Biến và key cho tốc độ phát âm ví dụ
 let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
-const MAX_RECENTLY_VIEWED_CARDS = 10; // Max number of recently viewed cards to store
+const MAX_RECENTLY_VIEWED_CARDS = 10; 
 
-// UID Admin - QUAN TRỌNG: BẠN CẦN THAY THẾ BẰNG UID THỰC CỦA TÀI KHOẢN ADMIN FIREBASE CỦA BẠN
-const ADMIN_UID = "xPLCuTRXnvNb9Uqa2ezFpOcyQmz2"; // Ví dụ: "abcdef123456xyz7890ghijk"
+const ADMIN_UID = "xPLCuTRXnvNb9Uqa2ezFpOcyQmz2"; 
 
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
@@ -115,7 +112,7 @@ const sampleData = {
     "collocations": [
         { "collocation": "take a break", "baseVerb": "take", "category": "collocations", "pronunciation": "/teɪk ə breɪk/", "meanings": [ { "id": "m_col_sample_1_1", "text": "Nghỉ giải lao, nghỉ ngơi một lát", "notes": "Thường dùng trong công việc hoặc học tập", "examples": [ { "id": "ex_col_sample_1_1_1", "eng": "Let's take a break for 10 minutes.", "vie": "Chúng ta hãy nghỉ giải lao 10 phút." }, { "id": "ex_col_sample_1_1_2", "eng": "She's been working all day, she needs to take a break.", "vie": "Cô ấy đã làm việc cả ngày, cô ấy cần nghỉ ngơi." } ]}], "tags": ["daily_routine", "work_business"], "generalNotes": "Một collocation phổ biến với động từ 'take'." },
     ],
-    "idioms": [ // Added sample data for idioms
+    "idioms": [ 
         { "idiom": "Kick the bucket", "category": "idioms", "pronunciation": "/kɪk ðə ˈbʌkɪt/", "meanings": [ { "id": "m_idiom_sample_1_1", "text": "Chết (nghĩa lóng)", "notes": "Thường dùng không trang trọng", "examples": [ { "id": "ex_idiom_sample_1_1_1", "eng": "The old man finally kicked the bucket after a long illness.", "vie": "Ông lão cuối cùng cũng qua đời sau một thời gian dài bệnh tật." } ]}], "tags": ["death", "informal"], "generalNotes": "Một thành ngữ phổ biến." },
         { "idiom": "Break a leg", "category": "idioms", "pronunciation": "/breɪk ə lɛg/", "meanings": [ { "id": "m_idiom_sample_2_1", "text": "Chúc may mắn (đặc biệt trong biểu diễn)", "notes": "", "examples": [ { "id": "ex_idiom_sample_2_1_1", "eng": "Break a leg in your performance tonight!", "vie": "Chúc bạn may mắn trong buổi biểu diễn tối nay!" } ]}], "tags": ["luck", "performance"], "generalNotes": "" }
     ]
@@ -126,7 +123,7 @@ const defaultCategoryState = {
     searchTerm: '',
     baseVerb: 'all',
     tag: 'all',
-    filterMarked: 'all_study',
+    filterMarked: 'all_study', // Giá trị mặc định cho bộ lọc trạng thái thẻ
     currentIndex: 0,
     deckId: 'all_user_cards'
 };
@@ -136,13 +133,13 @@ const defaultAppState = {
     lastSelectedSource: 'web',
     lastSelectedDeckId: 'all_user_cards',
     categoryStates: {},
-    recentlyViewedCards: [] // Added for Recently Viewed
+    recentlyViewedCards: [] 
 };
 let appState = JSON.parse(JSON.stringify(defaultAppState));
 
-const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; // Consider versioning if making breaking changes
+const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; 
 
-// --- START: Utility Functions (Moved outside DOMContentLoaded) ---
+
 function generateUniqueId(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`;
 }
@@ -159,7 +156,7 @@ function getCardIdentifier(item){
         case 'collocations':
             keyPart = item.collocation;
             break;
-        case 'idioms': // Added idioms
+        case 'idioms': 
             keyPart = item.idiom;
             break;
         default:
@@ -179,7 +176,6 @@ function closeSidebar(){
     if (filterSidebar) filterSidebar.classList.remove('translate-x-0');
     if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
 }
-// --- END: Utility Functions ---
 
 
 async function loadAppState() {
@@ -192,27 +188,27 @@ async function loadAppState() {
                 ...defaultAppState,
                 ...firestoreState,
                 categoryStates: firestoreState.categoryStates ? { ...firestoreState.categoryStates } : {},
-                recentlyViewedCards: Array.isArray(firestoreState.recentlyViewedCards) ? firestoreState.recentlyViewedCards : [] // Load recently viewed
+                recentlyViewedCards: Array.isArray(firestoreState.recentlyViewedCards) ? firestoreState.recentlyViewedCards : [] 
             };
             Object.keys(appState.categoryStates).forEach(k => {
                 appState.categoryStates[k] = {
                     ...defaultCategoryState,
                     ...(appState.categoryStates[k] || {}),
-                    searchTerm: appState.categoryStates[k]?.searchTerm || ''
+                    searchTerm: appState.categoryStates[k]?.searchTerm || '',
+                    filterMarked: appState.categoryStates[k]?.filterMarked || defaultCategoryState.filterMarked // Đảm bảo filterMarked được tải
                 };
             });
             if (appState.userPreferences && typeof appState.userPreferences.exampleSpeechRate === 'number') {
                 currentExampleSpeechRate = appState.userPreferences.exampleSpeechRate;
             }
             console.log("AppState loaded from Firestore and merged with defaults:", JSON.parse(JSON.stringify(appState)));
-            localStorage.setItem(appStateStorageKey, JSON.stringify(appState)); // Sync to localStorage
+            localStorage.setItem(appStateStorageKey, JSON.stringify(appState)); 
             return;
         } else {
             console.log("No AppState in Firestore for this user, trying localStorage or defaults.");
         }
     }
 
-    // Fallback to localStorage or defaults if no Firestore state or no user
     try {
         const s = localStorage.getItem(appStateStorageKey);
         if (s) {
@@ -223,31 +219,32 @@ async function loadAppState() {
                 lastSelectedSource: p.lastSelectedSource || defaultAppState.lastSelectedSource,
                 lastSelectedDeckId: p.lastSelectedDeckId || defaultAppState.lastSelectedDeckId,
                 categoryStates: p.categoryStates ? { ...p.categoryStates } : {},
-                recentlyViewedCards: Array.isArray(p.recentlyViewedCards) ? p.recentlyViewedCards : [] // Load recently viewed
+                recentlyViewedCards: Array.isArray(p.recentlyViewedCards) ? p.recentlyViewedCards : [] 
             };
             Object.keys(appState.categoryStates).forEach(k => {
                  appState.categoryStates[k] = {
                     ...defaultCategoryState,
                     ...(appState.categoryStates[k] || {}),
-                    searchTerm: appState.categoryStates[k]?.searchTerm || ''
+                    searchTerm: appState.categoryStates[k]?.searchTerm || '',
+                    filterMarked: appState.categoryStates[k]?.filterMarked || defaultCategoryState.filterMarked // Đảm bảo filterMarked được tải
                 };
             });
             if (appState.userPreferences && typeof appState.userPreferences.exampleSpeechRate === 'number') {
                 currentExampleSpeechRate = appState.userPreferences.exampleSpeechRate;
             } else {
-                loadExampleSpeechRate(); // Load from its own localStorage if not in appState
+                loadExampleSpeechRate(); 
             }
             console.log("AppState loaded from localStorage and merged with defaults:", JSON.parse(JSON.stringify(appState)));
-            if (userId) { // If user logged in now, save the merged state to Firestore
+            if (userId) { 
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
             }
         } else {
             console.log("No AppState in localStorage, using defaults.");
             appState = JSON.parse(JSON.stringify(defaultAppState));
             loadExampleSpeechRate();
-             if (userId) { // If user logged in, save default state to Firestore
+             if (userId) { 
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
-            } else { // No user, just save defaults to localStorage
+            } else { 
                 localStorage.setItem(appStateStorageKey, JSON.stringify(appState));
             }
         }
@@ -255,7 +252,7 @@ async function loadAppState() {
         console.error("Lỗi load appState từ localStorage, using defaults:", e);
         appState = JSON.parse(JSON.stringify(defaultAppState));
         loadExampleSpeechRate();
-        if (userId) { // If user logged in, save default state to Firestore
+        if (userId) { 
             await FirestoreService.saveAppStateToFirestoreService(userId, appState);
         }
     }
@@ -263,32 +260,31 @@ async function loadAppState() {
 
 async function saveAppState(){
     if (!categorySelect || !filterCardStatusSelect || !userDeckSelect || !baseVerbSelect || !tagSelect) {
-        // DOM elements might not be ready yet, especially during initial load
-    } else {
-        const currentCategoryValue = categorySelect.value;
-        const stateForCategory = getCategoryState(currentDatasetSource, currentCategoryValue);
+        return;
+    } 
+    const currentCategoryValue = categorySelect.value;
+    const stateForCategory = getCategoryState(currentDatasetSource, currentCategoryValue);
 
-        stateForCategory.currentIndex = window.currentIndex;
-        stateForCategory.filterMarked = filterCardStatusSelect.value;
-        if (currentDatasetSource === 'user') {
-            stateForCategory.deckId = userDeckSelect.value;
-        }
-        if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations' || currentCategoryValue === 'idioms') { // Added idioms
-            if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations') { // Base verb only for PV and Collocations
-                 stateForCategory.baseVerb = baseVerbSelect.value;
-            } else {
-                stateForCategory.baseVerb = 'all'; // Reset for idioms
-            }
-            stateForCategory.tag = tagSelect.value; // Tags for PV, Collocations, Idioms
-        }
-        appState.lastSelectedCategory = currentCategoryValue;
-        appState.lastSelectedSource = currentDatasetSource;
-        appState.lastSelectedDeckId = (currentDatasetSource === 'user') ? userDeckSelect.value : 'all_user_cards';
-
-        appState.userPreferences = appState.userPreferences || {};
-        appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
-        // appState.recentlyViewedCards is managed directly when a card is viewed
+    stateForCategory.currentIndex = window.currentIndex;
+    stateForCategory.filterMarked = filterCardStatusSelect.value; // Lưu giá trị filterMarked hiện tại
+    if (currentDatasetSource === 'user') {
+        stateForCategory.deckId = userDeckSelect.value;
     }
+    if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations' || currentCategoryValue === 'idioms') { 
+        if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations') { 
+             stateForCategory.baseVerb = baseVerbSelect.value;
+        } else {
+            stateForCategory.baseVerb = 'all'; 
+        }
+        stateForCategory.tag = tagSelect.value; 
+    }
+    appState.lastSelectedCategory = currentCategoryValue;
+    appState.lastSelectedSource = currentDatasetSource;
+    appState.lastSelectedDeckId = (currentDatasetSource === 'user') ? userDeckSelect.value : 'all_user_cards';
+
+    appState.userPreferences = appState.userPreferences || {};
+    appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
+    
 
     try{
         localStorage.setItem(appStateStorageKey,JSON.stringify(appState));
@@ -310,15 +306,16 @@ function getCategoryState(src, cat) {
         appState.categoryStates[key] = {
             ...defaultCategoryState,
             ...appState.categoryStates[key],
-            searchTerm: appState.categoryStates[key].searchTerm || ''
+            searchTerm: appState.categoryStates[key].searchTerm || '',
+            filterMarked: appState.categoryStates[key].filterMarked || defaultCategoryState.filterMarked // Đảm bảo có giá trị
         };
     }
     return appState.categoryStates[key];
 }
 
 async function handleAuthStateChangedInApp(user) {
-    await loadAppState(); // Load app state first, which might depend on user ID for Firestore
-    renderRecentlyViewedList(); // Then render recently viewed list
+    await loadAppState(); 
+    renderRecentlyViewedList(); 
 
     if (user) {
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email || "Người dùng";
@@ -342,10 +339,7 @@ async function handleAuthStateChangedInApp(user) {
     }
 
     if (typeof setupInitialCategoryAndSource === 'function') {
-        await setupInitialCategoryAndSource(); // This will call loadVocabularyData -> updateFlashcard
-
-        // updateFlashcard is now called within loadVocabularyData or applyAllFilters
-        // No need for RAF here as updateFlashcard will eventually be called by setupInitialCategoryAndSource
+        await setupInitialCategoryAndSource(); 
     }
 
     if (typeof updateSidebarFilterVisibility === 'function') updateSidebarFilterVisibility();
@@ -356,7 +350,7 @@ let toastTimeout;
 function showToast(message, duration = 3000, type = 'info') {
     if (!srsFeedbackToastEl) return;
     srsFeedbackToastEl.textContent = message;
-    srsFeedbackToastEl.className = 'fixed bottom-5 right-5 text-white text-sm py-3 px-5 rounded-lg shadow-md opacity-0 transition-opacity duration-500 ease-in-out z-[1010]'; // Reset classes
+    srsFeedbackToastEl.className = 'fixed bottom-5 right-5 text-white text-sm py-3 px-5 rounded-lg shadow-md opacity-0 transition-opacity duration-500 ease-in-out z-[1010]'; 
     srsFeedbackToastEl.classList.add('show');
 
     if (type === 'error') srsFeedbackToastEl.classList.add('bg-red-600');
@@ -367,7 +361,7 @@ function showToast(message, duration = 3000, type = 'info') {
     toastTimeout = setTimeout(() => { srsFeedbackToastEl.classList.remove('show'); }, duration);
 }
 
-// --- START: Speech Rate Functions for Examples ---
+
 function loadExampleSpeechRate() {
     const savedRate = localStorage.getItem(EXAMPLE_SPEECH_RATE_KEY);
     if (savedRate) {
@@ -380,10 +374,10 @@ function loadExampleSpeechRate() {
 
 function saveExampleSpeechRate() {
     localStorage.setItem(EXAMPLE_SPEECH_RATE_KEY, currentExampleSpeechRate.toString());
-    if (getCurrentUserId() && appState) { // Ensure appState is initialized
+    if (getCurrentUserId() && appState) { 
         appState.userPreferences = appState.userPreferences || {};
         appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
-        saveAppState(); // This will save the entire appState including userPreferences
+        saveAppState(); 
     }
 }
 
@@ -395,15 +389,14 @@ function updateAllExampleSpeechRateDropdownsUI() {
         }
     });
 }
-// --- END: Speech Rate Functions for Examples ---
 
-// --- START: Speech Synthesis Functions ---
+
 function speakText(txt, meta = [], cb = null) {
     if (!txt || !txt.trim()) { if (cb) cb(); return; }
     if ('speechSynthesis' in window) {
         const u = new SpeechSynthesisUtterance(txt);
         u.lang = 'en-US';
-        u.rate = 1.0; // Default rate for main word/phrase
+        u.rate = 1.0; 
         u.pitch = 1;
         window.speechSynthesis.cancel();
         if (meta.length > 0) {
@@ -429,7 +422,7 @@ function speakExample(text, spansMeta) {
     if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
-        utterance.rate = currentExampleSpeechRate; // Use specific rate for examples
+        utterance.rate = currentExampleSpeechRate; 
         utterance.pitch = 1.0;
         window.speechSynthesis.cancel();
 
@@ -468,9 +461,8 @@ function speakExample(text, spansMeta) {
         console.warn("Trình duyệt không hỗ trợ Speech Synthesis.");
     }
 }
-// --- END: Speech Synthesis Functions ---
 
-// --- START: Lecture Functions ---
+
 function generateCardLectureId(cardItem) {
     if (!cardItem) return `unknown-lecture-${generateUniqueId('uid')}`;
     let keyPart;
@@ -483,7 +475,7 @@ function generateCardLectureId(cardItem) {
         case 'collocations':
             keyPart = cardItem.collocation;
             break;
-        case 'idioms': // Added idioms
+        case 'idioms': 
             keyPart = cardItem.idiom;
             break;
         default:
@@ -497,16 +489,15 @@ function generateCardLectureId(cardItem) {
                                 .replace(/[^a-z0-9-]/g, '');
     return `${category}-${sanitizedKeyPart}`;
 }
-// --- END: Lecture Functions ---
 
-// --- START: Recently Viewed Functions ---
+
 function renderRecentlyViewedList() {
     if (!recentlyViewedListElement || !noRecentCardsMessageElement) {
-        console.warn("renderRecentlyViewedList: DOM elements for recently viewed list not found."); // Thêm cảnh báo
+        console.warn("renderRecentlyViewedList: DOM elements for recently viewed list not found."); 
         return;
     }
 
-    recentlyViewedListElement.innerHTML = ''; // Clear existing items
+    recentlyViewedListElement.innerHTML = ''; 
 
     if (!appState.recentlyViewedCards || appState.recentlyViewedCards.length === 0) {
         noRecentCardsMessageElement.style.display = 'block';
@@ -517,20 +508,19 @@ function renderRecentlyViewedList() {
 
     appState.recentlyViewedCards.forEach(recentCard => {
         const listItem = document.createElement('li');
-        listItem.className = 'recent-card-item group'; // Added group for potential hover effects on children
+        listItem.className = 'recent-card-item group'; 
         listItem.setAttribute('role', 'button');
-        listItem.tabIndex = 0; // Make it focusable
+        listItem.tabIndex = 0; 
 
-        // Store all necessary data to navigate back to the card
         listItem.dataset.cardIdentifier = recentCard.identifier;
         listItem.dataset.cardCategory = recentCard.category;
         listItem.dataset.cardSource = recentCard.source;
-        listItem.dataset.cardDeckId = recentCard.deckId || ''; // Store deckId, even if null/empty
+        listItem.dataset.cardDeckId = recentCard.deckId || ''; 
 
         const termSpan = document.createElement('span');
         termSpan.className = 'recent-card-term';
-        termSpan.textContent = recentCard.term.length > 25 ? recentCard.term.substring(0, 22) + '...' : recentCard.term; // Truncate if too long
-        termSpan.title = recentCard.term; // Show full term on hover
+        termSpan.textContent = recentCard.term.length > 25 ? recentCard.term.substring(0, 22) + '...' : recentCard.term; 
+        termSpan.title = recentCard.term; 
 
         const metaSpan = document.createElement('span');
         metaSpan.className = 'recent-card-meta';
@@ -563,15 +553,13 @@ function renderRecentlyViewedList() {
 async function navigateToRecentCard(recentCardInfo) {
     if (!recentCardInfo) return;
     console.log("Navigating to recent card:", recentCardInfo);
-    closeSidebar(); // This function was moved to module scope
+    closeSidebar(); 
 
-    // 1. Set source and category
     if (cardSourceSelect) cardSourceSelect.value = recentCardInfo.source;
-    currentDatasetSource = recentCardInfo.source; // Update global state
+    currentDatasetSource = recentCardInfo.source; 
 
     if (categorySelect) categorySelect.value = recentCardInfo.category;
 
-    // 2. Set deck if it's a user card from a specific deck
     if (recentCardInfo.source === 'user' && userDeckSelect) {
         if (recentCardInfo.deckId) {
             userDeckSelect.value = recentCardInfo.deckId;
@@ -580,26 +568,24 @@ async function navigateToRecentCard(recentCardInfo) {
         }
     }
     
-    // 3. Update sidebar visibility and header (important after changing selects)
     updateSidebarFilterVisibility();
     updateMainHeaderTitle();
 
-    // 4. Load vocabulary data for the card's category and source (and deck if applicable)
     const originalSearchTerm = searchInput.value;
     const originalBaseVerb = baseVerbSelect ? baseVerbSelect.value : 'all';
     const originalTag = tagSelect ? tagSelect.value : 'all';
     const originalFilterMarked = filterCardStatusSelect.value;
 
-    searchInput.value = ''; // Clear search
+    searchInput.value = ''; 
     if (baseVerbSelect) baseVerbSelect.value = 'all';
     if (tagSelect) tagSelect.value = 'all';
-
+    
     await loadVocabularyData(recentCardInfo.category); 
 
     let foundIndex = -1;
     if (window.currentData && window.currentData.length > 0) {
         foundIndex = window.currentData.findIndex(card => {
-            const cardId = card.isUserCard ? card.id : getCardIdentifier(card); // getCardIdentifier was moved
+            const cardId = card.isUserCard ? card.id : getCardIdentifier(card); 
             return cardId === recentCardInfo.identifier && card.category === recentCardInfo.category;
         });
     }
@@ -629,7 +615,7 @@ function addCardToRecentlyViewed(cardItem) {
     if (!cardItem) return;
 
     const term = cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || cardItem.word || 'N/A';
-    const identifier = cardItem.isUserCard ? cardItem.id : getCardIdentifier(cardItem); // getCardIdentifier was moved
+    const identifier = cardItem.isUserCard ? cardItem.id : getCardIdentifier(cardItem); 
 
     if (!identifier) {
         console.warn("Could not generate identifier for recently viewed card:", cardItem);
@@ -654,7 +640,76 @@ function addCardToRecentlyViewed(cardItem) {
     renderRecentlyViewedList(); 
     saveAppState(); 
 }
-// --- END: Recently Viewed Functions ---
+
+// --- START: Favorite Card Functions ---
+async function toggleFavoriteStatus(cardItem, favoriteButtonElement) {
+    if (!cardItem) return;
+    const userId = getCurrentUserId();
+    if (!userId) {
+        showToast("Vui lòng đăng nhập để sử dụng chức năng yêu thích.", 3000, 'error');
+        openAuthModalFromAuth('login');
+        return;
+    }
+
+    const newFavoriteState = !(cardItem.isFavorite || false); // Đảo ngược trạng thái, mặc định là false nếu chưa có
+
+    let success = false;
+    const dataToUpdate = { 
+        isFavorite: newFavoriteState, 
+        updatedAt: serverTimestamp() // Luôn cập nhật thời gian sửa đổi
+    };
+
+    if (cardItem.isUserCard) {
+        if (!cardItem.id || !cardItem.deckId) {
+            console.error("toggleFavoriteStatus: Missing id or deckId for user card.", cardItem);
+            showToast("Lỗi: Không thể cập nhật thẻ người dùng.", 3000, 'error');
+            return;
+        }
+        success = await FirestoreService.saveCardToFirestore(userId, cardItem.deckId, dataToUpdate, cardItem.id);
+    } else { // Web card
+        const webCardGlobalId = getCardIdentifier(cardItem);
+        if (!webCardGlobalId) {
+            console.error("toggleFavoriteStatus: Could not get identifier for web card.", cardItem);
+            showToast("Lỗi: Không thể cập nhật thẻ web.", 3000, 'error');
+            return;
+        }
+        // Khi cập nhật webCardStatus, ta cần truyền cả cardData gốc để giữ lại originalCategory và originalWordOrPhrase
+        // và srsDataToUpdate chỉ chứa phần thay đổi (isFavorite và updatedAt)
+        const statusUpdatePayload = { isFavorite: newFavoriteState, updatedAt: serverTimestamp() };
+        success = await FirestoreService.updateWebCardStatusInFirestore(userId, webCardGlobalId, cardItem, statusUpdatePayload);
+    }
+
+    if (success) {
+        cardItem.isFavorite = newFavoriteState; // Cập nhật trạng thái ở client
+        cardItem.updatedAt = Date.now(); // Cập nhật client-side timestamp
+
+        // Cập nhật UI của nút yêu thích (trong bottom sheet)
+        if (favoriteButtonElement) {
+            updateFavoriteButtonUI(favoriteButtonElement, newFavoriteState);
+        }
+        showToast(newFavoriteState ? "Đã thêm vào Yêu thích!" : "Đã xóa khỏi Yêu thích.", 2000, 'success');
+        
+        // Nếu đang lọc theo yêu thích, làm mới danh sách
+        if (filterCardStatusSelect && filterCardStatusSelect.value === 'favorites') {
+            applyAllFilters();
+        }
+    } else {
+        showToast("Lỗi cập nhật trạng thái yêu thích. Vui lòng thử lại.", 3000, 'error');
+    }
+}
+
+function updateFavoriteButtonUI(buttonElement, isFavorite) {
+    if (!buttonElement) return;
+    const icon = buttonElement.querySelector('i');
+    if (isFavorite) {
+        buttonElement.innerHTML = `<i class="fas fa-star w-5 mr-3 text-yellow-400"></i> Bỏ Yêu thích`;
+        buttonElement.classList.add('favorited');
+    } else {
+        buttonElement.innerHTML = `<i class="far fa-star w-5 mr-3 text-slate-500"></i> Thêm vào Yêu thích`;
+        buttonElement.classList.remove('favorited');
+    }
+}
+// --- END: Favorite Card Functions ---
 
 
 // Logic chính của ứng dụng
@@ -691,8 +746,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnSrsEasy = document.getElementById('btn-srs-easy');
     hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
     filterSidebar = document.getElementById('filter-sidebar');
-    closeSidebarBtn = document.getElementById('close-sidebar-btn'); // DOM element for close button
-    sidebarOverlay = document.getElementById('sidebar-overlay'); // DOM element for overlay
+    closeSidebarBtn = document.getElementById('close-sidebar-btn'); 
+    sidebarOverlay = document.getElementById('sidebar-overlay'); 
     tagsDisplayFront = document.getElementById('tags-display-front');
     typingInputContainer = document.getElementById('typing-input-container');
     typingInput = document.getElementById('typing-input');
@@ -781,7 +836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeSrsModule({
         firestoreServiceModule: FirestoreService,
         authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getCardIdentifier, // Now accessible
+        utilGetWebCardGlobalIdFunc: getCardIdentifier, 
         uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
         uiUpdateFlashcardFunc: updateFlashcard,
         uiNextBtnElement: nextBtn,
@@ -1279,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function getCardStatus(cardItem){
-        if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
+        if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false, isFavorite: false }; // Thêm isFavorite
         const userId = getCurrentUserId();
 
         if (cardItem.isUserCard) {
@@ -1291,42 +1346,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 interval: cardItem.interval || 0,
                 easeFactor: cardItem.easeFactor || 2.5,
                 repetitions: cardItem.repetitions || 0,
-                isSuspended: cardItem.isSuspended || false
+                isSuspended: cardItem.isSuspended || false,
+                isFavorite: cardItem.isFavorite || false // Lấy isFavorite từ thẻ người dùng
             };
-        } else {
+        } else { // Web card
             if (userId) {
                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem));
-                if (firestoreStatus) {
-                    return {
-                        ...defaultCategoryState, 
-                        ...firestoreStatus,
-                        status: firestoreStatus.status || 'new',
-                        isSuspended: firestoreStatus.isSuspended || false
-                    };
-                }
-            }
-            const webCardGlobalId = getCardIdentifier(cardItem);
-            const defaultStatus = {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false};
-            if (!webCardGlobalId) return defaultStatus;
-            try {
-                const legacyStatuses = JSON.parse(localStorage.getItem('flashcardCardStatuses_v4_nested_linked_ui_fixed_v2') || '{}');
-                const statusKey = webCardGlobalId;
-                if (!legacyStatuses[statusKey]) return defaultStatus;
-                const s = legacyStatuses[statusKey];
-                return {
-                    status:s.status||'new',
-                    lastReviewed:s.lastReviewed||null,
-                    reviewCount:s.reviewCount||0,
-                    nextReviewDate: s.nextReviewDate || null,
-                    interval: s.interval || 0,
-                    easeFactor: s.easeFactor || 2.5,
-                    repetitions: s.repetitions || 0,
-                    isSuspended: s.isSuspended || false
+                // firestoreStatus đã bao gồm isFavorite (hoặc false nếu không có)
+                return { 
+                    status: 'new', interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false, // Các giá trị SRS mặc định
+                    ...firestoreStatus, // Ghi đè bằng dữ liệu từ Firestore nếu có (bao gồm isFavorite)
+                    status: firestoreStatus?.status || 'new', // Đảm bảo status có giá trị
+                    isSuspended: firestoreStatus?.isSuspended || false,
+                    isFavorite: firestoreStatus?.isFavorite || false
                 };
-            } catch (e) {
-                console.error("Error parsing legacy card statuses from localStorage", e);
-                return defaultStatus;
             }
+            // Nếu không đăng nhập, thẻ web không có trạng thái cá nhân hóa
+            return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false, isFavorite: false};
         }
     }
 
@@ -1364,8 +1400,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
              console.log(`All cards loaded for user ${userId}:`, cards);
         } else if (selectedDeckId === 'unassigned_cards') {
-            cards = await FirestoreService.loadUserCardsFromFirestore(userId, null); 
+            // Hiện tại, FirestoreService.loadUserCardsFromFirestore sẽ trả về [] nếu deckId là null.
+            // Logic lọc thẻ không có bộ (unassigned) sẽ nằm ở applyAllFilters dựa trên thuộc tính deckId của thẻ.
+            // Để tải *tất cả* thẻ rồi lọc, chúng ta cần một hàm khác hoặc sửa đổi loadUserCards.
+            // Tạm thời, để 'unassigned_cards' hoạt động, chúng ta sẽ tải tất cả các thẻ từ tất cả các bộ
+            // và sau đó lọc những thẻ không có deckId (hoặc có deckId là null/undefined).
+            // Tuy nhiên, cách tốt hơn là FirestoreService hỗ trợ query này.
+            // Vì FirestoreService hiện tại không hỗ trợ, chúng ta sẽ dựa vào việc activeMasterList chứa tất cả thẻ khi 'all_user_cards' được chọn,
+            // và applyAllFilters sẽ lọc ra thẻ unassigned.
+            // Do đó, khi deckIdToLoad là 'unassigned_cards', chúng ta thực tế nên tải tất cả thẻ.
+            if (Array.isArray(userDecks)) {
+                for (const deck of userDecks) {
+                    const deckCards = await FirestoreService.loadUserCardsFromFirestore(userId, deck.id);
+                    cards.push(...deckCards);
+                }
+            }
+            // Sau đó, trong applyAllFilters, chúng ta sẽ lọc những thẻ không có deckId.
         }
+        // isFavorite đã được xử lý trong FirestoreService.loadUserCardsFromFirestore
         return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false, videoUrl: card.videoUrl || null }));
     }
 
@@ -1438,22 +1490,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         }).filter(m => m);
 
+        const editingCardId = cardIdInput.value;
+        let existingCardData = {};
+        if (editingCardId) {
+            // Lấy dữ liệu thẻ hiện tại để giữ lại isFavorite nếu không thay đổi
+            const currentCardInList = window.currentData.find(c => c.id === editingCardId && c.isUserCard);
+            if (currentCardInList) {
+                existingCardData.isFavorite = currentCardInList.isFavorite || false;
+            }
+        }
+
+
         const cardDataToSave = {
+            ...existingCardData, // Giữ lại isFavorite nếu đang sửa
             pronunciation: cardPronunciationInput.value.trim(),
             meanings: meaningsData,
             generalNotes: cardGeneralNotesInput.value.trim(),
             videoUrl: cardVideoUrlInput.value.trim() || null,
             category: cardCategory,
-            status: 'new',
-            lastReviewed: null,
-            reviewCount: 0,
-            nextReviewDate: serverTimestamp(), 
-            interval: 0,
-            easeFactor: 2.5,
-            repetitions: 0,
-            isSuspended: false,
+            status: editingCardId ? (existingCardData.status || 'new') : 'new', // Giữ status cũ nếu sửa
+            lastReviewed: editingCardId ? existingCardData.lastReviewed : null,
+            reviewCount: editingCardId ? (existingCardData.reviewCount || 0) : 0,
+            nextReviewDate: editingCardId ? existingCardData.nextReviewDate : serverTimestamp(), 
+            interval: editingCardId ? (existingCardData.interval || 0) : 0,
+            easeFactor: editingCardId ? (existingCardData.easeFactor || 2.5) : 2.5,
+            repetitions: editingCardId ? (existingCardData.repetitions || 0) : 0,
+            isSuspended: editingCardId ? (existingCardData.isSuspended || false) : false,
+            // isFavorite sẽ được giữ lại từ existingCardData hoặc mặc định là false bởi FirestoreService nếu tạo mới
             updatedAt: serverTimestamp()
         };
+        
+        if (!editingCardId) { // Nếu là thẻ mới, isFavorite mặc định là false
+            cardDataToSave.isFavorite = false;
+        }
+
+
         if (cardSourceSelect.value === 'user') {
             cardDataToSave.deckId = assignedDeckId || null; 
         }
@@ -1472,7 +1543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cardDataToSave.word = wordValue;
         }
 
-        const editingCardId = cardIdInput.value;
+        
         const deckIdForSave = cardSourceSelect.value === 'user' ? (assignedDeckId || null) : null; 
         
         const savedCardId = await FirestoreService.saveCardToFirestore(userId, deckIdForSave, cardDataToSave, editingCardId);
@@ -1540,60 +1611,126 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function applyAllFilters(fromLoad=false){
         const userId = getCurrentUserId();
-        clearLearningTimer();const cCV=categorySelect.value;const sFCSC=getCategoryState(currentDatasetSource,cCV);let cST=searchInput.value.trim().toLowerCase();if(!fromLoad){if(cCV==='phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms'){ 
-            if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
-                sFCSC.baseVerb=baseVerbSelect.value;
-            } else {
-                sFCSC.baseVerb = 'all'; 
-            }
-            sFCSC.tag=tagSelect.value;
-        }if(currentDatasetSource==='user' && userId)sFCSC.deckId=userDeckSelect.value;sFCSC.filterMarked=filterCardStatusSelect.value;sFCSC.currentIndex=0;}let lTP=[...activeMasterList];if(currentDatasetSource==='user' && userId){const sDI=sFCSC.deckId||userDeckSelect.value;if(sDI&&sDI!=='all_user_cards'){if(sDI==='unassigned_cards')lTP=lTP.filter(i=>!i.deckId);else lTP=lTP.filter(i=>i.deckId===sDI);}}if(currentDatasetSource==='user' && userId)lTP=lTP.filter(i=>i.category===cCV);
-        if(cCV==='phrasalVerbs' || cCV === 'collocations'){ 
-            if(sFCSC.baseVerb&&sFCSC.baseVerb!=='all')lTP=lTP.filter(i=>i.baseVerb===sFCSC.baseVerb);
-        }
-        if(cCV==='phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms'){ 
-            if(sFCSC.tag&&sFCSC.tag!=='all')lTP=lTP.filter(i=>i.tags&&i.tags.includes(sFCSC.tag));
-        }
-        if(cST){lTP=lTP.filter(i=>{const wOP=(i.category==='phrasalVerbs'?i.phrasalVerb:(i.category === 'collocations' ? i.collocation : (i.category === 'idioms' ? i.idiom : i.word)))||'';if(wOP.toLowerCase().includes(cST))return true;if(i.meanings&&i.meanings.some(m=>m.text.toLowerCase().includes(cST)))return true;if(i.meanings){for(const meaning of i.meanings){if(meaning.examples && meaning.examples.some(ex => ex.eng.toLowerCase().includes(cST) || (ex.vie && ex.vie.toLowerCase().includes(cST)) )) return true;}}return false;});}
+        clearLearningTimer();
+        const cCV = categorySelect.value;
+        const sFCSC = getCategoryState(currentDatasetSource, cCV);
+        let cST = searchInput.value.trim().toLowerCase();
 
-        const sFV = sFCSC.filterMarked;
-        if (sFV === 'review_today') {
+        if (!fromLoad) {
+            if (cCV === 'phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms') {
+                if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
+                    sFCSC.baseVerb = baseVerbSelect.value;
+                } else {
+                    sFCSC.baseVerb = 'all';
+                }
+                sFCSC.tag = tagSelect.value;
+            }
+            if (currentDatasetSource === 'user' && userId) {
+                sFCSC.deckId = userDeckSelect.value;
+            }
+            sFCSC.filterMarked = filterCardStatusSelect.value; // Cập nhật filterMarked từ select
+            sFCSC.currentIndex = 0; // Reset index khi filter thay đổi (trừ khi là từ load ban đầu)
+        }
+
+        let lTP = [...activeMasterList];
+
+        if (currentDatasetSource === 'user' && userId) {
+            const sDI = sFCSC.deckId || userDeckSelect.value;
+            if (sDI && sDI !== 'all_user_cards') {
+                if (sDI === 'unassigned_cards') {
+                    lTP = lTP.filter(i => !i.deckId);
+                } else {
+                    lTP = lTP.filter(i => i.deckId === sDI);
+                }
+            }
+            lTP = lTP.filter(i => i.category === cCV); // Lọc theo category cho thẻ người dùng
+        }
+        // Nếu là thẻ web, activeMasterList đã được lọc theo category từ loadVocabularyData
+
+        if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
+            if (sFCSC.baseVerb && sFCSC.baseVerb !== 'all') {
+                lTP = lTP.filter(i => i.baseVerb === sFCSC.baseVerb);
+            }
+        }
+        if (cCV === 'phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms') {
+            if (sFCSC.tag && sFCSC.tag !== 'all') {
+                lTP = lTP.filter(i => i.tags && i.tags.includes(sFCSC.tag));
+            }
+        }
+
+        if (cST) {
+            lTP = lTP.filter(i => {
+                const wOP = (i.category === 'phrasalVerbs' ? i.phrasalVerb : (i.category === 'collocations' ? i.collocation : (i.category === 'idioms' ? i.idiom : i.word))) || '';
+                if (wOP.toLowerCase().includes(cST)) return true;
+                if (i.meanings && i.meanings.some(m => m.text.toLowerCase().includes(cST))) return true;
+                if (i.meanings) {
+                    for (const meaning of i.meanings) {
+                        if (meaning.examples && meaning.examples.some(ex => ex.eng.toLowerCase().includes(cST) || (ex.vie && ex.vie.toLowerCase().includes(cST)))) return true;
+                    }
+                }
+                return false;
+            });
+        }
+
+        // Lọc theo trạng thái yêu thích NẾU được chọn
+        const selectedFilterStatus = sFCSC.filterMarked; // Sử dụng giá trị đã lưu/cập nhật
+        if (selectedFilterStatus === 'favorites') {
+            if (userId) { // Chỉ lọc yêu thích nếu người dùng đăng nhập
+                lTP = lTP.filter(item => item.isFavorite === true);
+            } else {
+                // Nếu không đăng nhập, không thể có thẻ yêu thích, trả về mảng rỗng hoặc thông báo
+                lTP = [];
+                showToast("Vui lòng đăng nhập để xem thẻ yêu thích.", 3000, 'info');
+            }
+            console.log(`Filtered for 'favorites': ${lTP.length} cards`);
+        } else if (selectedFilterStatus === 'review_today') {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const reviewTodayCards = [];
             for (const item of lTP) {
-                if (item.isSuspended) continue; 
-
+                if (item.isSuspended) continue;
                 if (item.nextReviewDate && typeof item.nextReviewDate === 'number') {
                     const reviewDate = new Date(item.nextReviewDate);
-                    reviewDate.setHours(0,0,0,0);
+                    reviewDate.setHours(0, 0, 0, 0);
                     if (reviewDate <= today) {
                         reviewTodayCards.push(item);
                     }
-                } else if (item.status === 'new' && item.nextReviewDate === null) { 
+                } else if ((item.status === 'new' || !item.status) && item.nextReviewDate === null) { // Thẻ mới hoặc chưa có status cũng cần ôn
                     reviewTodayCards.push(item);
                 }
             }
             lTP = reviewTodayCards;
             console.log(`Filtered for 'review_today': ${lTP.length} cards`);
-        } else if (sFV !== 'all_visible') { 
+        } else if (selectedFilterStatus !== 'all_visible') {
             const filteredByStatus = [];
             for (const item of lTP) {
-                if (item.isSuspended && sFV !== 'all_visible') continue; 
+                if (item.isSuspended && selectedFilterStatus !== 'all_visible') continue;
                 const sV = item.status || 'new';
-                if(sFV==='all_study' && (sV==='new'||sV==='learning')) filteredByStatus.push(item);
-                else if(sFV==='new' && sV==='new') filteredByStatus.push(item);
-                else if(sFV==='learning' && sV==='learning') filteredByStatus.push(item);
-                else if(sFV==='learned' && sV==='learned') filteredByStatus.push(item);
+                if (selectedFilterStatus === 'all_study' && (sV === 'new' || sV === 'learning')) filteredByStatus.push(item);
+                else if (selectedFilterStatus === 'new' && sV === 'new') filteredByStatus.push(item);
+                else if (selectedFilterStatus === 'learning' && sV === 'learning') filteredByStatus.push(item);
+                else if (selectedFilterStatus === 'learned' && sV === 'learned') filteredByStatus.push(item);
             }
             lTP = filteredByStatus;
-            console.log(`Filtered by status '${sFV}': ${lTP.length} cards`);
-        } else if (sFV === 'all_visible') { 
-            
+            console.log(`Filtered by status '${selectedFilterStatus}': ${lTP.length} cards`);
         }
+        // Nếu là 'all_visible', không cần lọc thêm theo status, chỉ cần đảm bảo isSuspended được xử lý (đã làm ở trên)
 
 
-        window.currentData=lTP;if(fromLoad){let nI=sFCSC.currentIndex||0;if(window.currentData.length===0)nI=0;else{nI=Math.min(nI,window.currentData.length-1);nI=Math.max(0,nI);}window.currentIndex=nI;}else window.currentIndex=0;sFCSC.currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();window.updateMainHeaderTitle();}
+        window.currentData=lTP;
+        if(fromLoad){
+            let nI=sFCSC.currentIndex||0;
+            if(window.currentData.length===0)nI=0;
+            else{nI=Math.min(nI,window.currentData.length-1);nI=Math.max(0,nI);}
+            window.currentIndex=nI;
+        } else {
+            window.currentIndex=0; // Reset về thẻ đầu tiên khi áp dụng bộ lọc mới (không phải từ load ban đầu)
+        }
+        sFCSC.currentIndex=window.currentIndex; // Lưu lại index
+        saveAppState();
+        window.updateFlashcard();
+        window.updateMainHeaderTitle();
+    }
 
     async function loadVocabularyData (category) {
         const userId = getCurrentUserId();
@@ -1620,7 +1757,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             await loadUserDecks(); 
             userDeckSelect.value = stateForCurrentSourceCategory.deckId || appState.lastSelectedDeckId || 'all_user_cards';
-            activeMasterList = await loadUserCards(userDeckSelect.value);
+            // FirestoreService.loadUserCardsFromFirestore đã bao gồm isFavorite
+            activeMasterList = await loadUserCards(userDeckSelect.value); 
         } else { 
             try {
                 const response = await fetch(`data/${category}.json?v=${new Date().getTime()}`); 
@@ -1631,7 +1769,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const jsonData = await response.json();
                 if (jsonData && jsonData[category] && jsonData[category].length > 0) {
                     let webCards = jsonData[category].map(card => {
-                        
                         let meaningsArray = [];
                         if (Array.isArray(card.meanings)) {
                             meaningsArray = card.meanings.map(m => ({
@@ -1670,7 +1807,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             meanings: meaningsArray,
                             generalNotes: card.generalNotes || card.notes || '', 
                             videoUrl: card.videoUrl || null,
-                            
                             status: 'new',
                             lastReviewed: null,
                             reviewCount: 0,
@@ -1678,18 +1814,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             interval: 0,
                             easeFactor: 2.5,
                             repetitions: 0,
-                            isSuspended: false
+                            isSuspended: false,
+                            isFavorite: false // Mặc định isFavorite cho thẻ web
                         };
                     });
 
-                    
                     if (userId && webCards.length > 0) {
                         const statusPromises = webCards.map(async (card) => {
                             const webId = card.id; 
                             if (webId) {
                                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
                                 if (firestoreStatus) {
-                                    
                                     card.status = firestoreStatus.status || 'new';
                                     card.lastReviewed = firestoreStatus.lastReviewed; 
                                     card.reviewCount = firestoreStatus.reviewCount || 0;
@@ -1699,6 +1834,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     card.repetitions = firestoreStatus.repetitions || 0;
                                     card.isSuspended = firestoreStatus.isSuspended || false;
                                     card.videoUrl = firestoreStatus.videoUrl || card.videoUrl || null; 
+                                    card.isFavorite = firestoreStatus.isFavorite || false; // Lấy isFavorite từ Firestore
                                 }
                             }
                             return card;
@@ -1720,6 +1856,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         isUserCard: false,
                         category: category,
                         status: 'new', lastReviewed: null, reviewCount: 0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false,
+                        isFavorite: false, // Mặc định cho thẻ mẫu
                         videoUrl: card.videoUrl || null
                     }));
                     console.log(`Đã tải dữ liệu mẫu cho '${category}'.`);
@@ -1845,6 +1982,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (item) { 
             addCardToRecentlyViewed(item);
+            // Đảm bảo isFavorite được khởi tạo nếu chưa có (quan trọng cho thẻ web mới tải)
+            if (typeof item.isFavorite === 'undefined') {
+                item.isFavorite = false;
+            }
         }
 
 
@@ -2435,6 +2576,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 repetitions: 0,
                 isSuspended: false,
                 isUserCard: true, 
+                isFavorite: cardJson.isFavorite || false, // Thêm isFavorite từ JSON nếu có
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             };
@@ -2571,6 +2713,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         cardToCopy.easeFactor = 2.5;
         cardToCopy.repetitions = 0;
         cardToCopy.isSuspended = false;
+        cardToCopy.isFavorite = currentCard.isFavorite || false; // Sao chép trạng thái yêu thích
         cardToCopy.videoUrl = currentCard.videoUrl || null;
         cardToCopy.createdAt = serverTimestamp();
         cardToCopy.updatedAt = serverTimestamp();
@@ -2607,7 +2750,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
         let hasActions = false;
-        bottomSheetContent.innerHTML = '';
+        bottomSheetContent.innerHTML = ''; // Xóa nội dung cũ
         const loggedInUserId = getCurrentUserId();
         const isAdmin = loggedInUserId === ADMIN_UID;
         let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "Thẻ"; 
@@ -2621,6 +2764,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (viewType === 'default') {
             bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             
+            // Nút Yêu thích (Thêm vào đầu danh sách tùy chọn)
+            if (loggedInUserId) { // Chỉ hiển thị nút yêu thích nếu đã đăng nhập
+                const favoriteBtnEl = document.createElement('button');
+                favoriteBtnEl.className = 'favorite-btn'; // Class để CSS có thể target
+                updateFavoriteButtonUI(favoriteBtnEl, cardItem.isFavorite || false); // Cập nhật UI ban đầu
+                favoriteBtnEl.onclick = async () => {
+                    await toggleFavoriteStatus(cardItem, favoriteBtnEl);
+                    // Không cần đóng bottom sheet ở đây, người dùng có thể muốn thực hiện hành động khác
+                };
+                bottomSheetContent.appendChild(favoriteBtnEl);
+                hasActions = true;
+            }
+
+
              if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
                 const srsInfoDiv = document.createElement('div');
                 srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
@@ -2669,12 +2826,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const srsResetData = {
                             status: 'new', lastReviewed: serverTimestamp(), reviewCount: 0,
                             nextReviewDate: serverTimestamp(), interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false
+                            // Không reset isFavorite ở đây, để isFavorite độc lập với SRS
                         };
                         let updateSuccess = false;
                         if (cardItem.isUserCard) {
                             updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, srsResetData, cardItem.id);
                         } else {
                             const webCardGlobalId = getCardIdentifier(cardItem);
+                            // Khi reset SRS cho thẻ web, chỉ cập nhật các trường SRS, giữ nguyên isFavorite nếu có
                             if (webCardGlobalId) updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, srsResetData);
                         }
                         if (updateSuccess) {
@@ -2701,7 +2860,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else {
                         const webCardGlobalId = getCardIdentifier(cardItem);
                         if (webCardGlobalId) {
-                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {};
+                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {isFavorite: cardItem.isFavorite || false}; // Giữ lại isFavorite
                             const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
                             for (const key in fullDataToSet) { if (fullDataToSet[key] === undefined) delete fullDataToSet[key]; } 
                             updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, fullDataToSet);
