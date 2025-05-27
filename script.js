@@ -281,12 +281,7 @@ function extractYouTubeVideoId(url) {
 }
 
 function setActiveMediaTab(tabName, cardItem) {
-    if (!bottomSheetContent || !tabBtnYouTube) { 
-        console.error("setActiveMediaTab: Essential DOM elements not found.");
-        return;
-    }
-
-    const youtubeContentDiv = document.getElementById('youtube-tab-content'); 
+    const youtubeContentDiv = document.getElementById('youtube-tab-content');
     let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
 
     if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
@@ -1762,7 +1757,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!fromLoad) { 
             if (cCV === 'phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms') {
                 if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
-                    // Không cập nhật sFCSC.baseVerb ở đây nữa, vì nó sẽ được xử lý bởi handleBaseVerbFilterChange
+                    sFCSC.baseVerb = baseVerbSelect.value;
+                } else {
+                    sFCSC.baseVerb = 'all';
                 }
                 sFCSC.tag = tagSelect.value;
             }
@@ -1787,15 +1784,11 @@ document.addEventListener('DOMContentLoaded', async () => {
              lTP = lTP.filter(i => i.category === cCV);
         }
         
-        // Lọc theo baseVerb (chỉ áp dụng nếu không có cụm từ cụ thể nào được chọn từ BottomSheet)
-        // Nếu searchInput có giá trị (tức là người dùng đã chọn cụm từ cụ thể từ BottomSheet hoặc tự tìm kiếm),
-        // thì không cần lọc theo baseVerb nữa, vì tìm kiếm sẽ cụ thể hơn.
-        if (!cST && (cCV === 'phrasalVerbs' || cCV === 'collocations')) {
+        if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
             if (sFCSC.baseVerb && sFCSC.baseVerb !== 'all') {
                 lTP = lTP.filter(i => i.baseVerb === sFCSC.baseVerb);
             }
         }
-
         if (cCV === 'phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms') {
             if (sFCSC.tag && sFCSC.tag !== 'all') {
                 lTP = lTP.filter(i => i.tags && i.tags.includes(sFCSC.tag));
@@ -1822,6 +1815,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selectedFilterValue === 'all_visible') {
             // No further filtering by SRS status or suspension; shows all cards that passed previous filters.
         } else {
+            // For all other filters, exclude suspended cards first.
             lTP = lTP.filter(item => !(item.isSuspended === true));
 
             if (selectedFilterValue === 'favorites') {
@@ -1844,7 +1838,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (['new', 'learning', 'learned'].includes(selectedFilterValue)) {
                 lTP = lTP.filter(item => (item.status || 'new') === selectedFilterValue);
             } else if (selectedFilterValue === 'all_active') {
-                // Already filtered out suspended cards.
+                // Already filtered out suspended cards. 'all_active' includes 'new', 'learning', 'learned'.
             }
         }
         console.log(`Filtered list length for '${selectedFilterValue}': ${lTP.length} cards`);
@@ -2907,18 +2901,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     Array.from(filterCardStatusSelect.options).forEach(option => {
                         if (option.disabled) { 
                             const divider = document.createElement('div');
-                            divider.className = 'status-filter-divider'; // Sử dụng class mới
+                            divider.className = 'text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider py-2 px-1 font-medium';
                             divider.textContent = option.textContent;
                             bottomSheetContent.appendChild(divider);
                         } else {
                             const filterButton = document.createElement('button');
-                            filterButton.className = 'status-filter-button'; // Sử dụng class mới
                             filterButton.innerHTML = `<i class="fas fa-check w-5 mr-3 text-transparent"></i> <span class="flex-grow">${option.textContent}</span>`;
                             filterButton.title = option.title || option.textContent;
+                            filterButton.classList.add('flex', 'items-center', 'w-full', 'text-left', 'py-2.5', 'px-4', 'hover:bg-slate-100', 'dark:hover:bg-slate-700', 'rounded-md', 'transition-colors');
                             
                             if (filterCardStatusSelect.value === option.value) {
-                                filterButton.classList.add('selected'); // Class để style nút được chọn
                                 filterButton.querySelector('i').classList.replace('text-transparent', 'text-indigo-500');
+                                filterButton.querySelector('span').classList.add('font-semibold', 'text-indigo-600', 'dark:text-indigo-400');
+                            } else {
+                                filterButton.querySelector('span').classList.add('text-slate-700', 'dark:text-slate-200');
                             }
 
                             filterButton.onclick = () => {
