@@ -233,7 +233,7 @@ body {
 .additional-action-btn:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-#action-btn-media { /* ID của nút "Nghe/Xem" (trước là action-btn-youglish) */
+#action-btn-media { 
     background-color: #ecfdf5;
     color: #059669;
     border: 1px solid #a7f3d0;
@@ -287,7 +287,7 @@ body {
 /* CSS cho các chế độ đặc biệt của Bottom Sheet */
 #bottom-sheet.bottom-sheet-notes-mode,
 #bottom-sheet.bottom-sheet-media-mode {
-    height: 75vh; /* Khôi phục chiều cao vừa phải */
+    height: 75vh; 
     max-height: 75vh;
     padding: 0.5rem;
 }
@@ -304,13 +304,13 @@ body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    padding: 0; /* Bỏ padding ở đây để tab content tự quản lý */
+    padding: 0; 
     overflow: hidden;
 }
 
 /* CSS cho Tabs trong Bottom Sheet */
 #bottom-sheet-tabs {
-    display: flex; /* Sẽ được JS bật lên khi cần */
+    display: flex; 
     border-bottom: 1px solid #e5e7eb;
     margin-bottom: 0.75rem;
 }
@@ -367,7 +367,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-grow: 1; /* Cho phép co giãn nếu cần, nhưng aspect-ratio sẽ ưu tiên */
+    flex-grow: 1; 
     overflow: hidden;
     position: relative;
 }
@@ -390,7 +390,7 @@ body {
 #bottom-sheet.bottom-sheet-notes-mode #bottom-sheet-notes-textarea {
     flex-grow: 1;
     min-height: 150px;
-    max-height: calc(100% - 4rem); /* Trừ đi khoảng trống cho nút Lưu */
+    max-height: calc(100% - 4rem); 
 }
 
 #notes-display {
@@ -447,4 +447,21 @@ body {
     padding: 0.125rem 0.375rem; /* px-1.5 py-0.5 */
     border-radius: 0.25rem; /* rounded-sm */
     white-space: nowrap;
+}
+
+/* CSS cho nút Yêu thích (trong Bottom Sheet) */
+.favorite-btn i.fas.fa-star { /* Biểu tượng ngôi sao đầy (đã yêu thích) */
+    color: #facc15; /* Tailwind yellow-400 */
+}
+.favorite-btn i.far.fa-star { /* Biểu tượng ngôi sao rỗng (chưa yêu thích) */
+    color: #6b7280; /* Tailwind gray-500 */
+}
+.dark .favorite-btn i.far.fa-star {
+    color: #9ca3af; /* Tailwind gray-400 */
+}
+.favorite-btn.favorited i.far.fa-star { /* Ẩn ngôi sao rỗng khi đã yêu thích */
+    display: none;
+}
+.favorite-btn:not(.favorited) i.fas.fa-star { /* Ẩn ngôi sao đầy khi chưa yêu thích */
+    display: none;
 }
