@@ -80,12 +80,15 @@
             <div>
                 <label for="filter-card-status" class="block text-sm font-medium text-slate-600 mb-1">Hiển thị thẻ:</label>
                 <select id="filter-card-status" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="all_study">Mới & Đang học</option>
-                    <option value="review_today">Cần ôn tập hôm nay</option>
-                    <option value="favorites">Chỉ Thẻ yêu thích</option> <option value="all_visible">Tất cả</option>
-                    <option value="new">Chỉ Mới</option>
-                    <option value="learning">Chỉ Đang học</option>
-                    <option value="learned">Chỉ Đã thuộc</option>
+                    <option value="all_active" title="Hiển thị tất cả thẻ Mới, Đang học và Đã thuộc (không bao gồm thẻ tạm ngưng)">Tất cả thẻ hoạt động</option>
+                    <option value="review_today" title="Các thẻ cần ôn tập trong ngày hôm nay">Cần ôn tập hôm nay</option>
+                    <option value="favorites" title="Chỉ hiển thị các thẻ bạn đã đánh dấu yêu thích (không bao gồm thẻ tạm ngưng)">Thẻ yêu thích</option>
+                    <option disabled>--- Trạng thái học (SRS) ---</option>
+                    <option value="new" title="Các thẻ bạn chưa ôn tập lần nào">Thẻ mới (chưa ôn)</option>
+                    <option value="learning" title="Các thẻ bạn đang trong quá trình học và cần lặp lại">Thẻ đang ôn luyện</option>
+                    <option value="learned" title="Các thẻ bạn đã nắm vững và ít cần ôn lại hơn">Thẻ đã nắm vững</option>
+                    <option disabled>--- Khác ---</option>
+                    <option value="all_visible" title="Hiển thị tất cả các thẻ, bao gồm cả những thẻ đang bị tạm ngưng ôn tập">Tất cả (gồm cả tạm ngưng)</option>
                 </select>
             </div>
         </section>
