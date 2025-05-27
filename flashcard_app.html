@@ -63,14 +63,7 @@
                     <i class="fas fa-plus mr-2"></i>Thêm thẻ mới
                 </button>
             </div>
-
-            <div class="control-group mt-4 pt-4 border-t border-slate-200">
-                <h3 class="text-md font-semibold text-slate-600 mb-2">Xem Gần Đây</h3>
-                <ul id="recently-viewed-list" class="space-y-1 max-h-60 overflow-y-auto text-sm">
-                    <li id="no-recent-cards-message" class="text-slate-500 italic p-1">Chưa có thẻ nào được xem gần đây.</li>
-                </ul>
-            </div>
-            <div class="control-group category-selection mt-4 pt-4 border-t border-slate-200">
+            <div class="control-group category-selection">
                 <label for="category" class="block text-sm font-medium text-slate-600 mb-1">Chọn loại từ:</label>
                 <select id="category" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="verbs">Động từ</option>
@@ -78,8 +71,7 @@
                     <option value="nouns">Danh từ</option>
                     <option value="phrasalVerbs">Cụm động từ</option>
                     <option value="collocations">Collocations</option>
-                    <option value="idioms">Thành ngữ (Idioms)</option>
-                </select>
+                    <option value="idioms">Thành ngữ (Idioms)</option> </select>
             </div>
             <div id="base-verb-filter-container" style="display:none;"><label for="base-verb-filter" class="block text-sm font-medium text-slate-600 mb-1">Lọc theo từ gốc:</label><select id="base-verb-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"></select></div>
             <div id="tag-filter-container" style="display:none;"><label for="tags" class="block text-sm font-medium text-slate-600 mb-1">Lọc theo chủ đề:</label><select id="tags" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"></select></div>
