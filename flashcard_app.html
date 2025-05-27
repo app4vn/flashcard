@@ -77,8 +77,9 @@
             <div id="base-verb-filter-container" style="display:none;"><label for="base-verb-filter" class="block text-sm font-medium text-slate-600 mb-1">Lọc theo từ gốc:</label><select id="base-verb-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"></select></div>
             <div id="tag-filter-container" style="display:none;"><label for="tags" class="block text-sm font-medium text-slate-600 mb-1">Lọc theo chủ đề:</label><select id="tags" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"></select></div>
             <div><label for="practice-type-select" class="block text-sm font-medium text-slate-600 mb-1">Chế độ Luyện tập:</label><select id="practice-type-select" class="w-full p-2 border border-slate-300 rounded-md shadow-sm"><option value="off">Tắt</option><option value="meaning_quiz">Chọn Nghĩa</option><option value="word_quiz">Chọn Từ</option><option value="typing_practice">Gõ Từ</option></select></div>
-            <div>
-                <label for="filter-card-status" class="block text-sm font-medium text-slate-600 mb-1">Hiển thị thẻ:</label>
+            
+            <div style="display: none;"> 
+                <label for="filter-card-status" class="block text-sm font-medium text-slate-600 mb-1">Hiển thị thẻ (ẩn):</label>
                 <select id="filter-card-status" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="all_active" title="Hiển thị tất cả thẻ Mới, Đang học và Đã thuộc (không bao gồm thẻ tạm ngưng)">Tất cả thẻ hoạt động</option>
                     <option value="review_today" title="Các thẻ cần ôn tập trong ngày hôm nay">Cần ôn tập hôm nay</option>
@@ -107,11 +108,14 @@
 
     <main class="container mx-auto p-4 sm:p-6 flex-grow w-full max-w-2xl flex flex-col items-center">
         <section class="search-filter-main-container w-full mb-4">
-            <div class="control-group bg-white p-3 rounded-lg shadow">
-                <div class="relative">
+            <div class="control-group bg-white p-3 rounded-lg shadow flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 items-center">
+                <div class="relative flex-grow w-full">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-slate-400"></i></div>
                     <input type="search" id="search-input" placeholder="Nhập từ tiếng Anh..." class="w-full p-3 pl-10 pr-8 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
+                <button id="open-status-filter-btn" title="Lọc thẻ theo trạng thái" class="p-3 text-slate-600 hover:bg-slate-200 rounded-md border border-slate-300 transition-colors duration-150 w-full sm:w-auto">
+                    <i class="fas fa-filter mr-0 sm:mr-2"></i>
+                    <span class="sm:hidden ml-2">Lọc trạng thái</span> </button>
             </div>
         </section>
         <section id="practice-area" class="w-full mb-4" style="display:none;">
