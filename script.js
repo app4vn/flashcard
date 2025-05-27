@@ -243,6 +243,40 @@ function handleTouchEnd(event) {
     touchEndY = 0;
 }
 // --- END: Swipe Handler Functions ---
+
+// --- START: Single Card Practice Functions (Moved to Module Scope) ---
+function startSingleCardPractice(cardItem, practiceMode) {
+    if (!cardItem) return;
+    console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}, Mode: ${practiceMode}`); 
+
+    isSingleCardPracticeMode = true;
+    originalCurrentData = [...window.currentData]; 
+    originalCurrentIndex = window.currentIndex;
+
+    window.currentData = [cardItem]; 
+    window.currentIndex = 0;
+
+    practiceType = practiceMode; 
+
+    updateFlashcard(); 
+    showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}`, 3000); 
+}
+
+function exitSingleCardPractice() {
+    if (!isSingleCardPracticeMode) return;
+    console.log("Exiting single card practice mode.");
+
+    isSingleCardPracticeMode = false;
+    window.currentData = [...originalCurrentData]; 
+    window.currentIndex = originalCurrentIndex; 
+
+    practiceType = 'off'; 
+    if (practiceTypeSelect) practiceTypeSelect.value = 'off'; 
+
+    updateFlashcard(); 
+    showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
+}
+// --- END: Single Card Practice Functions ---
 // --- END: Utility Functions ---
 
 
@@ -869,7 +903,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     bottomSheetOverlay = document.getElementById('bottom-sheet-overlay');
     bottomSheet = document.getElementById('bottom-sheet');
     bottomSheetTitle = document.getElementById('bottom-sheet-title');
-    closeBottomSheetBtn = document.getElementById('close-bottom-sheet-btn'); // Đã được gán ở trên
+    closeBottomSheetBtn = document.getElementById('close-bottom-sheet-btn'); 
     bottomSheetContent = document.getElementById('bottom-sheet-content');
     cardOptionsMenuBtn = document.getElementById('card-options-menu-btn');
     cardOptionsMenuBtnBack = document.getElementById('card-options-menu-btn-back');
@@ -3356,7 +3390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const initialCategory = appState.lastSelectedCategory || 'phrasalVerbs';
         const initialSource = appState.lastSelectedSource || 'web';
         const initialCategoryState = getCategoryState(initialSource, initialCategory);
-        if(filterCardStatusSelect) { // Đặt giá trị cho select ẩn
+        if(filterCardStatusSelect) { 
             filterCardStatusSelect.value = initialCategoryState.filterMarked || defaultCategoryState.filterMarked;
         }
         
@@ -3369,7 +3403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(categorySelect) categorySelect.value = initialCategory;
 
         const finalCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
-        if(filterCardStatusSelect) { // Cập nhật lại select ẩn nếu category/source thay đổi do URL
+        if(filterCardStatusSelect) { 
             filterCardStatusSelect.value = finalCategoryState.filterMarked;
         }
 
