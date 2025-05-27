@@ -400,38 +400,3 @@ body {
     line-height: 1.5;
     color: #e0f2fe;
 }
-
-/* Styles for Recently Viewed List in Sidebar */
-#recently-viewed-list .recent-card-item {
-    padding: 0.4rem 0.6rem;
-    cursor: pointer;
-    border-radius: 0.375rem; /* rounded-md */
-    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #374151; /* slate-700 */
-}
-
-#recently-viewed-list .recent-card-item:hover {
-    background-color: #eef2ff; /* indigo-50 */
-    color: #4338ca; /* indigo-700 */
-}
-
-#recently-viewed-list .recent-card-term {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-grow: 1;
-}
-
-#recently-viewed-list .recent-card-meta {
-    font-size: 0.8em; /* Nhỏ hơn term chính */
-    color: #6b7280; /* slate-500 */
-    margin-left: 0.5rem;
-    flex-shrink: 0; /* Không cho meta co lại */
-}
-
-#recently-viewed-list .recent-card-item:hover .recent-card-meta {
-    color: #4f46e5; /* indigo-600 on hover to match text color */
-}
