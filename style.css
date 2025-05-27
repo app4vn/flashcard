@@ -180,7 +180,7 @@ body {
 #bottom-sheet.active {
     transform: translateY(0);
 }
-#bottom-sheet-content button:not(.bottom-sheet-tab-btn):not(.status-filter-button) { /* Loại trừ status-filter-button khỏi style chung này */
+#bottom-sheet-content button:not(.bottom-sheet-tab-btn):not(.status-filter-button) { 
     display: flex;
     align-items: center;
     width: 100%;
@@ -203,53 +203,52 @@ body {
 
 /* CSS cho các nút lọc trạng thái thẻ trong Bottom Sheet */
 .status-filter-button {
-    display: flex !important; /* Đảm bảo display flex */
-    align-items: center !important; /* Căn giữa theo chiều dọc */
+    display: flex !important; 
+    align-items: center !important; 
     width: 100% !important;
-    font-size: 0.875rem !important; /* 14px */
-    padding: 0.6rem 0.75rem !important; /* Giảm padding: py-2.5 (0.625rem) px-3 (0.75rem) */
+    font-size: 0.8rem !important; /* Giảm kích thước chữ (khoảng 12.8px) */
+    padding: 0.4rem 0.6rem !important; /* Giảm padding đáng kể */
     text-align: left !important;
-    border-radius: 0.375rem !important; /* rounded-md */
+    border-radius: 0.375rem !important; 
     transition: background-color 0.15s ease-in-out !important;
-    margin-bottom: 0.25rem !important; /* Thêm khoảng cách nhỏ giữa các nút */
+    margin-bottom: 0.15rem !important; /* Giảm khoảng cách dưới */
 }
 .status-filter-button:hover {
-    background-color: #f0f9ff !important; /* Tailwind sky-50 */
+    background-color: #f0f9ff !important; 
 }
 .dark .status-filter-button:hover {
-    background-color: #374151 !important; /* Tailwind slate-700 */
+    background-color: #374151 !important; 
 }
 .status-filter-button i.fa-check {
-    width: 1rem !important; 
-    margin-right: 0.6rem !important; /* Điều chỉnh khoảng cách icon và text */
+    width: 0.8rem !important; /* Điều chỉnh kích thước icon check */
+    margin-right: 0.4rem !important; 
     text-align: center !important;
 }
-.status-filter-button span.flex-grow { /* Đảm bảo text chiếm không gian còn lại */
+.status-filter-button span.flex-grow { 
     flex-grow: 1;
 }
 
-/* Style cho nút được chọn */
 .status-filter-button.selected i.fa-check {
-    color: #4f46e5 !important; /* Tailwind indigo-600 */
+    color: #4f46e5 !important; 
 }
 .dark .status-filter-button.selected i.fa-check {
-    color: #818cf8 !important; /* Tailwind indigo-400 */
+    color: #818cf8 !important; 
 }
 .status-filter-button.selected span.flex-grow {
-    font-weight: 600 !important; /* Tailwind font-semibold */
+    font-weight: 600 !important; 
     color: #4f46e5 !important;
 }
 .dark .status-filter-button.selected span.flex-grow {
-    color: #a5b4fc !important; /* Tailwind indigo-300 */
+    color: #a5b4fc !important; 
 }
 
 
 .status-filter-divider { 
-    font-size: 0.65rem; /* 10.4px - nhỏ hơn nữa */
+    font-size: 0.6rem !important; /* Giảm kích thước chữ (khoảng 9.6px) */
     color: #9ca3af; 
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 0.6rem 0.75rem 0.15rem !important; /* Giảm padding */
+    padding: 0.4rem 0.6rem 0.1rem !important; /* Giảm padding */
     font-weight: 500; 
 }
 .dark .status-filter-divider {
