@@ -87,12 +87,13 @@ let isSingleCardPracticeMode = false;
 let originalCurrentData = [];
 let originalCurrentIndex = 0;
 
+// Biến cho chức năng vuốt thẻ (được sử dụng bởi các hàm xử lý swipe)
 let touchStartX = 0;
 let touchEndX = 0;
 let touchStartY = 0;
 let touchEndY = 0;
-const swipeThreshold = 50;
-const swipeMaxVerticalOffset = 75;
+const swipeThreshold = 50; // Ngưỡng vuốt (pixel)
+const swipeMaxVerticalOffset = 75; // Độ lệch dọc tối đa cho phép khi vuốt ngang
 
 let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
@@ -141,6 +142,7 @@ let appState = JSON.parse(JSON.stringify(defaultAppState));
 const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; 
 
 
+// --- START: Utility Functions (Moved outside DOMContentLoaded) ---
 function generateUniqueId(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`;
 }
@@ -177,6 +179,71 @@ function closeSidebar(){
     if (filterSidebar) filterSidebar.classList.remove('translate-x-0');
     if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
 }
+
+function closeBottomSheet() {
+    if (!bottomSheet || !bottomSheetOverlay) return;
+    bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
+    bottomSheetOverlay.classList.remove('active');
+    bottomSheet.style.paddingBottom = ''; 
+    if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
+
+    setTimeout(() => {
+        bottomSheet.classList.add('translate-y-full');
+        bottomSheetOverlay.classList.add('hidden');
+        const videoIframe = bottomSheetContent.querySelector('iframe');
+        if (videoIframe) {
+            videoIframe.src = ''; 
+        }
+        bottomSheetContent.innerHTML = ''; 
+    }, 300); 
+}
+
+// --- START: Swipe Handler Functions (Moved to Module Scope) ---
+function handleTouchStart(event) {
+    if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+        return;
+    }
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+    touchEndX = touchStartX; 
+    touchEndY = touchStartY;
+}
+
+function handleTouchMove(event) {
+    if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+        return;
+    }
+    touchEndX = event.touches[0].clientX;
+    touchEndY = event.touches[0].clientY;
+}
+
+function handleTouchEnd(event) {
+    if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+        return;
+    }
+
+    const horizontalDiff = touchEndX - touchStartX;
+    const verticalDiff = touchEndY - touchStartY;
+
+    if (Math.abs(horizontalDiff) > Math.abs(verticalDiff) && Math.abs(horizontalDiff) > swipeThreshold) {
+        event.preventDefault(); 
+        if (horizontalDiff > 0) { 
+            if (prevBtn && !prevBtn.disabled) {
+                prevBtn.click();
+            }
+        } else { 
+            if (nextBtn && !nextBtn.disabled) {
+                nextBtn.click();
+            }
+        }
+    }
+    touchStartX = 0;
+    touchEndX = 0;
+    touchStartY = 0;
+    touchEndY = 0;
+}
+// --- END: Swipe Handler Functions ---
+// --- END: Utility Functions ---
 
 
 async function loadAppState() {
@@ -734,8 +801,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     practiceArea = document.getElementById('practice-area');
     multipleChoiceOptionsContainer = document.getElementById('multiple-choice-options');
     feedbackMessage = document.getElementById('feedback-message');
-    filterCardStatusSelect = document.getElementById('filter-card-status'); // Thẻ select ẩn
-    openStatusFilterBtn = document.getElementById('open-status-filter-btn'); // Nút icon mới
+    filterCardStatusSelect = document.getElementById('filter-card-status'); 
+    openStatusFilterBtn = document.getElementById('open-status-filter-btn'); 
     btnSrsAgain = document.getElementById('btn-srs-again');
     btnSrsHard = document.getElementById('btn-srs-hard');
     btnSrsGood = document.getElementById('btn-srs-good');
@@ -802,7 +869,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     bottomSheetOverlay = document.getElementById('bottom-sheet-overlay');
     bottomSheet = document.getElementById('bottom-sheet');
     bottomSheetTitle = document.getElementById('bottom-sheet-title');
-    closeBottomSheetBtn = document.getElementById('close-bottom-sheet-btn');
+    closeBottomSheetBtn = document.getElementById('close-bottom-sheet-btn'); // Đã được gán ở trên
     bottomSheetContent = document.getElementById('bottom-sheet-content');
     cardOptionsMenuBtn = document.getElementById('card-options-menu-btn');
     cardOptionsMenuBtnBack = document.getElementById('card-options-menu-btn-back');
@@ -817,6 +884,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     tabBtnYouTube = document.getElementById('tab-btn-youtube');
     flipIconFront = document.getElementById('flip-icon-front');
     flipIconBack = document.getElementById('flip-icon-back');
+    cardFrontElement = flashcardElement.querySelector('.card-front');
     recentlyViewedListElement = document.getElementById('recently-viewed-list'); 
     noRecentCardsMessageElement = document.getElementById('no-recent-cards-message'); 
 
@@ -2749,7 +2817,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             bottomSheetContent.appendChild(divider);
                         } else {
                             const filterButton = document.createElement('button');
-                            // Thêm icon check và text, icon ban đầu ẩn (hoặc có màu nhạt)
                             filterButton.innerHTML = `<i class="fas fa-check w-5 mr-3 text-transparent"></i> <span class="flex-grow">${option.textContent}</span>`;
                             filterButton.title = option.title || option.textContent;
                             filterButton.classList.add('flex', 'items-center', 'w-full', 'text-left', 'py-2.5', 'px-4', 'hover:bg-slate-100', 'dark:hover:bg-slate-700', 'rounded-md', 'transition-colors');
@@ -2764,7 +2831,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             filterButton.onclick = () => {
                                 filterCardStatusSelect.value = option.value;
                                 applyAllFilters(false);
-                                closeBottomSheet();
+                                closeBottomSheet(); // Đóng Bottom Sheet sau khi chọn
                             };
                             bottomSheetContent.appendChild(filterButton);
                         }
@@ -2894,8 +2961,69 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
                 bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
                 FirestoreService.getLectureContent(cardLectureId)
-                    .then(lectureData => { /* ... (như trước) ... */ })
-                    .catch(error => { /* ... (như trước) ... */ });
+                    .then(lectureData => { 
+                        if (isAdmin) {
+                            bottomSheetContent.innerHTML = ''; 
+                            const titleLabel = document.createElement('label');
+                            titleLabel.htmlFor = 'lecture-title-input';
+                            titleLabel.textContent = 'Tiêu đề Bài giảng:';
+                            titleLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                            bottomSheetContent.appendChild(titleLabel);
+                            const titleInput = document.createElement('input');
+                            titleInput.type = 'text';
+                            titleInput.id = 'lecture-title-input';
+                            titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
+                            titleInput.value = lectureData?.title || `${lectureTitlePrefix}${cardTerm}`;
+                            bottomSheetContent.appendChild(titleInput);
+                            const contentLabel = document.createElement('label');
+                            contentLabel.htmlFor = 'lecture-content-html-input';
+                            contentLabel.textContent = 'Nội dung HTML Bài giảng:';
+                            contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                            bottomSheetContent.appendChild(contentLabel);
+                            const contentTextarea = document.createElement('textarea');
+                            contentTextarea.id = 'lecture-content-html-input';
+                            contentTextarea.rows = 15;
+                            contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]';
+                            contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
+                            contentTextarea.value = lectureData?.contentHTML || '';
+                            bottomSheetContent.appendChild(contentTextarea);
+                            const saveLectureBtn = document.createElement('button');
+                            saveLectureBtn.id = 'save-lecture-btn';
+                            saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                            saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
+                            saveLectureBtn.onclick = async () => {
+                                const newTitle = titleInput.value.trim();
+                                const newContentHTML = contentTextarea.value; 
+                                if (!newTitle) {
+                                    alert("Tiêu đề bài giảng không được để trống.");
+                                    return;
+                                }
+                                saveLectureBtn.disabled = true;
+                                saveLectureBtn.textContent = 'Đang lưu...';
+                                const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
+                                if (success) {
+                                    showToast("Đã lưu bài giảng!", 2000, 'success');
+                                    closeBottomSheet();
+                                } else {
+                                    showToast("Lỗi: Không thể lưu bài giảng.", 3000, 'error');
+                                }
+                                saveLectureBtn.disabled = false;
+                                saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                            };
+                            bottomSheetContent.appendChild(saveLectureBtn);
+                        } else { 
+                            if (lectureData && lectureData.contentHTML) {
+                                bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
+                                bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
+                            } else {
+                                bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
+                            }
+                        }
+                    })
+                    .catch(error => { 
+                        console.error("Lỗi khi tải bài giảng:", error);
+                        bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
+                    });
                 break;
             case 'media':
                 bottomSheet.classList.add('bottom-sheet-media-mode');
@@ -3150,8 +3278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>applyAllFilters(false));
         if(tagSelect) tagSelect.addEventListener('change', ()=>applyAllFilters(false));
         if(searchInput) searchInput.addEventListener('input', ()=>applyAllFilters(false));
-        // filterCardStatusSelect không còn event listener trực tiếp nữa,
-        // thay vào đó, các nút trong Bottom Sheet sẽ cập nhật giá trị của nó và gọi applyAllFilters.
+        // Không cần event listener cho filterCardStatusSelect nữa vì nó được điều khiển qua BottomSheet
 
         if(flipBtn) flipBtn.addEventListener('click', ()=>{
             if(practiceType==="off" && window.currentData.length>0) {
@@ -3226,12 +3353,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function setupInitialCategoryAndSource() {
         await loadAppState();
         
-        // Đặt giá trị cho filterCardStatusSelect từ appState sau khi loadAppState
-        // và trước khi gọi loadVocabularyData (vì loadVocabularyData có thể gọi applyAllFilters)
         const initialCategory = appState.lastSelectedCategory || 'phrasalVerbs';
         const initialSource = appState.lastSelectedSource || 'web';
         const initialCategoryState = getCategoryState(initialSource, initialCategory);
-        if(filterCardStatusSelect) {
+        if(filterCardStatusSelect) { // Đặt giá trị cho select ẩn
             filterCardStatusSelect.value = initialCategoryState.filterMarked || defaultCategoryState.filterMarked;
         }
         
@@ -3243,9 +3368,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(cardSourceSelect) cardSourceSelect.value = currentDatasetSource;
         if(categorySelect) categorySelect.value = initialCategory;
 
-        // Đảm bảo filterCardStatusSelect được cập nhật một lần nữa nếu category/source thay đổi do URL params
         const finalCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
-        if(filterCardStatusSelect) filterCardStatusSelect.value = finalCategoryState.filterMarked;
+        if(filterCardStatusSelect) { // Cập nhật lại select ẩn nếu category/source thay đổi do URL
+            filterCardStatusSelect.value = finalCategoryState.filterMarked;
+        }
 
         await loadVocabularyData(categorySelect.value); 
     }
