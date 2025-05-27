@@ -36,8 +36,8 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     nextBtn, currentCardIndexDisplay, totalCardsDisplay, speakerBtn, speakerExampleBtn,
     tagFilterContainer, tagSelect, searchInput, baseVerbFilterContainer, baseVerbSelect,
     practiceTypeSelect, practiceArea, multipleChoiceOptionsContainer, feedbackMessage,
-    filterCardStatusSelect, // Đây là thẻ <select> ẩn đi, dùng để lưu trữ giá trị bộ lọc
-    openStatusFilterBtn,    // Nút icon mới để mở bộ lọc trạng thái thẻ
+    filterCardStatusSelect, 
+    openStatusFilterBtn,    
     btnSrsAgain, btnSrsHard, btnSrsGood, btnSrsEasy,
     hamburgerMenuBtn, filterSidebar, closeSidebarBtn, sidebarOverlay, tagsDisplayFront,
     typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn,
@@ -87,13 +87,12 @@ let isSingleCardPracticeMode = false;
 let originalCurrentData = [];
 let originalCurrentIndex = 0;
 
-// Biến cho chức năng vuốt thẻ (được sử dụng bởi các hàm xử lý swipe)
 let touchStartX = 0;
 let touchEndX = 0;
 let touchStartY = 0;
 let touchEndY = 0;
-const swipeThreshold = 50; // Ngưỡng vuốt (pixel)
-const swipeMaxVerticalOffset = 75; // Độ lệch dọc tối đa cho phép khi vuốt ngang
+const swipeThreshold = 50; 
+const swipeMaxVerticalOffset = 75; 
 
 let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
@@ -198,7 +197,6 @@ function closeBottomSheet() {
     }, 300); 
 }
 
-// --- START: Swipe Handler Functions (Moved to Module Scope) ---
 function handleTouchStart(event) {
     if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
         return;
@@ -242,9 +240,7 @@ function handleTouchEnd(event) {
     touchStartY = 0;
     touchEndY = 0;
 }
-// --- END: Swipe Handler Functions ---
 
-// --- START: Single Card Practice Functions (Moved to Module Scope) ---
 function startSingleCardPractice(cardItem, practiceMode) {
     if (!cardItem) return;
     console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}, Mode: ${practiceMode}`); 
@@ -276,7 +272,66 @@ function exitSingleCardPractice() {
     updateFlashcard(); 
     showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
 }
-// --- END: Single Card Practice Functions ---
+
+function extractYouTubeVideoId(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2] && match[2].length === 11) ? match[2] : null;
+}
+
+function setActiveMediaTab(tabName, cardItem) {
+    const youtubeContentDiv = document.getElementById('youtube-tab-content');
+    let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
+
+    if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
+    if (tabBtnYouTube) tabBtnYouTube.classList.remove('active'); 
+
+    if (tabName === 'youtube_custom') {
+        if (youtubeContentDiv) {
+            youtubeContentDiv.classList.remove('hidden'); 
+            youtubeContentDiv.innerHTML = ''; 
+
+            if (cardItem.videoUrl) {
+                const videoId = extractYouTubeVideoId(cardItem.videoUrl);
+                if (videoId) {
+                    const iframeContainer = document.createElement('div');
+                    iframeContainer.className = 'video-iframe-container w-full'; 
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                    iframe.title = "YouTube video player";
+                    iframe.frameBorder = "0";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                    iframe.allowFullscreen = true;
+                    iframeContainer.appendChild(iframe);
+                    youtubeContentDiv.appendChild(iframeContainer);
+                } else {
+                    youtubeContentDiv.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video YouTube không hợp lệ.</p>';
+                }
+            } else {
+                 const searchButtonContainer = document.createElement('div');
+                 searchButtonContainer.className = 'p-4 text-center';
+
+                 const pMessage = document.createElement('p');
+                 pMessage.className = 'text-slate-500 dark:text-slate-400 mb-3';
+                 pMessage.textContent = 'Chưa có video YouTube nào được gán. Bạn có thể thêm link khi sửa thẻ, hoặc:';
+                 searchButtonContainer.appendChild(pMessage);
+
+                 const searchButton = document.createElement('button');
+                 searchButton.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm flex items-center justify-center mx-auto';
+                 const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
+                 const youtubeSearchTerm = `học từ ${baseSearchTerm}`; 
+                 searchButton.innerHTML = `<i class="fab fa-youtube mr-2"></i> Tìm trên YouTube với từ khóa "${baseSearchTerm}"`;
+                 searchButton.onclick = () => {
+                     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank');
+                 };
+                 searchButtonContainer.appendChild(searchButton);
+                 youtubeContentDiv.appendChild(searchButtonContainer);
+            }
+        }
+        if (tabBtnYouTube) tabBtnYouTube.classList.add('active'); 
+    }
+}
 // --- END: Utility Functions ---
 
 
@@ -2865,7 +2920,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             filterButton.onclick = () => {
                                 filterCardStatusSelect.value = option.value;
                                 applyAllFilters(false);
-                                closeBottomSheet(); // Đóng Bottom Sheet sau khi chọn
+                                closeBottomSheet(); 
                             };
                             bottomSheetContent.appendChild(filterButton);
                         }
@@ -3312,7 +3367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>applyAllFilters(false));
         if(tagSelect) tagSelect.addEventListener('change', ()=>applyAllFilters(false));
         if(searchInput) searchInput.addEventListener('input', ()=>applyAllFilters(false));
-        // Không cần event listener cho filterCardStatusSelect nữa vì nó được điều khiển qua BottomSheet
+        
 
         if(flipBtn) flipBtn.addEventListener('click', ()=>{
             if(practiceType==="off" && window.currentData.length>0) {
