@@ -36,8 +36,7 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     nextBtn, currentCardIndexDisplay, totalCardsDisplay, speakerBtn, speakerExampleBtn,
     tagFilterContainer, tagSelect, searchInput, baseVerbFilterContainer, baseVerbSelect,
     practiceTypeSelect, practiceArea, multipleChoiceOptionsContainer, feedbackMessage,
-    filterCardStatusSelect, 
-    openStatusFilterBtn,    
+    filterCardStatusSelect,
     btnSrsAgain, btnSrsHard, btnSrsGood, btnSrsEasy,
     hamburgerMenuBtn, filterSidebar, closeSidebarBtn, sidebarOverlay, tagsDisplayFront,
     typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn,
@@ -91,8 +90,8 @@ let touchStartX = 0;
 let touchEndX = 0;
 let touchStartY = 0;
 let touchEndY = 0;
-const swipeThreshold = 50; 
-const swipeMaxVerticalOffset = 75; 
+const swipeThreshold = 50;
+const swipeMaxVerticalOffset = 75;
 
 let currentExampleSpeechRate = 1.0;
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
@@ -124,7 +123,7 @@ const defaultCategoryState = {
     searchTerm: '',
     baseVerb: 'all',
     tag: 'all',
-    filterMarked: 'all_active', 
+    filterMarked: 'all_active', // Giá trị mặc định mới cho bộ lọc hiển thị thẻ
     currentIndex: 0,
     deckId: 'all_user_cards'
 };
@@ -141,7 +140,6 @@ let appState = JSON.parse(JSON.stringify(defaultAppState));
 const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; 
 
 
-// --- START: Utility Functions (Moved outside DOMContentLoaded) ---
 function generateUniqueId(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`;
 }
@@ -178,161 +176,6 @@ function closeSidebar(){
     if (filterSidebar) filterSidebar.classList.remove('translate-x-0');
     if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
 }
-
-function closeBottomSheet() {
-    if (!bottomSheet || !bottomSheetOverlay) return;
-    bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
-    bottomSheetOverlay.classList.remove('active');
-    bottomSheet.style.paddingBottom = ''; 
-    if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
-
-    setTimeout(() => {
-        bottomSheet.classList.add('translate-y-full');
-        bottomSheetOverlay.classList.add('hidden');
-        const videoIframe = bottomSheetContent.querySelector('iframe');
-        if (videoIframe) {
-            videoIframe.src = ''; 
-        }
-        bottomSheetContent.innerHTML = ''; 
-    }, 300); 
-}
-
-function handleTouchStart(event) {
-    if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
-        return;
-    }
-    touchStartX = event.touches[0].clientX;
-    touchStartY = event.touches[0].clientY;
-    touchEndX = touchStartX; 
-    touchEndY = touchStartY;
-}
-
-function handleTouchMove(event) {
-    if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
-        return;
-    }
-    touchEndX = event.touches[0].clientX;
-    touchEndY = event.touches[0].clientY;
-}
-
-function handleTouchEnd(event) {
-    if (!flashcardElement || flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
-        return;
-    }
-
-    const horizontalDiff = touchEndX - touchStartX;
-    const verticalDiff = touchEndY - touchStartY;
-
-    if (Math.abs(horizontalDiff) > Math.abs(verticalDiff) && Math.abs(horizontalDiff) > swipeThreshold) {
-        event.preventDefault(); 
-        if (horizontalDiff > 0) { 
-            if (prevBtn && !prevBtn.disabled) {
-                prevBtn.click();
-            }
-        } else { 
-            if (nextBtn && !nextBtn.disabled) {
-                nextBtn.click();
-            }
-        }
-    }
-    touchStartX = 0;
-    touchEndX = 0;
-    touchStartY = 0;
-    touchEndY = 0;
-}
-
-function startSingleCardPractice(cardItem, practiceMode) {
-    if (!cardItem) return;
-    console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}, Mode: ${practiceMode}`); 
-
-    isSingleCardPracticeMode = true;
-    originalCurrentData = [...window.currentData]; 
-    originalCurrentIndex = window.currentIndex;
-
-    window.currentData = [cardItem]; 
-    window.currentIndex = 0;
-
-    practiceType = practiceMode; 
-
-    updateFlashcard(); 
-    showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}`, 3000); 
-}
-
-function exitSingleCardPractice() {
-    if (!isSingleCardPracticeMode) return;
-    console.log("Exiting single card practice mode.");
-
-    isSingleCardPracticeMode = false;
-    window.currentData = [...originalCurrentData]; 
-    window.currentIndex = originalCurrentIndex; 
-
-    practiceType = 'off'; 
-    if (practiceTypeSelect) practiceTypeSelect.value = 'off'; 
-
-    updateFlashcard(); 
-    showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
-}
-
-function extractYouTubeVideoId(url) {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2] && match[2].length === 11) ? match[2] : null;
-}
-
-function setActiveMediaTab(tabName, cardItem) {
-    const youtubeContentDiv = document.getElementById('youtube-tab-content');
-    let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
-
-    if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
-    if (tabBtnYouTube) tabBtnYouTube.classList.remove('active'); 
-
-    if (tabName === 'youtube_custom') {
-        if (youtubeContentDiv) {
-            youtubeContentDiv.classList.remove('hidden'); 
-            youtubeContentDiv.innerHTML = ''; 
-
-            if (cardItem.videoUrl) {
-                const videoId = extractYouTubeVideoId(cardItem.videoUrl);
-                if (videoId) {
-                    const iframeContainer = document.createElement('div');
-                    iframeContainer.className = 'video-iframe-container w-full'; 
-                    const iframe = document.createElement('iframe');
-                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
-                    iframe.title = "YouTube video player";
-                    iframe.frameBorder = "0";
-                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-                    iframe.allowFullscreen = true;
-                    iframeContainer.appendChild(iframe);
-                    youtubeContentDiv.appendChild(iframeContainer);
-                } else {
-                    youtubeContentDiv.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video YouTube không hợp lệ.</p>';
-                }
-            } else {
-                 const searchButtonContainer = document.createElement('div');
-                 searchButtonContainer.className = 'p-4 text-center';
-
-                 const pMessage = document.createElement('p');
-                 pMessage.className = 'text-slate-500 dark:text-slate-400 mb-3';
-                 pMessage.textContent = 'Chưa có video YouTube nào được gán. Bạn có thể thêm link khi sửa thẻ, hoặc:';
-                 searchButtonContainer.appendChild(pMessage);
-
-                 const searchButton = document.createElement('button');
-                 searchButton.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm flex items-center justify-center mx-auto';
-                 const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
-                 const youtubeSearchTerm = `học từ ${baseSearchTerm}`; 
-                 searchButton.innerHTML = `<i class="fab fa-youtube mr-2"></i> Tìm trên YouTube với từ khóa "${baseSearchTerm}"`;
-                 searchButton.onclick = () => {
-                     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank');
-                 };
-                 searchButtonContainer.appendChild(searchButton);
-                 youtubeContentDiv.appendChild(searchButtonContainer);
-            }
-        }
-        if (tabBtnYouTube) tabBtnYouTube.classList.add('active'); 
-    }
-}
-// --- END: Utility Functions ---
 
 
 async function loadAppState() {
@@ -890,8 +733,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     practiceArea = document.getElementById('practice-area');
     multipleChoiceOptionsContainer = document.getElementById('multiple-choice-options');
     feedbackMessage = document.getElementById('feedback-message');
-    filterCardStatusSelect = document.getElementById('filter-card-status'); 
-    openStatusFilterBtn = document.getElementById('open-status-filter-btn'); 
+    filterCardStatusSelect = document.getElementById('filter-card-status');
     btnSrsAgain = document.getElementById('btn-srs-again');
     btnSrsHard = document.getElementById('btn-srs-hard');
     btnSrsGood = document.getElementById('btn-srs-good');
@@ -958,7 +800,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     bottomSheetOverlay = document.getElementById('bottom-sheet-overlay');
     bottomSheet = document.getElementById('bottom-sheet');
     bottomSheetTitle = document.getElementById('bottom-sheet-title');
-    closeBottomSheetBtn = document.getElementById('close-bottom-sheet-btn'); 
+    closeBottomSheetBtn = document.getElementById('close-bottom-sheet-btn');
     bottomSheetContent = document.getElementById('bottom-sheet-content');
     cardOptionsMenuBtn = document.getElementById('card-options-menu-btn');
     cardOptionsMenuBtnBack = document.getElementById('card-options-menu-btn-back');
@@ -973,7 +815,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     tabBtnYouTube = document.getElementById('tab-btn-youtube');
     flipIconFront = document.getElementById('flip-icon-front');
     flipIconBack = document.getElementById('flip-icon-back');
-    cardFrontElement = flashcardElement.querySelector('.card-front');
     recentlyViewedListElement = document.getElementById('recently-viewed-list'); 
     noRecentCardsMessageElement = document.getElementById('no-recent-cards-message'); 
 
@@ -1557,6 +1398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     cards.push(...deckCards);
                 }
             }
+            // Lọc thẻ không có deckId sẽ được thực hiện trong applyAllFilters
         }
         return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false, videoUrl: card.videoUrl || null }));
     }
@@ -1635,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (editingCardId) {
             const currentCardInList = window.currentData.find(c => c.id === editingCardId && c.isUserCard);
             if (currentCardInList) {
-                existingCardData = { ...currentCardInList }; 
+                existingCardData = { ...currentCardInList }; // Sao chép toàn bộ dữ liệu cũ
             }
         }
 
@@ -1646,6 +1488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             generalNotes: cardGeneralNotesInput.value.trim(),
             videoUrl: cardVideoUrlInput.value.trim() || null,
             category: cardCategory,
+            // Giữ nguyên trạng thái SRS và isFavorite nếu đang sửa, đặt mặc định nếu tạo mới
             status: editingCardId ? (existingCardData.status || 'new') : 'new',
             lastReviewed: editingCardId ? existingCardData.lastReviewed : null,
             reviewCount: editingCardId ? (existingCardData.reviewCount || 0) : 0,
@@ -1654,7 +1497,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             easeFactor: editingCardId ? (existingCardData.easeFactor || 2.5) : 2.5,
             repetitions: editingCardId ? (existingCardData.repetitions || 0) : 0,
             isSuspended: editingCardId ? (existingCardData.isSuspended || false) : false,
-            isFavorite: editingCardId ? (existingCardData.isFavorite || false) : false, 
+            isFavorite: editingCardId ? (existingCardData.isFavorite || false) : false, // Mặc định isFavorite là false khi tạo mới
             updatedAt: serverTimestamp()
         };
         
@@ -1751,10 +1594,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userId = getCurrentUserId();
         clearLearningTimer();
         const cCV = categorySelect.value;
-        const sFCSC = getCategoryState(currentDatasetSource, cCV); 
-        let cST = searchInput.value.trim().toLowerCase(); 
+        const sFCSC = getCategoryState(currentDatasetSource, cCV);
+        let cST = searchInput.value.trim().toLowerCase();
 
-        if (!fromLoad) { 
+        if (!fromLoad) {
             if (cCV === 'phrasalVerbs' || cCV === 'collocations' || cCV === 'idioms') {
                 if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
                     sFCSC.baseVerb = baseVerbSelect.value;
@@ -1770,10 +1613,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             sFCSC.currentIndex = 0; 
         }
 
-        let lTP = [...activeMasterList]; 
+        let lTP = [...activeMasterList];
 
         if (currentDatasetSource === 'user' && userId) {
-            const sDI = sFCSC.deckId || userDeckSelect.value; 
+            const sDI = sFCSC.deckId || userDeckSelect.value;
             if (sDI && sDI !== 'all_user_cards') {
                 if (sDI === 'unassigned_cards') {
                     lTP = lTP.filter(i => !i.deckId);
@@ -1781,9 +1624,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     lTP = lTP.filter(i => i.deckId === sDI);
                 }
             }
+            // Đối với thẻ người dùng, activeMasterList đã được lọc theo category khi loadUserCards (nếu cần)
+            // hoặc chứa tất cả thẻ nếu deckId là 'all_user_cards'/'unassigned_cards'.
+            // Cần đảm bảo activeMasterList là nguồn đúng trước khi lọc category ở đây.
+            // Nếu loadUserCards(deckIdToLoad) trả về thẻ của *chỉ* deck đó, thì lọc category ở đây là đúng.
+            // Nếu loadUserCards trả về tất cả thẻ (ví dụ khi deckIdToLoad là 'all_user_cards'),
+            // thì lọc category ở đây cũng cần thiết.
              lTP = lTP.filter(i => i.category === cCV);
         }
-        
+        // Đối với thẻ web, activeMasterList đã được lọc theo category từ loadVocabularyData.
+
         if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
             if (sFCSC.baseVerb && sFCSC.baseVerb !== 'all') {
                 lTP = lTP.filter(i => i.baseVerb === sFCSC.baseVerb);
@@ -1809,20 +1659,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        const selectedFilterValue = sFCSC.filterMarked; 
-        console.log("Applying card status filter: ", selectedFilterValue);
+        const selectedFilterValue = sFCSC.filterMarked;
+        console.log("Applying filter: ", selectedFilterValue);
 
         if (selectedFilterValue === 'all_visible') {
-            // No further filtering by SRS status or suspension; shows all cards that passed previous filters.
+            // Không lọc thêm theo trạng thái SRS hoặc isSuspended, hiển thị tất cả (đã qua các bộ lọc khác)
         } else {
-            // For all other filters, exclude suspended cards first.
+            // Các bộ lọc khác sẽ loại bỏ thẻ bị tạm ngưng trước
             lTP = lTP.filter(item => !(item.isSuspended === true));
 
             if (selectedFilterValue === 'favorites') {
                 if (userId) {
                     lTP = lTP.filter(item => item.isFavorite === true);
                 } else {
-                    lTP = []; 
+                    lTP = [];
+                    showToast("Vui lòng đăng nhập để xem thẻ yêu thích.", 3000, 'info');
                 }
             } else if (selectedFilterValue === 'review_today') {
                 const today = new Date();
@@ -1833,12 +1684,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         reviewDate.setHours(0, 0, 0, 0);
                         return reviewDate <= today;
                     }
+                    // Thẻ mới (status 'new' hoặc không có status và không có nextReviewDate) cũng được coi là cần ôn tập
                     return (item.status === 'new' || !item.status) && item.nextReviewDate === null; 
                 });
             } else if (['new', 'learning', 'learned'].includes(selectedFilterValue)) {
                 lTP = lTP.filter(item => (item.status || 'new') === selectedFilterValue);
             } else if (selectedFilterValue === 'all_active') {
-                // Already filtered out suspended cards. 'all_active' includes 'new', 'learning', 'learned'.
+                // Đã lọc isSuspended ở trên, không cần làm gì thêm ở đây cho 'all_active'
             }
         }
         console.log(`Filtered list length for '${selectedFilterValue}': ${lTP.length} cards`);
@@ -1858,7 +1710,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.updateFlashcard();
         window.updateMainHeaderTitle();
     }
-    
+
     async function loadVocabularyData (category) {
         const userId = getCurrentUserId();
         clearLearningTimer();
@@ -1868,7 +1720,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (speakerExampleBtn) speakerExampleBtn.style.display = 'none'; 
 
         const stateForCurrentSourceCategory = getCategoryState(currentDatasetSource, category);
-        if(filterCardStatusSelect) filterCardStatusSelect.value = stateForCurrentSourceCategory.filterMarked || defaultCategoryState.filterMarked;
+        // Đặt giá trị filterCardStatusSelect từ appState, nếu không có thì dùng giá trị mặc định của defaultCategoryState
+        filterCardStatusSelect.value = stateForCurrentSourceCategory.filterMarked || defaultCategoryState.filterMarked;
 
 
         if (currentDatasetSource === 'user') {
@@ -1951,7 +1804,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const webId = card.id; 
                             if (webId) {
                                 const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
-                                if (firestoreStatus) { 
+                                if (firestoreStatus) { // firestoreStatus có thể null hoặc là object chứa isFavorite
                                     card.status = firestoreStatus.status || 'new';
                                     card.lastReviewed = firestoreStatus.lastReviewed; 
                                     card.reviewCount = firestoreStatus.reviewCount || 0;
@@ -2109,13 +1962,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (item) { 
             addCardToRecentlyViewed(item);
-            if (typeof item.isFavorite === 'undefined') { 
+            if (typeof item.isFavorite === 'undefined') { // Đảm bảo isFavorite tồn tại
                 item.isFavorite = false;
             }
-            if (typeof item.isSuspended === 'undefined') { 
+            if (typeof item.isSuspended === 'undefined') { // Đảm bảo isSuspended tồn tại
                 item.isSuspended = false;
             }
-            if (!item.status) { 
+            if (!item.status) { // Đảm bảo status tồn tại
                 item.status = 'new';
             }
         }
@@ -2879,274 +2732,269 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function openBottomSheet(cardItem, viewType = 'default', subView = 'youtube_custom') {
-        if (!bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
-    
+        if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
+
+        let hasActions = false;
         bottomSheetContent.innerHTML = ''; 
         const loggedInUserId = getCurrentUserId();
         const isAdmin = loggedInUserId === ADMIN_UID;
-        let cardTerm = "";
-        if (cardItem) { 
-            cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "Thẻ";
-        }
-    
+        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "Thẻ"; 
+
         bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
         bottomSheet.style.paddingBottom = '';
-    
+
         if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
-    
-        switch (viewType) {
-            case 'status_filter':
-                bottomSheetTitle.textContent = "Lọc thẻ theo trạng thái";
-                if (filterCardStatusSelect) { 
-                    Array.from(filterCardStatusSelect.options).forEach(option => {
-                        if (option.disabled) { 
-                            const divider = document.createElement('div');
-                            divider.className = 'text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider py-2 px-1 font-medium';
-                            divider.textContent = option.textContent;
-                            bottomSheetContent.appendChild(divider);
-                        } else {
-                            const filterButton = document.createElement('button');
-                            filterButton.innerHTML = `<i class="fas fa-check w-5 mr-3 text-transparent"></i> <span class="flex-grow">${option.textContent}</span>`;
-                            filterButton.title = option.title || option.textContent;
-                            filterButton.classList.add('flex', 'items-center', 'w-full', 'text-left', 'py-2.5', 'px-4', 'hover:bg-slate-100', 'dark:hover:bg-slate-700', 'rounded-md', 'transition-colors');
-                            
-                            if (filterCardStatusSelect.value === option.value) {
-                                filterButton.querySelector('i').classList.replace('text-transparent', 'text-indigo-500');
-                                filterButton.querySelector('span').classList.add('font-semibold', 'text-indigo-600', 'dark:text-indigo-400');
-                            } else {
-                                filterButton.querySelector('span').classList.add('text-slate-700', 'dark:text-slate-200');
-                            }
 
-                            filterButton.onclick = () => {
-                                filterCardStatusSelect.value = option.value;
-                                applyAllFilters(false);
-                                closeBottomSheet(); 
-                            };
-                            bottomSheetContent.appendChild(filterButton);
-                        }
-                    });
-                } else {
-                    bottomSheetContent.innerHTML = '<p class="text-slate-500">Lỗi: Không tìm thấy bộ lọc.</p>';
-                }
-                break;
+
+        if (viewType === 'default') {
+            bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             
-            case 'default':
-                bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                if (loggedInUserId && cardItem) { 
-                    const favoriteBtnEl = document.createElement('button');
-                    favoriteBtnEl.className = 'favorite-btn'; 
-                    updateFavoriteButtonUI(favoriteBtnEl, cardItem.isFavorite || false); 
-                    favoriteBtnEl.onclick = async () => {
-                        await toggleFavoriteStatus(cardItem, favoriteBtnEl);
-                    };
-                    bottomSheetContent.appendChild(favoriteBtnEl);
-                }
-                 if (loggedInUserId && cardItem && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
-                    const srsInfoDiv = document.createElement('div');
-                    srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
-                    let srsInfoHtml = `<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập (Trạng thái: <strong class="uppercase">${cardItem.status || 'MỚI'}</strong>):</h4><ul class="list-inside space-y-0.5">`;
-                    if (cardItem.nextReviewDate) {
-                        const nextReview = new Date(cardItem.nextReviewDate);
-                        const today = new Date(); today.setHours(0,0,0,0);
-                        const reviewDay = new Date(nextReview.getTime()); reviewDay.setHours(0,0,0,0);
-                        let reviewText = `Lần ôn tiếp theo: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
-                        if (reviewDay <= today) reviewText += ' <span class="font-semibold text-amber-600 dark:text-amber-400">(Đến hạn)</span>';
-                        srsInfoHtml += `<li>${reviewText}</li>`;
-                    } else {
-                        srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có (thẻ mới)</li>`;
-                    }
-                    srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
-                    srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
-                    srsInfoHtml += `<li>Ôn đúng liên tiếp: ${cardItem.repetitions || 0}</li>`;
-                    if (cardItem.isSuspended) {
-                        srsInfoHtml += `<li class="text-orange-500 font-semibold">Trạng thái ôn tập: Đang tạm ngưng</li>`;
-                    }
-                    srsInfoHtml += '</ul>';
-                    srsInfoDiv.innerHTML = srsInfoHtml;
-                    bottomSheetContent.appendChild(srsInfoDiv);
-                }
+            if (loggedInUserId) { 
+                const favoriteBtnEl = document.createElement('button');
+                favoriteBtnEl.className = 'favorite-btn'; 
+                updateFavoriteButtonUI(favoriteBtnEl, cardItem.isFavorite || false); 
+                favoriteBtnEl.onclick = async () => {
+                    await toggleFavoriteStatus(cardItem, favoriteBtnEl);
+                };
+                bottomSheetContent.appendChild(favoriteBtnEl);
+                hasActions = true;
+            }
 
-                if (cardItem && !cardItem.isUserCard && loggedInUserId) {
-                    const copyBtnEl = document.createElement('button');
-                    copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
-                    copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
-                    bottomSheetContent.appendChild(copyBtnEl);
-                }
-                if (cardItem && cardItem.isUserCard && loggedInUserId) {
-                    const editBtnEl = document.createElement('button');
-                    editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
-                    editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
-                    bottomSheetContent.appendChild(editBtnEl);
-                }
-                 if (loggedInUserId && cardItem && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
-                    const resetSrsBtn = document.createElement('button');
-                    resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
-                    resetSrsBtn.onclick = async () => { 
-                        if (confirm("Bạn có chắc muốn đặt lại tiến độ học cho thẻ này? Thẻ sẽ được coi như mới học.")) {
-                            const srsResetData = {
-                                status: 'new', lastReviewed: serverTimestamp(), reviewCount: 0,
-                                nextReviewDate: serverTimestamp(), interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false
-                            };
-                            let updateSuccess = false;
-                            if (cardItem.isUserCard) {
-                                const dataWithFavorite = {...srsResetData, isFavorite: cardItem.isFavorite || false };
-                                updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataWithFavorite, cardItem.id);
-                            } else {
-                                const webCardGlobalId = getCardIdentifier(cardItem);
-                                if (webCardGlobalId) {
-                                    const statusUpdatePayload = {...srsResetData, isFavorite: cardItem.isFavorite || false};
-                                    updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, statusUpdatePayload);
-                                }
-                            }
-                            if (updateSuccess) {
-                                Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); 
-                                alert("Đã đặt lại tiến độ học cho thẻ."); updateFlashcard(); applyAllFilters();
-                            }
-                        }
-                        closeBottomSheet(); 
-                    };
-                    bottomSheetContent.appendChild(resetSrsBtn);
 
-                    const suspendBtn = document.createElement('button');
-                    suspendBtn.innerHTML = cardItem.isSuspended
-                        ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
-                        : `<i class="fas fa-pause-circle w-5 mr-3 text-yellow-500"></i> Tạm ngưng Ôn tập`;
-                    suspendBtn.onclick = async () => { 
-                        const newSuspendedState = !cardItem.isSuspended;
-                        const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
+             if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+                const srsInfoDiv = document.createElement('div');
+                srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
+                let srsInfoHtml = `<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập (Trạng thái: <strong class="uppercase">${cardItem.status || 'MỚI'}</strong>):</h4><ul class="list-inside space-y-0.5">`;
+                if (cardItem.nextReviewDate) {
+                    const nextReview = new Date(cardItem.nextReviewDate);
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    const reviewDay = new Date(nextReview.getTime()); reviewDay.setHours(0,0,0,0);
+                    let reviewText = `Lần ôn tiếp theo: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+                    if (reviewDay <= today) reviewText += ' <span class="font-semibold text-amber-600 dark:text-amber-400">(Đến hạn)</span>';
+                    srsInfoHtml += `<li>${reviewText}</li>`;
+                } else {
+                    srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có (thẻ mới)</li>`;
+                }
+                srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
+                srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
+                srsInfoHtml += `<li>Ôn đúng liên tiếp: ${cardItem.repetitions || 0}</li>`;
+                if (cardItem.isSuspended) {
+                    srsInfoHtml += `<li class="text-orange-500 font-semibold">Trạng thái ôn tập: Đang tạm ngưng</li>`;
+                }
+                srsInfoHtml += '</ul>';
+                srsInfoDiv.innerHTML = srsInfoHtml;
+                bottomSheetContent.appendChild(srsInfoDiv);
+                hasActions = true;
+            }
+
+            if (!cardItem.isUserCard && loggedInUserId) {
+                const copyBtnEl = document.createElement('button');
+                copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
+                copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
+                bottomSheetContent.appendChild(copyBtnEl);
+                hasActions = true;
+            }
+            if (cardItem.isUserCard && loggedInUserId) {
+                const editBtnEl = document.createElement('button');
+                editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
+                editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
+                bottomSheetContent.appendChild(editBtnEl);
+                hasActions = true;
+            }
+            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+                const resetSrsBtn = document.createElement('button');
+                resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
+                resetSrsBtn.onclick = async () => {
+                    if (confirm("Bạn có chắc muốn đặt lại tiến độ học cho thẻ này? Thẻ sẽ được coi như mới học.")) {
+                        const srsResetData = {
+                            status: 'new', lastReviewed: serverTimestamp(), reviewCount: 0,
+                            nextReviewDate: serverTimestamp(), interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false
+                        };
                         let updateSuccess = false;
                         if (cardItem.isUserCard) {
-                            const dataWithFavorite = {...dataToUpdate, isFavorite: cardItem.isFavorite || false };
+                            // Khi reset thẻ user, isFavorite vẫn giữ nguyên
+                            const dataWithFavorite = {...srsResetData, isFavorite: cardItem.isFavorite || false };
                             updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataWithFavorite, cardItem.id);
                         } else {
                             const webCardGlobalId = getCardIdentifier(cardItem);
                             if (webCardGlobalId) {
-                                const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {isFavorite: cardItem.isFavorite || false}; 
-                                const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
-                                updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, fullDataToSet);
+                                // Khi reset thẻ web, cũng giữ nguyên isFavorite
+                                const statusUpdatePayload = {...srsResetData, isFavorite: cardItem.isFavorite || false};
+                                updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, statusUpdatePayload);
                             }
                         }
                         if (updateSuccess) {
-                            cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now(); 
-                            alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
-                            updateFlashcard(); applyAllFilters();
+                            Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); // isFavorite không đổi ở client
+                            alert("Đã đặt lại tiến độ học cho thẻ."); updateFlashcard(); applyAllFilters();
                         }
-                        closeBottomSheet(); 
-                    };
-                    bottomSheetContent.appendChild(suspendBtn);
-                }
-                if (cardItem && cardItem.isUserCard && loggedInUserId) {
-                    const deleteBtnEl = document.createElement('button');
-                    deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
-                    deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
-                    deleteBtnEl.onclick = async () => { await handleDeleteCard(); closeBottomSheet(); };
-                    bottomSheetContent.appendChild(deleteBtnEl);
-                }
-                break;
-            case 'lecture':
-                bottomSheet.classList.add('bottom-sheet-lecture-mode');
-                const cardLectureId = generateCardLectureId(cardItem);
-                const lectureTitlePrefix = "Bài giảng: ";
-                bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
-                FirestoreService.getLectureContent(cardLectureId)
-                    .then(lectureData => { 
-                        if (isAdmin) {
-                            bottomSheetContent.innerHTML = ''; 
-                            const titleLabel = document.createElement('label');
-                            titleLabel.htmlFor = 'lecture-title-input';
-                            titleLabel.textContent = 'Tiêu đề Bài giảng:';
-                            titleLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
-                            bottomSheetContent.appendChild(titleLabel);
-                            const titleInput = document.createElement('input');
-                            titleInput.type = 'text';
-                            titleInput.id = 'lecture-title-input';
-                            titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
-                            titleInput.value = lectureData?.title || `${lectureTitlePrefix}${cardTerm}`;
-                            bottomSheetContent.appendChild(titleInput);
-                            const contentLabel = document.createElement('label');
-                            contentLabel.htmlFor = 'lecture-content-html-input';
-                            contentLabel.textContent = 'Nội dung HTML Bài giảng:';
-                            contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
-                            bottomSheetContent.appendChild(contentLabel);
-                            const contentTextarea = document.createElement('textarea');
-                            contentTextarea.id = 'lecture-content-html-input';
-                            contentTextarea.rows = 15;
-                            contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]';
-                            contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
-                            contentTextarea.value = lectureData?.contentHTML || '';
-                            bottomSheetContent.appendChild(contentTextarea);
-                            const saveLectureBtn = document.createElement('button');
-                            saveLectureBtn.id = 'save-lecture-btn';
-                            saveLectureBtn.textContent = 'Lưu Bài Giảng';
-                            saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
-                            saveLectureBtn.onclick = async () => {
-                                const newTitle = titleInput.value.trim();
-                                const newContentHTML = contentTextarea.value; 
-                                if (!newTitle) {
-                                    alert("Tiêu đề bài giảng không được để trống.");
-                                    return;
-                                }
-                                saveLectureBtn.disabled = true;
-                                saveLectureBtn.textContent = 'Đang lưu...';
-                                const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
-                                if (success) {
-                                    showToast("Đã lưu bài giảng!", 2000, 'success');
-                                    closeBottomSheet();
-                                } else {
-                                    showToast("Lỗi: Không thể lưu bài giảng.", 3000, 'error');
-                                }
-                                saveLectureBtn.disabled = false;
-                                saveLectureBtn.textContent = 'Lưu Bài Giảng';
-                            };
-                            bottomSheetContent.appendChild(saveLectureBtn);
-                        } else { 
-                            if (lectureData && lectureData.contentHTML) {
-                                bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
-                                bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
-                            } else {
-                                bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
-                            }
+                        closeBottomSheet();
+                    }
+                };
+                bottomSheetContent.appendChild(resetSrsBtn);
+                hasActions = true;
+            }
+            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
+                const suspendBtn = document.createElement('button');
+                suspendBtn.innerHTML = cardItem.isSuspended
+                    ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
+                    : `<i class="fas fa-pause-circle w-5 mr-3 text-yellow-500"></i> Tạm ngưng Ôn tập`;
+                suspendBtn.onclick = async () => {
+                    const newSuspendedState = !cardItem.isSuspended;
+                    const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
+                    let updateSuccess = false;
+                    if (cardItem.isUserCard) {
+                         // Khi tạm ngưng thẻ user, isFavorite vẫn giữ nguyên
+                        const dataWithFavorite = {...dataToUpdate, isFavorite: cardItem.isFavorite || false };
+                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataWithFavorite, cardItem.id);
+                    } else {
+                        const webCardGlobalId = getCardIdentifier(cardItem);
+                        if (webCardGlobalId) {
+                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {isFavorite: cardItem.isFavorite || false}; 
+                            const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
+                            // isFavorite đã có trong existingWebStatus hoặc từ cardItem
+                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, fullDataToSet);
                         }
-                    })
-                    .catch(error => { 
-                        console.error("Lỗi khi tải bài giảng:", error);
-                        bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
-                    });
-                break;
-            case 'media':
-                bottomSheet.classList.add('bottom-sheet-media-mode');
-                bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
-                let youtubeContentDiv = document.getElementById('youtube-tab-content');
-                if (!youtubeContentDiv) { 
-                    youtubeContentDiv = document.createElement('div');
-                    youtubeContentDiv.id = 'youtube-tab-content';
-                    youtubeContentDiv.className = 'bottom-sheet-tab-content'; 
-                    bottomSheetContent.appendChild(youtubeContentDiv);
-                }
-                setActiveMediaTab('youtube_custom', cardItem); 
-                break;
-            case 'practice_options':
-                 bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-                 const practiceMeaningBtn = document.createElement('button');
-                 practiceMeaningBtn.innerHTML = `<i class="fas fa-list-alt w-5 mr-3 text-purple-500"></i> Luyện Nghĩa (Thẻ này)`;
-                 practiceMeaningBtn.onclick = () => {
-                    startSingleCardPractice(cardItem, 'meaning_quiz');
+                    }
+                    if (updateSuccess) {
+                        cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now(); 
+                        alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
+                        updateFlashcard(); applyAllFilters();
+                    }
                     closeBottomSheet();
                 };
-                 bottomSheetContent.appendChild(practiceMeaningBtn);
+                bottomSheetContent.appendChild(suspendBtn);
+                hasActions = true;
+            }
+            if (cardItem.isUserCard && loggedInUserId) {
+                const deleteBtnEl = document.createElement('button');
+                deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
+                deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
+                deleteBtnEl.onclick = async () => { await handleDeleteCard(); closeBottomSheet(); };
+                bottomSheetContent.appendChild(deleteBtnEl);
+                hasActions = true;
+            }
 
-                 const practiceTypingBtn = document.createElement('button');
-                 practiceTypingBtn.innerHTML = `<i class="fas fa-keyboard w-5 mr-3 text-teal-500"></i> Luyện Gõ Từ (Thẻ này)`;
-                 practiceTypingBtn.onclick = () => {
-                    startSingleCardPractice(cardItem, 'typing_practice');
-                    closeBottomSheet();
-                };
-                 bottomSheetContent.appendChild(practiceTypingBtn);
-                 break;
+        } else if (viewType === 'lecture') {
+            bottomSheet.classList.add('bottom-sheet-lecture-mode');
+
+            const cardLectureId = generateCardLectureId(cardItem);
+            const lectureTitlePrefix = "Bài giảng: ";
+            bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+            bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
+
+            FirestoreService.getLectureContent(cardLectureId)
+                .then(lectureData => {
+                    if (isAdmin) {
+                        bottomSheetContent.innerHTML = ''; 
+
+                        const titleLabel = document.createElement('label');
+                        titleLabel.htmlFor = 'lecture-title-input';
+                        titleLabel.textContent = 'Tiêu đề Bài giảng:';
+                        titleLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(titleLabel);
+
+                        const titleInput = document.createElement('input');
+                        titleInput.type = 'text';
+                        titleInput.id = 'lecture-title-input';
+                        titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
+                        titleInput.value = lectureData?.title || `${lectureTitlePrefix}${cardTerm}`;
+                        bottomSheetContent.appendChild(titleInput);
+
+                        const contentLabel = document.createElement('label');
+                        contentLabel.htmlFor = 'lecture-content-html-input';
+                        contentLabel.textContent = 'Nội dung HTML Bài giảng:';
+                        contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(contentLabel);
+
+                        const contentTextarea = document.createElement('textarea');
+                        contentTextarea.id = 'lecture-content-html-input';
+                        contentTextarea.rows = 15;
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[250px]';
+                        contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài giảng vào đây...';
+                        contentTextarea.value = lectureData?.contentHTML || '';
+                        bottomSheetContent.appendChild(contentTextarea);
+
+                        const saveLectureBtn = document.createElement('button');
+                        saveLectureBtn.id = 'save-lecture-btn';
+                        saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                        saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
+                        saveLectureBtn.onclick = async () => {
+                            const newTitle = titleInput.value.trim();
+                            const newContentHTML = contentTextarea.value; 
+                            if (!newTitle) {
+                                alert("Tiêu đề bài giảng không được để trống.");
+                                return;
+                            }
+                            saveLectureBtn.disabled = true;
+                            saveLectureBtn.textContent = 'Đang lưu...';
+                            const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
+                            if (success) {
+                                showToast("Đã lưu bài giảng!", 2000, 'success');
+                                closeBottomSheet();
+                            } else {
+                                showToast("Lỗi: Không thể lưu bài giảng.", 3000, 'error');
+                            }
+                            saveLectureBtn.disabled = false;
+                            saveLectureBtn.textContent = 'Lưu Bài Giảng';
+                        };
+                        bottomSheetContent.appendChild(saveLectureBtn);
+
+                    } else { 
+                        if (lectureData && lectureData.contentHTML) {
+                            bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
+                            bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
+                        } else {
+                            bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
+                        }
+                    }
+                })
+                .catch(error => { 
+                    console.error("Lỗi khi tải bài giảng:", error);
+                    bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
+                });
+            hasActions = true; 
+        } else if (viewType === 'media') {
+            bottomSheet.classList.add('bottom-sheet-media-mode');
+            bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+
+            if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
+
+            let youtubeContentDiv = document.getElementById('youtube-tab-content');
+            if (!youtubeContentDiv) { 
+                youtubeContentDiv = document.createElement('div');
+                youtubeContentDiv.id = 'youtube-tab-content';
+                youtubeContentDiv.className = 'bottom-sheet-tab-content'; 
+                bottomSheetContent.appendChild(youtubeContentDiv);
+            }
+            setActiveMediaTab('youtube_custom', cardItem); 
+            hasActions = true;
+        } else if (viewType === 'practice_options') {
+             bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+             const practiceMeaningBtn = document.createElement('button');
+             practiceMeaningBtn.innerHTML = `<i class="fas fa-list-alt w-5 mr-3 text-purple-500"></i> Luyện Nghĩa (Thẻ này)`;
+             practiceMeaningBtn.onclick = () => {
+                startSingleCardPractice(cardItem, 'meaning_quiz');
+                closeBottomSheet();
+            };
+             bottomSheetContent.appendChild(practiceMeaningBtn);
+
+             const practiceTypingBtn = document.createElement('button');
+             practiceTypingBtn.innerHTML = `<i class="fas fa-keyboard w-5 mr-3 text-teal-500"></i> Luyện Gõ Từ (Thẻ này)`;
+             practiceTypingBtn.onclick = () => {
+                startSingleCardPractice(cardItem, 'typing_practice');
+                closeBottomSheet();
+            };
+             bottomSheetContent.appendChild(practiceTypingBtn);
+             hasActions = true;
         }
-        
+
+        if (!hasActions && viewType === 'default') {
+             console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
+             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none'; 
+             if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
+             return; 
+        }
+
         bottomSheetOverlay.classList.remove('hidden');
         bottomSheet.classList.remove('translate-y-full');
         requestAnimationFrame(() => { 
@@ -3154,18 +3002,174 @@ document.addEventListener('DOMContentLoaded', async () => {
             bottomSheet.classList.add('active');
         });
     }
+
+    function setActiveMediaTab(tabName, cardItem) {
+        const youtubeContentDiv = document.getElementById('youtube-tab-content');
+        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
+
+        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
+        if (tabBtnYouTube) tabBtnYouTube.classList.remove('active'); 
+
+        if (tabName === 'youtube_custom') {
+            if (youtubeContentDiv) {
+                youtubeContentDiv.classList.remove('hidden'); 
+                youtubeContentDiv.innerHTML = ''; 
+
+                if (cardItem.videoUrl) {
+                    const videoId = extractYouTubeVideoId(cardItem.videoUrl);
+                    if (videoId) {
+                        const iframeContainer = document.createElement('div');
+                        iframeContainer.className = 'video-iframe-container w-full'; 
+                        const iframe = document.createElement('iframe');
+                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                        iframe.title = "YouTube video player";
+                        iframe.frameBorder = "0";
+                        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                        iframe.allowFullscreen = true;
+                        iframeContainer.appendChild(iframe);
+                        youtubeContentDiv.appendChild(iframeContainer);
+                    } else {
+                        youtubeContentDiv.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video YouTube không hợp lệ.</p>';
+                    }
+                } else {
+                     
+                     const searchButtonContainer = document.createElement('div');
+                     searchButtonContainer.className = 'p-4 text-center';
+
+                     const pMessage = document.createElement('p');
+                     pMessage.className = 'text-slate-500 dark:text-slate-400 mb-3';
+                     pMessage.textContent = 'Chưa có video YouTube nào được gán. Bạn có thể thêm link khi sửa thẻ, hoặc:';
+                     searchButtonContainer.appendChild(pMessage);
+
+                     const searchButton = document.createElement('button');
+                     searchButton.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm flex items-center justify-center mx-auto';
+                     const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
+                     const youtubeSearchTerm = `học từ ${baseSearchTerm}`; 
+                     searchButton.innerHTML = `<i class="fab fa-youtube mr-2"></i> Tìm trên YouTube với từ khóa "${baseSearchTerm}"`;
+                     searchButton.onclick = () => {
+                         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank');
+                     };
+                     searchButtonContainer.appendChild(searchButton);
+                     youtubeContentDiv.appendChild(searchButtonContainer);
+                }
+            }
+            if (tabBtnYouTube) tabBtnYouTube.classList.add('active'); 
+        }
+    }
+
+
+    function closeBottomSheet() {
+        if (!bottomSheet || !bottomSheetOverlay) return;
+        bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
+        bottomSheetOverlay.classList.remove('active');
+        bottomSheet.style.paddingBottom = ''; 
+        if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
+
+        setTimeout(() => {
+            bottomSheet.classList.add('translate-y-full');
+            bottomSheetOverlay.classList.add('hidden');
+            
+            const videoIframe = bottomSheetContent.querySelector('iframe');
+            if (videoIframe) {
+                videoIframe.src = ''; 
+            }
+            bottomSheetContent.innerHTML = ''; 
+        }, 300); 
+    }
+
+    function extractYouTubeVideoId(url) {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2] && match[2].length === 11) ? match[2] : null;
+    }
+
+    function startSingleCardPractice(cardItem, practiceMode) {
+        if (!cardItem) return;
+        console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}, Mode: ${practiceMode}`); 
+
+        isSingleCardPracticeMode = true;
+        originalCurrentData = [...window.currentData]; 
+        originalCurrentIndex = window.currentIndex;
+
+        window.currentData = [cardItem]; 
+        window.currentIndex = 0;
+
+        practiceType = practiceMode; 
+
+        updateFlashcard(); 
+        showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}`, 3000); 
+    }
+
+    function exitSingleCardPractice() {
+        if (!isSingleCardPracticeMode) return;
+        console.log("Exiting single card practice mode.");
+
+        isSingleCardPracticeMode = false;
+        window.currentData = [...originalCurrentData]; 
+        window.currentIndex = originalCurrentIndex; 
+
+        practiceType = 'off'; 
+        if (practiceTypeSelect) practiceTypeSelect.value = 'off'; 
+
+        updateFlashcard(); 
+        showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
+    }
+
     
+    function handleTouchStart(event) {
+        if (flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+            return;
+        }
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+        touchEndX = touchStartX; 
+        touchEndY = touchStartY;
+    }
+
+    function handleTouchMove(event) {
+        if (flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+            return;
+        }
+        touchEndX = event.touches[0].clientX;
+        touchEndY = event.touches[0].clientY;
+    }
+
+    function handleTouchEnd(event) {
+        if (flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+            return;
+        }
+
+        const horizontalDiff = touchEndX - touchStartX;
+        const verticalDiff = touchEndY - touchStartY;
+
+        
+        if (Math.abs(horizontalDiff) > Math.abs(verticalDiff) && Math.abs(horizontalDiff) > swipeThreshold) {
+            event.preventDefault(); 
+            if (horizontalDiff > 0) { 
+                if (prevBtn && !prevBtn.disabled) {
+                    prevBtn.click();
+                }
+            } else { 
+                if (nextBtn && !nextBtn.disabled) {
+                    nextBtn.click();
+                }
+            }
+        }
+        
+        touchStartX = 0;
+        touchEndX = 0;
+        touchStartY = 0;
+        touchEndY = 0;
+    }
+    
+
 
     function setupEventListeners() {
         if(hamburgerMenuBtn) hamburgerMenuBtn.addEventListener('click', openSidebar);
         if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
         if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-        if(openStatusFilterBtn) { 
-            openStatusFilterBtn.addEventListener('click', () => {
-                openBottomSheet(null, 'status_filter');
-            });
-        }
         
         if (cardFrontElement) { 
             cardFrontElement.addEventListener('touchstart', handleTouchStart, { passive: true }); 
@@ -3177,7 +3181,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentDatasetSource=e.target.value;
             const userId = getCurrentUserId();
             if (currentDatasetSource === 'user' && !userId) {
+                
                 openAuthModalFromAuth('login');
+                
                 window.currentData = []; 
                 window.updateFlashcard(); 
                 window.updateSidebarFilterVisibility();
@@ -3186,10 +3192,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(practiceTypeSelect) practiceTypeSelect.value="off"; 
             practiceType="off";
             if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards'; 
-            
-            const stateForNewSource = getCategoryState(currentDatasetSource, categorySelect.value);
-            if(filterCardStatusSelect) filterCardStatusSelect.value = stateForNewSource.filterMarked;
-
             await loadVocabularyData(categorySelect.value);
             window.updateSidebarFilterVisibility();
             window.updateMainHeaderTitle();
@@ -3349,6 +3351,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 st.tag='all';if(tagSelect)tagSelect.value='all';
             } const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}
+            // Khi thay đổi chế độ luyện tập, nên reset bộ lọc hiển thị thẻ về một giá trị mặc định hợp lý, ví dụ 'all_active'
             st.filterMarked = defaultCategoryState.filterMarked; 
             if(filterCardStatusSelect) filterCardStatusSelect.value = defaultCategoryState.filterMarked;
             st.currentIndex=0;applyAllFilters();closeSidebar();});
@@ -3358,6 +3361,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(practiceTypeSelect)practiceTypeSelect.value="off"; 
             practiceType="off";
             searchInput.value=''; 
+            // Khi đổi category, cũng nên reset filterMarked về mặc định của category đó
             const stateForNewCategory = getCategoryState(currentDatasetSource, selCat);
             if(filterCardStatusSelect) filterCardStatusSelect.value = stateForNewCategory.filterMarked;
 
@@ -3367,7 +3371,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>applyAllFilters(false));
         if(tagSelect) tagSelect.addEventListener('change', ()=>applyAllFilters(false));
         if(searchInput) searchInput.addEventListener('input', ()=>applyAllFilters(false));
-        
+        if(filterCardStatusSelect) filterCardStatusSelect.addEventListener('change', ()=>applyAllFilters(false));
+
 
         if(flipBtn) flipBtn.addEventListener('click', ()=>{
             if(practiceType==="off" && window.currentData.length>0) {
@@ -3440,27 +3445,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function setupInitialCategoryAndSource() {
+        
         await loadAppState();
-        
-        const initialCategory = appState.lastSelectedCategory || 'phrasalVerbs';
-        const initialSource = appState.lastSelectedSource || 'web';
-        const initialCategoryState = getCategoryState(initialSource, initialCategory);
-        if(filterCardStatusSelect) { 
-            filterCardStatusSelect.value = initialCategoryState.filterMarked || defaultCategoryState.filterMarked;
+        // Đặt giá trị cho filterCardStatusSelect từ appState *sau khi* loadAppState
+        if (filterCardStatusSelect && appState.categoryStates[`${currentDatasetSource}_${categorySelect.value}`]) {
+             filterCardStatusSelect.value = appState.categoryStates[`${currentDatasetSource}_${categorySelect.value}`].filterMarked || defaultCategoryState.filterMarked;
+        } else if (filterCardStatusSelect) {
+            filterCardStatusSelect.value = defaultCategoryState.filterMarked;
         }
-        
+
         renderRecentlyViewedList(); 
 
         const urlParams = new URLSearchParams(window.location.search);
         const sourceFromUrl = urlParams.get('source');
-        currentDatasetSource = sourceFromUrl || initialSource;
+        currentDatasetSource = sourceFromUrl || appState.lastSelectedSource || 'web';
         if(cardSourceSelect) cardSourceSelect.value = currentDatasetSource;
-        if(categorySelect) categorySelect.value = initialCategory;
+        if(categorySelect) categorySelect.value = appState.lastSelectedCategory || 'phrasalVerbs';
 
-        const finalCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
-        if(filterCardStatusSelect) { 
-            filterCardStatusSelect.value = finalCategoryState.filterMarked;
-        }
+        // Đảm bảo filterCardStatusSelect được cập nhật một lần nữa sau khi category và source có thể đã thay đổi
+        const currentCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
+        if(filterCardStatusSelect) filterCardStatusSelect.value = currentCategoryState.filterMarked;
+
 
         await loadVocabularyData(categorySelect.value); 
     }
