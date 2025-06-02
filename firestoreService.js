@@ -23,7 +23,6 @@ export async function loadUserDecksFromFirestore(userId) {
         return querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
     } catch (error) {
         console.error("FirestoreService: Error loading decks:", error);
-        alert("Không thể tải danh sách bộ thẻ từ cơ sở dữ liệu. Vui lòng thử lại.");
         return [];
     }
 }
@@ -36,16 +35,15 @@ export async function createDeckInFirestore(userId, deckName) {
     const newDeckData = {
         name: deckName.trim(),
         createdAt: serverTimestamp(),
-        owner: userId 
+        owner: userId
     };
     try {
         const decksCollectionRef = collection(dbInstance, 'users', userId, 'decks');
         const docRef = await addDoc(decksCollectionRef, newDeckData);
         console.log("FirestoreService: Deck created with ID:", docRef.id);
-        return { id: docRef.id, ...newDeckData, createdAt: Date.now() }; 
+        return { id: docRef.id, ...newDeckData, createdAt: Date.now() };
     } catch (error) {
         console.error("FirestoreService: Error creating deck:", error);
-        alert("Đã xảy ra lỗi khi tạo bộ thẻ. Vui lòng thử lại.");
         return null;
     }
 }
@@ -57,38 +55,26 @@ export async function updateDeckNameInFirestore(userId, deckId, newName) {
     }
     const deckRef = doc(dbInstance, 'users', userId, 'decks', deckId);
     try {
-        await updateDoc(deckRef, { name: newName.trim() });
+        await updateDoc(deckRef, { name: newName.trim(), updatedAt: serverTimestamp() });
         console.log("FirestoreService: Deck name updated for ID:", deckId);
         return true;
     } catch (error) {
         console.error("FirestoreService: Error updating deck name:", error);
-        alert("Đã xảy ra lỗi khi cập nhật tên bộ thẻ. Vui lòng thử lại.");
         return false;
     }
 }
 
 // --- Card Operations ---
 export async function loadUserCardsFromFirestore(userId, deckId) {
-    if (!userId || !dbInstance || (deckId !== null && !deckId)) { 
-        console.error("FirestoreService: Missing data for loadUserCardsFromDeck (userId or dbInstance missing, or invalid deckId if not null)");
+    if (!userId || !dbInstance || (deckId !== null && !deckId)) {
+        console.error("FirestoreService: Missing data for loadUserCardsFromDeck");
         return [];
     }
 
     let cardsCollectionRef;
     if (deckId === null) {
-        // This case is for unassigned cards. If you decide to store them directly under a user's 'cards' collection:
-        // cardsCollectionRef = collection(dbInstance, 'users', userId, 'cards');
-        // For now, assuming unassigned cards are filtered client-side or not directly loaded this way.
-        console.warn("FirestoreService: loadUserCardsFromFirestore called with deckId=null. This implies loading unassigned cards, which requires a specific query or client-side filtering based on cards without a deckId if all cards are in one global collection per user, or a dedicated 'unassigned' collection.");
-        // If cards are always under a deck, and 'unassigned' is a virtual concept, this function might not be the right place to load them directly.
-        // Let's assume for now that if deckId is null, we are trying to get cards that don't have a deckId field,
-        // or this function is called specifically for a deck (not for 'all_user_cards' or 'unassigned_cards' which are handled in script.js by iterating).
-        // For simplicity, if deckId is truly null (meaning a specific "unassigned" collection, which is not the current structure), return empty.
-        // The current structure is users/{userId}/decks/{deckId}/cards
-        // So, a null deckId here means an error or a different design path.
-        // The main script.js handles 'all_user_cards' and 'unassigned_cards' by iterating or filtering.
-        // This function is primarily for loading cards from a *specific* deck's subcollection.
-        return []; 
+        console.warn("FirestoreService: loadUserCardsFromFirestore called with deckId=null. This is usually handled by client-side filtering.");
+        return [];
     } else {
         console.log(`FirestoreService: Loading cards for deck ID: ${deckId} for user ID: ${userId}`);
         cardsCollectionRef = collection(dbInstance, 'users', userId, 'decks', deckId, 'cards');
@@ -99,20 +85,22 @@ export async function loadUserCardsFromFirestore(userId, deckId) {
         const querySnapshot = await getDocs(qCards);
         return querySnapshot.docs.map(docSnap => {
             const data = docSnap.data();
+            const {
+                status, lastReviewed, reviewCount, nextReviewDate, interval, easeFactor, repetitions, isSuspended,
+                isFavorite, // Explicitly remove if it exists from old data
+                ...cardWithoutSrsAndFavorite // Spread the rest of the card data
+            } = data;
             return {
                 id: docSnap.id,
-                ...data,
+                ...cardWithoutSrsAndFavorite,
                 isUserCard: true,
-                isFavorite: data.isFavorite || false, // Lấy trạng thái yêu thích, mặc định là false
-                lastReviewed: data.lastReviewed?.toDate ? data.lastReviewed.toDate().getTime() : (data.lastReviewed || null),
-                nextReviewDate: data.nextReviewDate?.toDate ? data.nextReviewDate.toDate().getTime() : null,
+                isLearned: data.isLearned || false,
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().getTime() : (data.createdAt || null),
                 updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().getTime() : (data.updatedAt || null)
             };
         });
     } catch (error) {
         console.error(`FirestoreService: Error loading cards for deck ${deckId}:`, error);
-        alert("Không thể tải danh sách thẻ. Vui lòng thử lại.");
         return [];
     }
 }
@@ -124,43 +112,48 @@ export async function saveCardToFirestore(userId, deckId, cardData, cardId = nul
     }
     if (!deckId) {
         console.error("FirestoreService: deckId is required to save a user card.");
-        // alert("Lỗi: Không thể lưu thẻ người dùng mà không có thông tin bộ thẻ."); // Consider if alert is needed here or handled by caller
         return null;
     }
 
     let collectionRefPath = collection(dbInstance, 'users', userId, 'decks', deckId, 'cards');
-    
-    // Đảm bảo isFavorite có giá trị boolean
-    const dataToSave = { ...cardData };
-    if (typeof dataToSave.isFavorite === 'undefined') {
-        dataToSave.isFavorite = false; // Mặc định là false nếu không được cung cấp
+
+    const {
+        status, lastReviewed, reviewCount, nextReviewDate, interval, easeFactor, repetitions, isSuspended,
+        isFavorite, 
+        ...dataToSaveClean
+    } = cardData;
+
+    if (dataToSaveClean.hasOwnProperty('isLearned')) {
+        dataToSaveClean.isLearned = !!dataToSaveClean.isLearned;
+    } else if (!cardId) { 
+        dataToSaveClean.isLearned = false;
     }
 
-
     try {
-        if (cardId) { // Update existing card
-            dataToSave.updatedAt = serverTimestamp();
-            const cardRef = doc(collectionRefPath, cardId); 
-            await updateDoc(cardRef, dataToSave); // Sử dụng dataToSave đã chuẩn hóa
-            console.log("FirestoreService: Card updated with ID:", cardId, "in deck:", deckId);
+        if (cardId) { 
+            if (!dataToSaveClean.hasOwnProperty('updatedAt')) { 
+                 dataToSaveClean.updatedAt = serverTimestamp();
+            }
+            const cardRef = doc(collectionRefPath, cardId);
+            await updateDoc(cardRef, dataToSaveClean); 
+            console.log("FirestoreService: Card updated with ID:", cardId, "in deck:", deckId, "Data:", dataToSaveClean);
             return cardId;
-        } else { // Add new card
-            dataToSave.createdAt = serverTimestamp();
-            dataToSave.updatedAt = serverTimestamp(); // Cũng nên có updatedAt khi tạo mới
-            const docRef = await addDoc(collectionRefPath, dataToSave); // Sử dụng dataToSave đã chuẩn hóa
-            console.log("FirestoreService: Card added with ID:", docRef.id, "to deck:", deckId);
+        } else { 
+            dataToSaveClean.createdAt = serverTimestamp();
+            dataToSaveClean.updatedAt = serverTimestamp();
+            const docRef = await addDoc(collectionRefPath, dataToSaveClean);
+            console.log("FirestoreService: Card added with ID:", docRef.id, "to deck:", deckId, "Data:", dataToSaveClean);
             return docRef.id;
         }
     } catch (error) {
-        console.error("FirestoreService: Error saving card:", error, "Data attempted:", dataToSave);
-        alert("Đã xảy ra lỗi khi lưu thẻ. Vui lòng thử lại.");
+        console.error("FirestoreService: Error saving card:", error, "Data attempted:", dataToSaveClean);
         return null;
     }
 }
 
 export async function deleteCardFromFirestore(userId, deckId, cardId) {
     if (!userId || !dbInstance || !deckId || !cardId) {
-        console.error("FirestoreService: Missing data for deleteCardFromFirestore (userId, dbInstance, deckId, or cardId)");
+        console.error("FirestoreService: Missing data for deleteCardFromFirestore");
         return false;
     }
     try {
@@ -170,7 +163,6 @@ export async function deleteCardFromFirestore(userId, deckId, cardId) {
         return true;
     } catch (error) {
         console.error("FirestoreService: Error deleting card:", error);
-        alert("Đã xảy ra lỗi khi xóa thẻ. Vui lòng thử lại.");
         return false;
     }
 }
@@ -186,21 +178,20 @@ export async function getWebCardStatusFromFirestore(userId, webCardGlobalId) {
         if (docSnap.exists()) {
             const data = docSnap.data();
             return {
-                ...data,
-                isFavorite: data.isFavorite || false, // Lấy trạng thái yêu thích, mặc định là false
-                lastReviewed: data.lastReviewed?.toDate ? data.lastReviewed.toDate().getTime() : (data.lastReviewed || null),
-                nextReviewDate: data.nextReviewDate?.toDate ? data.nextReviewDate.toDate().getTime() : null,
+                isLearned: data.isLearned || false,
+                videoUrl: data.videoUrl || null,
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().getTime() : null
             };
         }
-        return { isFavorite: false }; // Trả về trạng thái mặc định nếu document không tồn tại
+        return { isLearned: false, videoUrl: null }; 
     } catch (error) {
         console.error("FirestoreService: Error fetching web card status for", webCardGlobalId, error);
-        return { isFavorite: false }; // Trả về trạng thái mặc định khi có lỗi
+        return { isLearned: false, videoUrl: null };
     }
 }
 
-export async function updateWebCardStatusInFirestore(userId, webCardGlobalId, cardData, srsDataToUpdate) {
-    if (!userId || !dbInstance || !webCardGlobalId || !cardData || !srsDataToUpdate) {
+export async function updateWebCardStatusInFirestore(userId, webCardGlobalId, cardData, statusDataToUpdate) {
+    if (!userId || !dbInstance || !webCardGlobalId || !cardData || !statusDataToUpdate) {
         console.error("FirestoreService: Missing data for updateWebCardStatusInFirestore. Aborting.");
         return false;
     }
@@ -213,26 +204,24 @@ export async function updateWebCardStatusInFirestore(userId, webCardGlobalId, ca
     else originalTerm = cardData.word;
 
     if (originalTerm === undefined) {
-        console.error("[FirestoreService] CRITICAL: originalTerm is undefined. cardData received:", cardData);
+        console.error("[FirestoreService] CRITICAL: originalTerm is undefined for web card. cardData received:", cardData);
         return false;
     }
 
     const dataToSet = {
         originalCategory: cardData.category,
         originalWordOrPhrase: originalTerm,
-        ...srsDataToUpdate // srsDataToUpdate có thể chứa isFavorite
+        updatedAt: serverTimestamp()
     };
-    
-    // Đảm bảo isFavorite có giá trị boolean nếu được cung cấp
-    if (typeof dataToSet.isFavorite === 'undefined' && srsDataToUpdate.hasOwnProperty('isFavorite')) {
-        // Nếu isFavorite được truyền vào nhưng là undefined, đặt nó thành false
-        // Hoặc nếu bạn muốn giữ nguyên giá trị cũ nếu isFavorite không được truyền, logic sẽ khác
-    } else if (typeof dataToSet.isFavorite !== 'boolean' && dataToSet.hasOwnProperty('isFavorite')) {
-        dataToSet.isFavorite = !!dataToSet.isFavorite; // Chuyển thành boolean
+
+    if (statusDataToUpdate.hasOwnProperty('isLearned')) {
+        dataToSet.isLearned = !!statusDataToUpdate.isLearned; 
+    }
+    if (statusDataToUpdate.hasOwnProperty('videoUrl')) {
+        dataToSet.videoUrl = statusDataToUpdate.videoUrl || null;
     }
 
-
-    console.log("[FirestoreService] updateWebCardStatusInFirestore - Data to set in Firestore:", JSON.parse(JSON.stringify(dataToSet)));
+    console.log("[FirestoreService] updateWebCardStatusInFirestore (with isLearned) - Data to set:", JSON.parse(JSON.stringify(dataToSet)));
 
     try {
         await setDoc(statusRef, dataToSet, { merge: true });
@@ -273,7 +262,7 @@ export async function saveAppStateToFirestoreService(userId, appStateData) {
     }
     const appStateRef = doc(dbInstance, 'users', userId, 'userSettings', 'appStateDoc');
     try {
-        await setDoc(appStateRef, appStateData); // Không cần merge ở đây vì ta lưu toàn bộ appState
+        await setDoc(appStateRef, appStateData); 
         console.log("FirestoreService: AppState saved to Firestore for user:", userId);
         return true;
     } catch (error) {
@@ -320,6 +309,50 @@ export async function saveLectureContent(lectureId, title, contentHTML) {
         return true;
     } catch (error) {
         console.error("FirestoreService: Error saving lecture content:", error);
+        return false;
+    }
+}
+
+// --- Custom Exercise Operations ---
+const CUSTOM_EXERCISES_COLLECTION = 'customExercises';
+
+export async function getCustomExercise(exerciseId) {
+    if (!dbInstance || !exerciseId) {
+        console.error("FirestoreService: Missing dbInstance or exerciseId for getCustomExercise");
+        return null;
+    }
+    const exerciseRef = doc(dbInstance, CUSTOM_EXERCISES_COLLECTION, exerciseId);
+    try {
+        const docSnap = await getDoc(exerciseRef);
+        if (docSnap.exists()) {
+            console.log("FirestoreService: Custom exercise loaded for ID:", exerciseId);
+            return docSnap.data();
+        }
+        console.log("FirestoreService: No custom exercise found for ID:", exerciseId);
+        return null;
+    } catch (error) {
+        console.error("FirestoreService: Error loading custom exercise:", error);
+        return null;
+    }
+}
+
+export async function saveCustomExercise(exerciseId, title, exerciseHTML) {
+    if (!dbInstance || !exerciseId || typeof title !== 'string' || typeof exerciseHTML !== 'string') {
+        console.error("FirestoreService: Missing data or invalid type for saveCustomExercise");
+        return false;
+    }
+    const exerciseRef = doc(dbInstance, CUSTOM_EXERCISES_COLLECTION, exerciseId);
+    const dataToSave = {
+        title: title,
+        exerciseHTML: exerciseHTML, // Lưu HTML của bài tập
+        lastUpdatedAt: serverTimestamp()
+    };
+    try {
+        await setDoc(exerciseRef, dataToSave, { merge: true });
+        console.log("FirestoreService: Custom exercise saved for ID:", exerciseId);
+        return true;
+    } catch (error) {
+        console.error("FirestoreService: Error saving custom exercise:", error);
         return false;
     }
 }
