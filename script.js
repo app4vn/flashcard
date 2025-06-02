@@ -101,7 +101,7 @@ const defaultAppState = {
 };
 let appState = JSON.parse(JSON.stringify(defaultAppState));
 
-const appStateStorageKey = 'flashcardAppState_v7_customExercise_userOnly'; // Updated storage key
+const appStateStorageKey = 'flashcardApp_userOnly_v1'; // Updated storage key for clarity
 
 
 function generateUniqueId(prefix = 'id') {
@@ -340,7 +340,7 @@ async function handleAuthStateChangedInApp(user) {
             authActionButtonMain.classList.replace('bg-red-500', 'bg-indigo-500');
             authActionButtonMain.classList.replace('hover:bg-red-600', 'hover:bg-indigo-600');
         }
-        console.log("User signed out. AppState loaded from localStorage or defaults.");
+        console.log("Auth State Changed: User signed out. AppState loaded from localStorage or defaults.");
     }
 
     if (typeof setupInitialCategoryAndSource === 'function') {
@@ -782,12 +782,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadUserDecks() {
         const userId = getCurrentUserId();
         if (!userId) {
+            console.log("loadUserDecks: No userId found, returning empty decks.");
             userDecks = [];
             populateDeckSelects();
             renderExistingDecksList();
             return;
         }
+        console.log("loadUserDecks: Loading decks for user ID:", userId);
         userDecks = await FirestoreService.loadUserDecksFromFirestore(userId);
+        console.log("loadUserDecks: Loaded decks:", userDecks);
         populateDeckSelects();
         renderExistingDecksList();
     }
@@ -795,44 +798,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function createDeck(name) {
         const userId = getCurrentUserId();
         if (!userId) {
+            console.error("createDeck: User not logged in.");
             alert("Vui lòng đăng nhập để tạo bộ thẻ.");
             openAuthModalFromAuth('login');
             return null;
         }
         if (!name || !name.trim()) {
+            console.warn("createDeck: Deck name is empty.");
             alert("Tên bộ thẻ không được để trống!");
             return null;
         }
 
         if (!Array.isArray(userDecks)) userDecks =[];
         if (userDecks.some(d => d.name.toLowerCase() === name.trim().toLowerCase())) {
+            console.warn("createDeck: Deck name already exists.");
             alert("Tên bộ thẻ đã tồn tại!");
             return null;
         }
 
+        console.log("createDeck: Attempting to create deck with name:", name, "for user:", userId);
         const createdDeck = await FirestoreService.createDeckInFirestore(userId, name);
         if (createdDeck) {
+            console.log("createDeck: Deck successfully created:", createdDeck);
             userDecks.push(createdDeck);
             userDecks.sort((a,b)=>a.name.localeCompare(b.name,'vi'));
             populateDeckSelects();
             renderExistingDecksList();
+        } else {
+            console.error("createDeck: Failed to create deck in Firestore.");
         }
         return createdDeck;
     }
 
     async function updateDeckName(id, newName) {
         const userId = getCurrentUserId();
-        if (!userId) { alert("Vui lòng đăng nhập."); return false; }
-        if (!newName || !newName.trim()) { alert("Tên bộ thẻ không được để trống!"); return false; }
+        if (!userId) { console.error("updateDeckName: User not logged in."); alert("Vui lòng đăng nhập."); return false; }
+        if (!newName || !newName.trim()) { console.warn("updateDeckName: New deck name is empty."); alert("Tên bộ thẻ không được để trống!"); return false; }
 
         if (!Array.isArray(userDecks)) userDecks =[];
         if (userDecks.some(d => d.id !== id && d.name.toLowerCase() === newName.trim().toLowerCase())) {
+            console.warn("updateDeckName: New deck name already exists.");
             alert("Tên bộ thẻ đã tồn tại!");
             return false;
         }
 
+        console.log("updateDeckName: Attempting to update deck ID:", id, "to name:", newName, "for user:", userId);
         const success = await FirestoreService.updateDeckNameInFirestore(userId, id, newName);
         if (success) {
+            console.log("updateDeckName: Deck name updated successfully.");
             const idx = userDecks.findIndex(d => d.id === id);
             if (idx > -1) {
                 userDecks[idx].name = newName.trim();
@@ -841,6 +854,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             populateDeckSelects();
             renderExistingDecksList();
             updateMainHeaderTitle();
+        } else {
+            console.error("updateDeckName: Failed to update deck name in Firestore.");
         }
         return success;
     }
@@ -1247,6 +1262,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         let cards = [];
         const selectedDeckId = deckIdToLoad || (userDeckSelect ? userDeckSelect.value : 'all_user_cards');
 
+        console.log("loadUserCards: Attempting to load cards for user:", userId, "and deck:", selectedDeckId);
+
         if (selectedDeckId && selectedDeckId !== 'all_user_cards' && selectedDeckId !== 'unassigned_cards') {
             cards = await FirestoreService.loadUserCardsFromFirestore(userId, selectedDeckId);
         } else if (selectedDeckId === 'all_user_cards') {
@@ -1256,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     cards.push(...deckCards);
                 }
             }
-             console.log(`All cards loaded for user ${userId}:`, cards);
+             console.log(`loadUserCards: All cards loaded for user ${userId}:`, cards);
         } else if (selectedDeckId === 'unassigned_cards') {
             // If "unassigned_cards" is selected, we need to load all cards and then filter.
             // This logic is already handled by applyAllFilters, so we just load all cards here.
@@ -1281,6 +1298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userId = getCurrentUserId();
         // Always check for user login as source is always 'user'
         if (!userId) {
+            console.error("handleSaveCard: User not logged in.");
             alert("Vui lòng đăng nhập để lưu thẻ.");
             openAuthModalFromAuth('login');
             return;
@@ -1320,11 +1338,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const assignedDeckId = cardDeckAssignmentSelect.value;
         // Always require a deck assignment as source is always 'user'
         if (!assignedDeckId) { 
+            console.warn("handleSaveCard: No deck selected for card.");
             alert("Vui lòng chọn một bộ thẻ để lưu thẻ này.");
             isValid = false;
         }
 
-        if (!isValid) { return; }
+        if (!isValid) { 
+            console.error("handleSaveCard: Form validation failed.");
+            return; 
+        }
 
         const meaningsData = Array.from(meaningBlockElements).map(block => {
             const meaningText = block.querySelector('.card-meaning-text-input').value.trim();
@@ -1375,22 +1397,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (cardCategory === 'idioms') {
             cardDataToSave.idiom = wordValue;
             cardDataToSave.baseVerb = null;
-            cardDataToSave.tags = cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_'));
+            cardDataToSave.tags = Array.isArray(cardTagsInput.value) ? cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_')) : [];
         } else {
             cardDataToSave.word = wordValue;
+            cardDataToSave.tags = Array.isArray(cardTagsInput.value) ? cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_')) : [];
         }
 
         // deckIdForSave is always assignedDeckId
         const deckIdForSave = assignedDeckId || null; 
 
+        console.log("handleSaveCard: Attempting to save card. User ID:", userId, "Deck ID:", deckIdForSave, "Card Data:", JSON.parse(JSON.stringify(cardDataToSave)), "Editing ID:", editingCardId);
         const savedCardId = await FirestoreService.saveCardToFirestore(userId, deckIdForSave, cardDataToSave, editingCardId);
 
 
         if (savedCardId) {
+            console.log("handleSaveCard: Card saved successfully with ID:", savedCardId);
             showToast(editingCardId ? "Đã cập nhật thẻ!" : "Đã thêm thẻ mới!", 2000, 'success');
             closeAddEditModal();
             // Always load user data
             await loadVocabularyData(categorySelect.value); 
+        } else {
+            console.error("handleSaveCard: Failed to save card.");
+            showToast("Lỗi: Không thể lưu thẻ.", 3000, 'error');
         }
         currentEditingCardId = null;
     }
@@ -1398,11 +1426,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function handleDeleteCard(){
         const userId = getCurrentUserId();
         if (!userId) {
+            console.error("handleDeleteCard: User not logged in.");
             alert("Vui lòng đăng nhập để xóa thẻ.");
             return;
         }
         // Always check if it's a user card, as source is always 'user'
         if(window.currentData.length===0 || !window.currentData[window.currentIndex].isUserCard) { 
+            console.warn("handleDeleteCard: Cannot delete non-user card or no card selected.");
             alert("Không thể xóa thẻ này (không phải thẻ của bạn hoặc không có thẻ).");
             return;
         }
@@ -1412,15 +1442,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const deckIdOfCard = cardToDelete.deckId;
 
         if (!cardIdToDelete) {
+            console.error("handleDeleteCard: Card ID missing for deletion.");
             alert("Không thể xác định thẻ để xóa. Thiếu ID thẻ.");
             return;
         }
         const cardIdentifierText = cardToDelete.word || cardToDelete.phrasalVerb || cardToDelete.collocation || cardToDelete.idiom || "Thẻ không tên";
         if(!confirm(`Bạn có chắc chắn muốn xóa thẻ "${cardIdentifierText}"? Hành động này không thể hoàn tác.`))return;
 
+        console.log("handleDeleteCard: Attempting to delete card ID:", cardIdToDelete, "from deck:", deckIdOfCard, "for user:", userId);
         const success = await FirestoreService.deleteCardFromFirestore(userId, deckIdOfCard, cardIdToDelete);
 
         if (success) {
+            console.log("handleDeleteCard: Card deleted successfully.");
             showToast("Đã xóa thẻ.", 2000, 'success');
             let newIndex = window.currentIndex;
             if(window.currentIndex >= window.currentData.length - 1 && window.currentIndex > 0) {
@@ -1440,6 +1473,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             getCategoryState(currentDatasetSource,categorySelect.value).currentIndex = window.currentIndex;
             saveAppState();
             window.updateFlashcard();
+        } else {
+            console.error("handleDeleteCard: Failed to delete card.");
+            showToast("Lỗi: Không thể xóa thẻ.", 3000, 'error');
         }
     }
     function shuffleArray(arr){const nA=[...arr];for(let i=nA.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nA[i],nA[j]]=[nA[j],nA[i]];}return nA;}
@@ -1548,6 +1584,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Always load user cards
         if (!userId) {
+            console.log("loadVocabularyData: No user logged in, displaying login prompt.");
             wordDisplay.classList.add('word-display-empty-state');
             wordDisplay.innerHTML = `<p>Vui lòng đăng nhập để xem hoặc tạo thẻ của bạn.</p><button id="login-prompt-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md mt-2">Đăng nhập ngay</button>`;
             const loginPromptBtn = document.getElementById('login-prompt-btn');
@@ -1558,6 +1595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateCardInfo(); window.updateMainHeaderTitle(); window.updateSidebarFilterVisibility();
             return;
         }
+        console.log("loadVocabularyData: User logged in, loading user decks and cards.");
         await loadUserDecks();
         userDeckSelect.value = stateForCurrentSourceCategory.deckId || appState.lastSelectedDeckId || 'all_user_cards';
         activeMasterList = await loadUserCards(userDeckSelect.value); 
@@ -1619,7 +1657,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         const item = window.currentData.length > 0 ? window.currentData[window.currentIndex] : null;
-        console.log('[updateFlashcard] Rendering card. Item:', JSON.parse(JSON.stringify(item)));
+        console.log('[updateFlashcard] Rendering card. Item:', JSON.parse(JSON.stringify(item || {})));
 
         if (item) {
             addCardToRecentlyViewed(item);
@@ -2000,6 +2038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function processAndSaveJsonCards() {
         const userId = getCurrentUserId();
         if (!userId) {
+            console.error("processAndSaveJsonCards: User not logged in.");
             jsonImportErrorMessage.textContent = "Vui lòng đăng nhập để tạo thẻ từ JSON.";
             jsonImportErrorMessage.classList.remove('hidden');
             openAuthModalFromAuth('login');
@@ -2008,6 +2047,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const jsonString = cardJsonInput.value.trim();
         if (!jsonString) {
+            console.warn("processAndSaveJsonCards: JSON input is empty.");
             jsonImportErrorMessage.textContent = "Vui lòng dán mã JSON vào ô nhập liệu.";
             jsonImportErrorMessage.classList.remove('hidden');
             return;
@@ -2015,6 +2055,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const selectedDeckId = jsonCardDeckAssignmentSelect.value;
         if (!selectedDeckId) {
+            console.warn("processAndSaveJsonCards: No deck selected for JSON import.");
             jsonImportErrorMessage.textContent = "Vui lòng chọn một bộ thẻ để gán các thẻ này vào.";
             jsonImportErrorMessage.classList.remove('hidden');
             return;
@@ -2035,8 +2076,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 throw new Error("Cấu trúc JSON không hợp lệ. Cần một đối tượng thẻ hoặc một mảng các đối tượng thẻ.");
             }
+            console.log("processAndSaveJsonCards: Parsed JSON data:", cardsToProcess);
         } catch (error) {
-            console.error("Lỗi parse JSON:", error);
+            console.error("processAndSaveJsonCards: Lỗi parse JSON:", error);
             jsonImportErrorMessage.textContent = `Lỗi parse JSON: ${error.message}`;
             jsonImportErrorMessage.classList.remove('hidden');
             processJsonBtn.disabled = false;
@@ -2057,6 +2099,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ) {
                 errorCount++;
                 errorMessages.push(`Thẻ "${mainTerm}" thiếu thông tin bắt buộc (category, từ/cụm từ/thành ngữ, hoặc nghĩa chính).`);
+                console.warn("processAndSaveJsonCards: Skipping card due to missing required info:", cardJson);
                 continue;
             }
 
@@ -2102,12 +2145,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                  cardDataToSave.tags = Array.isArray(cardJsonClean.tags) ? cardJsonClean.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
             }
 
+            console.log("processAndSaveJsonCards: Attempting to save card:", mainTerm, "Data:", JSON.parse(JSON.stringify(cardDataToSave)));
             const savedCardId = await FirestoreService.saveCardToFirestore(userId, selectedDeckId, cardDataToSave);
             if (savedCardId) {
                 successCount++;
+                console.log("processAndSaveJsonCards: Card saved successfully:", mainTerm, "ID:", savedCardId);
             } else {
                 errorCount++;
                 errorMessages.push(`Lỗi lưu thẻ "${mainTerm}" vào Firestore.`);
+                console.error("processAndSaveJsonCards: Failed to save card:", mainTerm);
             }
         }
 
@@ -2157,15 +2203,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let success = false;
                 // Always save to user card
                 const updatedData = { isLearned: newLearnedStatus, updatedAt: serverTimestamp() };
+                console.log("openBottomSheet: Attempting to update learned status for card ID:", cardItem.id, "to:", newLearnedStatus);
                 success = await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, updatedData, cardItem.id);
                 
 
                 if (success) {
+                    console.log("openBottomSheet: Learned status updated successfully.");
                     cardItem.isLearned = newLearnedStatus;
                     updateFlashcard(); 
                     showToast(newLearnedStatus ? "Đã đánh dấu thẻ là Đã học" : "Đã bỏ đánh dấu Đã học", 2000, "success");
                     closeBottomSheet();
                 } else {
+                    console.error("openBottomSheet: Failed to update learned status.");
                     showToast("Lỗi cập nhật trạng thái thẻ", 2000, "error");
                 }
             };
@@ -2203,7 +2252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (viewType === 'lecture') {
             bottomSheet.classList.add('bottom-sheet-lecture-mode');
             const cardLectureId = generateCardLectureId(cardItem); 
-            console.log("Attempting to load lecture with ID:", cardLectureId); 
+            console.log("openBottomSheet (lecture): Attempting to load lecture with ID:", cardLectureId); 
             const lectureTitlePrefix = "Bài giảng: ";
             bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
@@ -2253,11 +2302,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             saveLectureBtn.disabled = true;
                             saveLectureBtn.textContent = 'Đang lưu...';
+                            console.log("openBottomSheet (lecture): Attempting to save lecture. ID:", cardLectureId, "Title:", newTitle);
                             const success = await FirestoreService.saveLectureContent(cardLectureId, newTitle, newContentHTML);
                             if (success) {
+                                console.log("openBottomSheet (lecture): Lecture saved successfully.");
                                 showToast("Đã lưu bài giảng!", 2000, 'success');
                                 closeBottomSheet();
                             } else {
+                                console.error("openBottomSheet (lecture): Failed to save lecture.");
                                 showToast("Lỗi: Không thể lưu bài giảng.", 3000, 'error');
                             }
                             saveLectureBtn.disabled = false;
@@ -2267,15 +2319,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     } else {
                         if (lectureData && lectureData.contentHTML) {
+                            console.log("openBottomSheet (lecture): Displaying lecture content.");
                             bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
                             bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
                         } else {
+                            console.log("openBottomSheet (lecture): No lecture content found.");
                             bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài giảng chi tiết cho từ này.</p>';
                         }
                     }
                 })
                 .catch(error => {
-                    console.error("Lỗi khi tải bài giảng:", error);
+                    console.error("openBottomSheet (lecture): Lỗi khi tải bài giảng:", error);
                     bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
                 });
             hasActions = true;
@@ -2343,11 +2397,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             
                             saveExerciseBtn.disabled = true;
                             saveExerciseBtn.textContent = 'Đang lưu...';
+                            console.log("openBottomSheet (exercise): Attempting to save exercise. ID:", exerciseId, "Title:", newTitle);
                             const success = await FirestoreService.saveCustomExercise(exerciseId, newTitle, newExerciseHTML);
                             if (success) {
+                                console.log("openBottomSheet (exercise): Exercise saved successfully.");
                                 showToast("Đã lưu bài tập!", 2000, 'success');
                                 closeBottomSheet();
                             } else {
+                                console.error("openBottomSheet (exercise): Failed to save exercise.");
                                 showToast("Lỗi: Không thể lưu bài tập.", 3000, 'error');
                             }
                             saveExerciseBtn.disabled = false;
@@ -2357,16 +2414,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     } else { 
                         if (exerciseData && exerciseData.exerciseHTML) {
+                            console.log("openBottomSheet (exercise): Displaying exercise content.");
                             bottomSheetTitle.textContent = exerciseData.title || `${exerciseTitlePrefix}${cardTerm}`;
                             bottomSheetContent.innerHTML = `<div class="custom-exercise-render-area p-2">${exerciseData.exerciseHTML}</div>`;
                             initializeCustomExerciseInteractions(bottomSheetContent.querySelector('.custom-exercise-render-area')); 
                         } else {
+                            console.log("openBottomSheet (exercise): No exercise content found.");
                             bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài tập cho từ này.</p>';
                         }
                     }
                 })
                 .catch(error => {
-                    console.error("Lỗi khi tải bài tập tùy chỉnh:", error);
+                    console.error("openBottomSheet (exercise): Lỗi khi tải bài tập tùy chỉnh:", error);
                     bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài tập. Vui lòng thử lại.</p>';
                 });
             hasActions = true; 
@@ -2413,7 +2472,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         iframe.allowFullscreen = true;
                         iframeContainer.appendChild(iframe);
                         youtubeContentDiv.appendChild(iframeContainer);
+                        console.log("setActiveMediaTab: YouTube video loaded for ID:", videoId);
                     } else {
+                        console.warn("setActiveMediaTab: Invalid YouTube video URL provided.");
                         youtubeContentDiv.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video YouTube không hợp lệ.</p>';
                     }
                 } else {
@@ -2433,6 +2494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                      searchButton.innerHTML = `<i class="fab fa-youtube mr-2"></i> Tìm trên YouTube với từ khóa "${baseSearchTerm}"`;
                      searchButton.onclick = () => {
                          window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank'); // Corrected YouTube search URL
+                         console.log("setActiveMediaTab: Opening YouTube search for:", youtubeSearchTerm);
                      };
                      searchButtonContainer.appendChild(searchButton);
                      youtubeContentDiv.appendChild(searchButtonContainer);
@@ -2459,6 +2521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 videoIframe.src = '';
             }
             bottomSheetContent.innerHTML = '';
+            console.log("closeBottomSheet: Bottom sheet closed.");
         }, 300);
     }
 
@@ -2500,9 +2563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (input.value.trim().toLowerCase() === correctAnswer.toLowerCase()) {
                     feedbackArea.textContent = "Chính xác!";
                     feedbackArea.className = 'text-green-600 dark:text-green-400 mt-2 text-sm';
+                    console.log("Exercise: Correct answer for fill-in-the-blank.");
                 } else {
                     feedbackArea.textContent = `Sai rồi. Đáp án đúng là: "${correctAnswer}"`;
                     feedbackArea.className = 'text-red-600 dark:text-red-400 mt-2 text-sm';
+                    console.log("Exercise: Incorrect answer for fill-in-the-blank. Correct:", correctAnswer, "User:", input.value);
                 }
             } else if (action === 'check-mcq-sentence') {
                 const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
@@ -2519,13 +2584,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (selectedOption.value === correctAnswer) {
                         feedbackArea.textContent = "Chính xác! 'Make up for' trong câu này có nghĩa là bù đắp, đền bù.";
                         feedbackArea.className = 'text-green-600 dark:text-green-400 mt-2 text-sm';
+                        console.log("Exercise: Correct answer for MCQ.");
                     } else {
                         feedbackArea.textContent = "Chưa đúng. Hãy xem lại các lựa chọn và nghĩa của 'make up for'.";
                         feedbackArea.className = 'text-red-600 dark:text-red-400 mt-2 text-sm';
+                        console.log("Exercise: Incorrect answer for MCQ. Correct:", correctAnswer, "User selected:", selectedOption.value);
                     }
                 } else {
                     feedbackArea.textContent = "Vui lòng chọn một đáp án.";
                     feedbackArea.className = 'text-yellow-600 dark:text-yellow-400 mt-2 text-sm';
+                    console.warn("Exercise: No option selected for MCQ.");
                 }
             } else if (action === 'check-rewrite') {
                 const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
@@ -2536,6 +2604,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 suggestedAnswerEl.style.display = 'block'; 
                 feedbackArea.className = 'text-slate-500 dark:text-slate-400 mt-2 text-sm'; // Đảm bảo class đúng
+                console.log("Exercise: Showing suggested answer for rewrite.");
             } else if (action === 'show-example-sentence-creation') {
                 const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
                 const exampleSentenceEl = feedbackArea.querySelector('[data-example-sentence]');
@@ -2545,6 +2614,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 exampleSentenceEl.style.display = 'block'; 
                 feedbackArea.className = 'text-slate-500 dark:text-slate-400 mt-2 text-sm'; // Đảm bảo class đúng
+                console.log("Exercise: Showing example sentence for creation.");
             }
         });
     }
@@ -2628,7 +2698,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if(userDeckSelect) userDeckSelect.addEventListener('change', async ()=>{
             const userId = getCurrentUserId();
-            if(!userId) return;
+            if(!userId) {
+                console.warn("userDeckSelect change: No user logged in, cannot change deck.");
+                return;
+            }
+            console.log("userDeckSelect change: User ID:", userId, "Selected deck:", userDeckSelect.value);
             const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
             stateForCurrentCategory.deckId = userDeckSelect.value;
             appState.lastSelectedDeckId = userDeckSelect.value;
@@ -2640,10 +2714,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(manageDecksBtn) manageDecksBtn.addEventListener('click', async ()=>{
             const userId = getCurrentUserId();
             if(!userId) {
+                console.warn("manageDecksBtn click: No user logged in.");
                 alert("Vui lòng đăng nhập để quản lý bộ thẻ.");
                 openAuthModalFromAuth('login');
                 return;
             }
+            console.log("manageDecksBtn click: Opening manage decks modal for user:", userId);
             await loadUserDecks();
             renderExistingDecksList();
             manageDecksModal.classList.remove('hidden','opacity-0');
@@ -2653,6 +2729,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             newDeckNameInput.focus();
         });
         if(closeDeckModalBtn) closeDeckModalBtn.addEventListener('click', ()=>{
+            console.log("closeDeckModalBtn click: Closing manage decks modal.");
             manageDecksModal.classList.add('opacity-0');
             if (deckModalContent) deckModalContent.classList.add('scale-95');
             setTimeout(()=>manageDecksModal.classList.add('hidden'),250);
@@ -2661,14 +2738,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(addNewDeckBtn) addNewDeckBtn.addEventListener('click', async ()=>{
             const userId = getCurrentUserId();
             if(!userId) {
+                console.warn("addNewDeckBtn click: No user logged in.");
                 alert("Vui lòng đăng nhập để tạo bộ thẻ.");
                 openAuthModalFromAuth('login');
                 return;
             }
 
             const deckName = newDeckNameInput.value.trim();
+            console.log("addNewDeckBtn click: Attempting to add new deck with name:", deckName, "for user:", userId);
 
             if (!deckName) {
+                console.warn("addNewDeckBtn click: Deck name is empty.");
                 alert("Tên bộ thẻ không được để trống.");
                 newDeckNameInput.focus();
                 return;
@@ -2677,6 +2757,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const createdDeck = await createDeck(deckName);
 
             if(createdDeck){
+                console.log("addNewDeckBtn click: New deck created, updating UI.");
                 newDeckNameInput.value = '';
 
                 // Always user source
@@ -2688,27 +2769,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeMasterList = await loadUserCards(createdDeck.id);
                 applyAllFilters(false);
                 updateMainHeaderTitle();
+            } else {
+                console.error("addNewDeckBtn click: Failed to create new deck.");
             }
         });
 
         if(openAddCardModalBtn) openAddCardModalBtn.addEventListener('click', async () => {
+            console.log("openAddCardModalBtn click: Opening add new card modal.");
             await openAddEditModal('add');
         });
         if(closeModalBtn) closeModalBtn.addEventListener('click', closeAddEditModal);
         if(cancelCardBtn) cancelCardBtn.addEventListener('click', closeAddEditModal);
         if(addEditCardForm) addEditCardForm.addEventListener('submit', async (e)=>{
             e.preventDefault();
+            console.log("addEditCardForm submit: Handling save card.");
             await handleSaveCard();
         });
 
         if (manualInputModeBtn) {
-            manualInputModeBtn.addEventListener('click', () => switchToInputMode('manual'));
+            manualInputModeBtn.addEventListener('click', () => {
+                console.log("manualInputModeBtn click: Switching to manual input mode.");
+                switchToInputMode('manual');
+            });
         }
         if (jsonInputModeBtn) {
-            jsonInputModeBtn.addEventListener('click', () => switchToInputMode('json'));
+            jsonInputModeBtn.addEventListener('click', () => {
+                console.log("jsonInputModeBtn click: Switching to JSON input mode.");
+                switchToInputMode('json');
+            });
         }
         if (processJsonBtn) {
-            processJsonBtn.addEventListener('click', processAndSaveJsonCards);
+            processJsonBtn.addEventListener('click', () => {
+                console.log("processJsonBtn click: Processing and saving JSON cards.");
+                processAndSaveJsonCards();
+            });
         }
 
         // Removed all copy to deck modal event listeners
@@ -2737,13 +2831,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cardOptionsMenuBtn) {
             cardOptionsMenuBtn.addEventListener('click', () => {
                 const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'default');
+                if (currentCard) {
+                    console.log("cardOptionsMenuBtn click: Opening bottom sheet for card options.");
+                    openBottomSheet(currentCard, 'default');
+                } else {
+                    console.warn("cardOptionsMenuBtn click: No current card to open options for.");
+                }
             });
         }
         if (cardOptionsMenuBtnBack) {
              cardOptionsMenuBtnBack.addEventListener('click', () => {
                 const currentCard = window.currentData[window.currentIndex];
-                if (currentCard) openBottomSheet(currentCard, 'default');
+                if (currentCard) {
+                    console.log("cardOptionsMenuBtnBack click: Opening bottom sheet for card options.");
+                    openBottomSheet(currentCard, 'default');
+                } else {
+                    console.warn("cardOptionsMenuBtnBack click: No current card to open options for.");
+                }
             });
         }
         if (closeBottomSheetBtn) {
@@ -2755,20 +2859,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if(actionBtnNotes) actionBtnNotes.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'lecture');
+            if (currentCard) {
+                console.log("actionBtnNotes click: Opening bottom sheet for lecture.");
+                openBottomSheet(currentCard, 'lecture');
+            } else {
+                console.warn("actionBtnNotes click: No current card for lecture.");
+            }
         });
         if(actionBtnMedia) actionBtnMedia.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'media', 'youtube_custom');
+            if (currentCard) {
+                console.log("actionBtnMedia click: Opening bottom sheet for media.");
+                openBottomSheet(currentCard, 'media', 'youtube_custom');
+            } else {
+                console.warn("actionBtnMedia click: No current card for media.");
+            }
         });
         if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'custom_exercise'); 
+            if (currentCard) {
+                console.log("actionBtnPracticeCard click: Opening bottom sheet for custom exercise.");
+                openBottomSheet(currentCard, 'custom_exercise'); 
+            } else {
+                console.warn("actionBtnPracticeCard click: No current card for custom exercise.");
+            }
         });
 
         if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if(currentCard) setActiveMediaTab('youtube_custom', currentCard);
+            if(currentCard) {
+                console.log("tabBtnYouTube click: Setting active media tab to YouTube.");
+                setActiveMediaTab('youtube_custom', currentCard);
+            } else {
+                console.warn("tabBtnYouTube click: No current card to set media tab for.");
+            }
         });
 
 
@@ -2779,18 +2903,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             const stateForNewCategory = getCategoryState('user', selCat); 
             if(filterCardStatusSelect) filterCardStatusSelect.value = stateForNewCategory.filterMarked;
 
+            console.log("categorySelect change: Loading vocabulary data for category:", selCat);
             await loadVocabularyData(selCat);
             window.updateMainHeaderTitle();
         });
-        if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>applyAllFilters(false));
-        if(tagSelect) tagSelect.addEventListener('change', ()=>applyAllFilters(false));
-        if(searchInput) searchInput.addEventListener('input', ()=>applyAllFilters(false));
-        if(filterCardStatusSelect) filterCardStatusSelect.addEventListener('change', ()=>applyAllFilters(false));
+        if(baseVerbSelect) baseVerbSelect.addEventListener('change', ()=>{
+            console.log("baseVerbSelect change: Applying filters.");
+            applyAllFilters(false);
+        });
+        if(tagSelect) tagSelect.addEventListener('change', ()=>{
+            console.log("tagSelect change: Applying filters.");
+            applyAllFilters(false);
+        });
+        if(searchInput) searchInput.addEventListener('input', ()=>{
+            console.log("searchInput input: Applying filters.");
+            applyAllFilters(false);
+        });
+        if(filterCardStatusSelect) filterCardStatusSelect.addEventListener('change', ()=>{
+            console.log("filterCardStatusSelect change: Applying filters.");
+            applyAllFilters(false);
+        });
 
 
         if(flipBtn) flipBtn.addEventListener('click', ()=>{
             if(window.currentData.length>0) {
+                console.log("flipBtn click: Toggling flashcard flip.");
                 flashcardElement.classList.toggle('flipped');
+            } else {
+                console.warn("flipBtn click: No cards to flip.");
             }
         });
 
@@ -2798,7 +2938,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             flipIconFront.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (window.currentData.length > 0) {
+                    console.log("flipIconFront click: Toggling flashcard flip.");
                     flashcardElement.classList.toggle('flipped');
+                } else {
+                    console.warn("flipIconFront click: No cards to flip.");
                 }
             });
         }
@@ -2807,7 +2950,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             flipIconBack.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (window.currentData.length > 0) {
+                    console.log("flipIconBack click: Toggling flashcard flip.");
                     flashcardElement.classList.toggle('flipped');
+                } else {
+                    console.warn("flipIconBack click: No cards to flip.");
                 }
             });
         }
@@ -2815,25 +2961,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if(nextBtn) nextBtn.addEventListener('click', ()=>{
             window.speechSynthesis.cancel();
-            if(nextBtn.disabled)return;
+            if(nextBtn.disabled) {
+                console.warn("nextBtn click: Next button is disabled.");
+                return;
+            }
             if(window.currentIndex<window.currentData.length-1){
                 window.currentIndex++;
                 getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;
                 saveAppState();
                 window.updateFlashcard();
-            } 
+                console.log("nextBtn click: Moving to next card. Index:", window.currentIndex);
+            } else {
+                console.log("nextBtn click: Already at the last card.");
+            }
         });
         if(prevBtn) prevBtn.addEventListener('click', ()=>{
             window.speechSynthesis.cancel();
-            if(window.currentIndex>0){window.currentIndex--;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}});
+            if(prevBtn.disabled) {
+                console.warn("prevBtn click: Previous button is disabled.");
+                return;
+            }
+            if(window.currentIndex>0){
+                window.currentIndex--;
+                getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;
+                saveAppState();
+                window.updateFlashcard();
+                console.log("prevBtn click: Moving to previous card. Index:", window.currentIndex);
+            } else {
+                console.log("prevBtn click: Already at the first card.");
+            }
+        });
         if(speakerBtn) speakerBtn.addEventListener('click', (e)=>{
             e.stopPropagation();
             window.speechSynthesis.cancel();
             const txt=wordDisplay.dataset.ttsText;
-            if(txt&&!speakerBtn.disabled)speakText(txt,currentWordSpansMeta);});
+            if(txt&&!speakerBtn.disabled) {
+                speakText(txt,currentWordSpansMeta);
+                console.log("speakerBtn click: Speaking word/phrase:", txt);
+            } else {
+                console.warn("speakerBtn click: No text to speak or speaker is disabled.");
+            }
+        });
 
 
-        if(addAnotherMeaningBlockAtEndBtn) addAnotherMeaningBlockAtEndBtn.addEventListener('click', () => addMeaningBlockToEnd());
+        if(addAnotherMeaningBlockAtEndBtn) addAnotherMeaningBlockAtEndBtn.addEventListener('click', () => {
+            console.log("addAnotherMeaningBlockAtEndBtn click: Adding another meaning block.");
+            addMeaningBlockToEnd();
+        });
         if(cardWordInput) cardWordInput.addEventListener('input', () => clearFieldError(cardWordInput, cardWordError));
         initializeClearButtonForSearch();
         if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('input', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); if (inputValue.length === 0) { hideAutocompleteSuggestions(cardBaseVerbInput); return; } const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions); });
@@ -2850,6 +3024,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     currentExampleSpeechRate = parseFloat(targetSelect.value);
                     saveExampleSpeechRate();
                     updateAllExampleSpeechRateDropdownsUI();
+                    console.log("Meaning display container change: Example speech rate updated to:", currentExampleSpeechRate);
                 }
             });
         }
@@ -2879,7 +3054,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const finalCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
         if(filterCardStatusSelect) filterCardStatusSelect.value = finalCategoryState.filterMarked;
 
-
+        console.log("setupInitialCategoryAndSource: Initial category:", initialCategory, "Initial source:", initialSource);
         await loadVocabularyData(categorySelect.value);
     }
 
