@@ -1,23 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, getDoc, Timestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Import từ các module tự tạo
 import { initializeAuthModule, openAuthModal as openAuthModalFromAuth, getCurrentUserId, handleAuthAction as handleAuthActionFromAuth } from './auth.js';
 import * as FirestoreService from './firestoreService.js';
-import { initializeSrsModule, processSrsRatingWrapper } from './srs.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBcBpsCGt-eWyAvtNaqxG0QncqzYDJwG70",
+  apiKey: "AIzaSyBcBpsCGt-eWyAvtNaqxG0QncqzYDJwG70", // Replace with your actual API key if needed
   authDomain: "fcard-84890.firebaseapp.com",
   projectId: "fcard-84890",
   storageBucket: "fcard-84890.appspot.com",
@@ -31,19 +22,17 @@ const fbAuth = getAuth(fbApp);
 const db = getFirestore(fbApp);
 
 // KHAI BÁO CÁC BIẾN DOM SẼ ĐƯỢC SỬ DỤNG Ở PHẠM VI MODULE
-let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDisplay,
+let mainHeaderTitle, categorySelect, flashcardElement, wordDisplay,
     pronunciationDisplay, meaningDisplayContainer, notesDisplay, prevBtn, flipBtn,
     nextBtn, currentCardIndexDisplay, totalCardsDisplay, speakerBtn, speakerExampleBtn,
     tagFilterContainer, tagSelect, searchInput, baseVerbFilterContainer, baseVerbSelect,
-    practiceTypeSelect, practiceArea, multipleChoiceOptionsContainer, feedbackMessage,
     filterCardStatusSelect,
-    btnSrsAgain, btnSrsHard, btnSrsGood, btnSrsEasy,
     hamburgerMenuBtn, filterSidebar, closeSidebarBtn, sidebarOverlay, tagsDisplayFront,
-    typingInputContainer, typingInput, submitTypingAnswerBtn, openAddCardModalBtn,
+    openAddCardModalBtn,
     addEditCardModal, closeModalBtn, addEditCardForm, modalTitle, cardIdInput,
     cardWordInput, cardPronunciationInput, cardGeneralNotesInput, cardVideoUrlInput,
-    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields, 
-    cardBaseVerbInput, cardTagsInput, cardWordLabel, 
+    meaningBlocksContainer, addAnotherMeaningBlockAtEndBtn, phrasalVerbSpecificFields,
+    cardBaseVerbInput, cardTagsInput, cardWordLabel,
     cancelCardBtn, saveCardBtn, deckCreationHint,
     userDeckFilterContainer, userDeckSelect, manageDecksBtn, modalDeckAssignmentContainer,
     cardDeckAssignmentSelect, manageDecksModal, deckModalContent, closeDeckModalBtn,
@@ -51,125 +40,137 @@ let mainHeaderTitle, cardSourceSelect, categorySelect, flashcardElement, wordDis
     manualInputModeBtn, jsonInputModeBtn, jsonInputArea, cardJsonInput, processJsonBtn,
     jsonImportErrorMessage, jsonImportSuccessMessage, jsonCardDeckAssignmentSelect,
     jsonDeckCreationHint,
-    copyToDeckModal, closeCopyToDeckModalBtn,
-    copyToDeckSelect, copyNewDeckNameContainer, copyNewDeckNameInput, copyNewDeckError,
-    copyToDeckErrorMessage, copyToDeckSuccessMessage, cancelCopyToDeckBtn, confirmCopyToDeckBtn,
     bottomSheetOverlay, bottomSheet, bottomSheetTitle, closeBottomSheetBtn, bottomSheetContent,
     cardOptionsMenuBtn, cardOptionsMenuBtnBack,
     authActionButtonMain, userEmailDisplayMain,
-    srsFeedbackToastEl,
-    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard,
-    exitSingleCardPracticeBtn,
+    actionBtnNotes, actionBtnMedia, actionBtnPracticeCard, 
     bottomSheetTabsContainer, tabBtnYouTube,
     flipIconFront, flipIconBack, cardFrontElement,
-    recentlyViewedListElement, noRecentCardsMessageElement; 
+    recentlyViewedListElement, noRecentCardsMessageElement;
 
 
 // KHAI BÁO CÁC BIẾN TRẠNG THÁI ỨNG DỤNG Ở PHẠM VI MODULE
 let baseVerbSuggestions = [];
 let tagSuggestions = [];
-let currentDatasetSource = 'web';
+// currentDatasetSource luôn là 'user' vì đã bỏ thẻ của Web
+let currentDatasetSource = 'user'; 
 window.currentData = [];
 window.currentIndex = 0;
 let currentWordSpansMeta = [];
 let activeMasterList = [];
-let practiceType = "off";
 let currentInputMode = 'manual';
-let currentAnswerChecked = false;
-let currentCorrectAnswerForPractice = '';
 let userDecks = [];
-let learningCardNextButtonTimer = null;
-let learningCardCountdownInterval = null;
 let currentEditingCardId = null;
 let currentEditingDeckId = null;
-let isSingleCardPracticeMode = false;
-let originalCurrentData = [];
-let originalCurrentIndex = 0;
 
 let touchStartX = 0;
 let touchEndX = 0;
 let touchStartY = 0;
 let touchEndY = 0;
-const swipeThreshold = 50;
-const swipeMaxVerticalOffset = 75;
+const swipeThreshold = 50; 
+const swipeMaxVerticalOffset = 75; 
 
-let currentExampleSpeechRate = 1.0;
+let currentExampleSpeechRate = 1.0; 
 const EXAMPLE_SPEECH_RATE_KEY = 'flashcardAppExampleSpeechRate';
 const MAX_RECENTLY_VIEWED_CARDS = 10; 
 
-const ADMIN_UID = "xPLCuTRXnvNb9Uqa2ezFpOcyQmz2"; 
+const ADMIN_UID = "xPLCuTRXnvNb9Uqa2ezFpOcyQmz2"; // Thay bằng Admin UID thực tế nếu cần
 
 
 const tagDisplayNames = {"all": "Tất cả chủ đề", "actions_general": "Hành động chung", "actions_tasks": "Hành động & Nhiệm vụ", "movement_travel": "Di chuyển & Du lịch", "communication": "Giao tiếp", "relationships_social": "Quan hệ & Xã hội", "emotions_feelings": "Cảm xúc & Cảm giác", "problems_solutions": "Vấn đề & Giải pháp", "work_business": "Công việc & Kinh doanh", "learning_information": "Học tập & Thông tin", "daily_routine": "Thói quen hàng ngày", "health_wellbeing": "Sức khỏe & Tinh thần", "objects_possession": "Đồ vật & Sở hữu", "time_planning": "Thời gian & Kế hoạch", "money_finance": "Tiền bạc & Tài chính", "behavior_attitude": "Hành vi & Thái độ", "begin_end_change": "Bắt đầu, Kết thúc & Thay đổi", "food_drink": "Ăn uống", "home_living": "Nhà cửa & Đời sống", "rules_systems": "Quy tắc & Hệ thống", "effort_achievement": "Nỗ lực & Thành tựu", "safety_danger": "An toàn & Nguy hiểm", "technology": "Công nghệ", "nature": "Thiên nhiên & Thời tiết", "art_creation": "Nghệ thuật & Sáng tạo" };
 
-const sampleData = {
-    "phrasalVerbs": [
-        { "phrasalVerb": "Look up", "baseVerb": "look", "category": "phrasalVerbs", "pronunciation": "/lʊk ʌp/", "meanings": [ { "id": "m_pv_sample_1_1", "text": "Tra cứu (thông tin)", "notes": "Trong từ điển, danh bạ...", "examples": [ { "id": "ex_pv_sample_1_1_1", "eng": "I need to look up this word in the dictionary.", "vie": "Tôi cần tra từ này trong từ điển." }, { "id": "ex_pv_sample_1_1_2", "eng": "Can you look up the train times for me?", "vie": "Bạn có thể tra giờ tàu cho tôi được không?" } ]}], "tags": ["learning_information", "actions_tasks"], "generalNotes": "Một cụm động từ phổ biến." },
-    ],
-    "nouns": [ { "word": "Solution", "category": "nouns", "pronunciation": "/səˈluːʃən/", "meanings": [ { "id": "m_noun_sample_1_1", "text": "Giải pháp cho một vấn đề."}], "generalNotes": "Danh từ đếm được." } ],
-    "verbs": [ { "word": "Set", "category": "verbs", "pronunciation": "/set/", "meanings": [ { "id": "m_verb_sample_1_1", "text": "Đặt, để một cái gì đó ở một vị trí cụ thể."}], "generalNotes": "Một động từ có nhiều nghĩa." } ],
-    "adjectives": [ { "word": "Happy", "category": "adjectives", "pronunciation": "/ˈhæpi/", "meanings": [ { "id": "m_adj_sample_1_1", "text": "Cảm thấy hoặc thể hiện sự vui vẻ, hài lòng."}], "generalNotes": "" } ],
-    "collocations": [
-        { "collocation": "take a break", "baseVerb": "take", "category": "collocations", "pronunciation": "/teɪk ə breɪk/", "meanings": [ { "id": "m_col_sample_1_1", "text": "Nghỉ giải lao, nghỉ ngơi một lát", "notes": "Thường dùng trong công việc hoặc học tập", "examples": [ { "id": "ex_col_sample_1_1_1", "eng": "Let's take a break for 10 minutes.", "vie": "Chúng ta hãy nghỉ giải lao 10 phút." }, { "id": "ex_col_sample_1_1_2", "eng": "She's been working all day, she needs to take a break.", "vie": "Cô ấy đã làm việc cả ngày, cô ấy cần nghỉ ngơi." } ]}], "tags": ["daily_routine", "work_business"], "generalNotes": "Một collocation phổ biến với động từ 'take'." },
-    ],
-    "idioms": [ 
-        { "idiom": "Kick the bucket", "category": "idioms", "pronunciation": "/kɪk ðə ˈbʌkɪt/", "meanings": [ { "id": "m_idiom_sample_1_1", "text": "Chết (nghĩa lóng)", "notes": "Thường dùng không trang trọng", "examples": [ { "id": "ex_idiom_sample_1_1_1", "eng": "The old man finally kicked the bucket after a long illness.", "vie": "Ông lão cuối cùng cũng qua đời sau một thời gian dài bệnh tật." } ]}], "tags": ["death", "informal"], "generalNotes": "Một thành ngữ phổ biến." },
-        { "idiom": "Break a leg", "category": "idioms", "pronunciation": "/breɪk ə lɛg/", "meanings": [ { "id": "m_idiom_sample_2_1", "text": "Chúc may mắn (đặc biệt trong biểu diễn)", "notes": "", "examples": [ { "id": "ex_idiom_sample_2_1_1", "eng": "Break a leg in your performance tonight!", "vie": "Chúc bạn may mắn trong buổi biểu diễn tối nay!" } ]}], "tags": ["luck", "performance"], "generalNotes": "" }
-    ]
-};
+// Removed sampleData as it's no longer used for web cards
+// const sampleData = { ... };
 
 
 const defaultCategoryState = {
     searchTerm: '',
     baseVerb: 'all',
     tag: 'all',
-    filterMarked: 'all_active', // Giá trị mặc định mới cho bộ lọc hiển thị thẻ
+    filterMarked: 'all_cards', 
     currentIndex: 0,
     deckId: 'all_user_cards'
 };
 
 const defaultAppState = {
     lastSelectedCategory: 'phrasalVerbs',
-    lastSelectedSource: 'web',
+    // lastSelectedSource: 'web', // Removed as source is always 'user'
     lastSelectedDeckId: 'all_user_cards',
     categoryStates: {},
-    recentlyViewedCards: [] 
+    recentlyViewedCards: []
 };
 let appState = JSON.parse(JSON.stringify(defaultAppState));
 
-const appStateStorageKey = 'flashcardAppState_v4_firestore_sync_v2'; 
+const appStateStorageKey = 'flashcardAppState_v7_customExercise_userOnly'; // Updated storage key
 
 
 function generateUniqueId(prefix = 'id') {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`;
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function getCardIdentifier(item){
-    if(!item) return null;
+// getCardIdentifier is no longer needed for web cards, but can be simplified if still used for identifying user cards
+// However, user cards already have a unique 'id' from Firestore, so this function can be removed.
+// function getCardIdentifier(item){
+//     if(!item) return null;
+//     let keyPart;
+//     const category = item.category || 'unknown';
+
+//     switch(category) {
+//         case 'phrasalVerbs':
+//             keyPart = item.phrasalVerb;
+//             break;
+//         case 'collocations':
+//             keyPart = item.collocation;
+//             break;
+//         case 'idioms':
+//             keyPart = item.idiom;
+//             break;
+//         default:
+//             keyPart = item.word;
+//     }
+//     if (!keyPart) return `${category}-unknown-${generateUniqueId('cardkey')}`;
+
+//     const sanitizedKeyPart = String(keyPart).toLowerCase()
+//                             .replace(/\s+/g, '-')
+//                             .replace(/[().,/?!"':]/g, '')
+//                             .replace(/[^a-z0-9-]/g, '');
+//     return `${category}-${sanitizedKeyPart}`;
+// }
+
+function generateCardLectureId(cardItem) {
+    if (!cardItem) return `unknown-lecture-${generateUniqueId('uid')}`;
     let keyPart;
-    const category = item.category || 'unknown';
+    const category = cardItem.category || 'unknown';
 
     switch(category) {
-        case 'phrasalVerbs':
-            keyPart = item.phrasalVerb;
-            break;
-        case 'collocations':
-            keyPart = item.collocation;
-            break;
-        case 'idioms': 
-            keyPart = item.idiom;
-            break;
-        default:
-            keyPart = item.word;
+        case 'phrasalVerbs': keyPart = cardItem.phrasalVerb; break;
+        case 'collocations': keyPart = cardItem.collocation; break;
+        case 'idioms': keyPart = cardItem.idiom; break;
+        default: keyPart = cardItem.word;
     }
-    if (!keyPart) return `${category}-unknown-${generateUniqueId('cardkey')}`;
+    if (!keyPart) return `${category}-unknown-${generateUniqueId('lecturekey')}`;
 
-    const sanitizedKeyPart = String(keyPart).toLowerCase()
-                            .replace(/\s+/g, '-')
-                            .replace(/[().,/?!"':]/g, '')
-                            .replace(/[^a-z0-9-]/g, '');
-    return `${category}-${sanitizedKeyPart}`;
+    const sanitizedKeyPart = String(keyPart).toLowerCase().replace(/\s+/g, '-').replace(/[().,/?!"':]/g, '').replace(/[^a-z0-9-]/g, '');
+    return `${category}-${sanitizedKeyPart}`; 
 }
+
+function generateCardExerciseId(cardItem) {
+    if (!cardItem) return `unknown-exercise-${generateUniqueId('uid')}`;
+    let keyPart;
+    const category = cardItem.category || 'unknown';
+
+    switch(category) {
+        case 'phrasalVerbs': keyPart = cardItem.phrasalVerb; break;
+        case 'collocations': keyPart = cardItem.collocation; break;
+        case 'idioms': keyPart = cardItem.idiom; break;
+        default: keyPart = cardItem.word;
+    }
+    if (!keyPart) return `${category}-unknown-${generateUniqueId('exercisekey')}`;
+
+    const sanitizedKeyPart = String(keyPart).toLowerCase().replace(/\s+/g, '-').replace(/[().,/?!"':]/g, '').replace(/[^a-z0-9-]/g, '');
+    return `exercise-${category}-${sanitizedKeyPart}`; 
+}
+
 
 function closeSidebar(){
     if (filterSidebar) filterSidebar.classList.add('-translate-x-full');
@@ -188,7 +189,7 @@ async function loadAppState() {
                 ...defaultAppState,
                 ...firestoreState,
                 categoryStates: firestoreState.categoryStates ? { ...firestoreState.categoryStates } : {},
-                recentlyViewedCards: Array.isArray(firestoreState.recentlyViewedCards) ? firestoreState.recentlyViewedCards : [] 
+                recentlyViewedCards: Array.isArray(firestoreState.recentlyViewedCards) ? firestoreState.recentlyViewedCards : []
             };
             Object.keys(appState.categoryStates).forEach(k => {
                 appState.categoryStates[k] = {
@@ -216,10 +217,10 @@ async function loadAppState() {
             appState = {
                 ...defaultAppState,
                 lastSelectedCategory: p.lastSelectedCategory || defaultAppState.lastSelectedCategory,
-                lastSelectedSource: p.lastSelectedSource || defaultAppState.lastSelectedSource,
+                // lastSelectedSource: p.lastSelectedSource || defaultAppState.lastSelectedSource, // Removed
                 lastSelectedDeckId: p.lastSelectedDeckId || defaultAppState.lastSelectedDeckId,
                 categoryStates: p.categoryStates ? { ...p.categoryStates } : {},
-                recentlyViewedCards: Array.isArray(p.recentlyViewedCards) ? p.recentlyViewedCards : [] 
+                recentlyViewedCards: Array.isArray(p.recentlyViewedCards) ? p.recentlyViewedCards : []
             };
             Object.keys(appState.categoryStates).forEach(k => {
                  appState.categoryStates[k] = {
@@ -232,7 +233,7 @@ async function loadAppState() {
             if (appState.userPreferences && typeof appState.userPreferences.exampleSpeechRate === 'number') {
                 currentExampleSpeechRate = appState.userPreferences.exampleSpeechRate;
             } else {
-                loadExampleSpeechRate(); 
+                loadExampleSpeechRate();
             }
             console.log("AppState loaded from localStorage and merged with defaults:", JSON.parse(JSON.stringify(appState)));
             if (userId) { 
@@ -242,9 +243,9 @@ async function loadAppState() {
             console.log("No AppState in localStorage, using defaults.");
             appState = JSON.parse(JSON.stringify(defaultAppState));
             loadExampleSpeechRate();
-             if (userId) { 
+             if (userId) {
                 await FirestoreService.saveAppStateToFirestoreService(userId, appState);
-            } else { 
+            } else {
                 localStorage.setItem(appStateStorageKey, JSON.stringify(appState));
             }
         }
@@ -252,7 +253,7 @@ async function loadAppState() {
         console.error("Lỗi load appState từ localStorage, using defaults:", e);
         appState = JSON.parse(JSON.stringify(defaultAppState));
         loadExampleSpeechRate();
-        if (userId) { 
+        if (userId) {
             await FirestoreService.saveAppStateToFirestoreService(userId, appState);
         }
     }
@@ -260,31 +261,33 @@ async function loadAppState() {
 
 async function saveAppState(){
     if (!categorySelect || !filterCardStatusSelect || !userDeckSelect || !baseVerbSelect || !tagSelect) {
+        console.warn("saveAppState: One or more select elements are not available. Skipping save.");
         return;
-    } 
+    }
     const currentCategoryValue = categorySelect.value;
-    const stateForCategory = getCategoryState(currentDatasetSource, currentCategoryValue);
+    // Key for category state no longer includes source as it's always 'user'
+    const stateForCategory = getCategoryState(currentDatasetSource, currentCategoryValue); 
 
     stateForCategory.currentIndex = window.currentIndex;
     stateForCategory.filterMarked = filterCardStatusSelect.value; 
-    if (currentDatasetSource === 'user') {
-        stateForCategory.deckId = userDeckSelect.value;
-    }
-    if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations' || currentCategoryValue === 'idioms') { 
-        if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations') { 
+    // Always save deckId as it's always 'user' source now
+    stateForCategory.deckId = userDeckSelect.value; 
+    
+    if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations' || currentCategoryValue === 'idioms') {
+        if (currentCategoryValue === 'phrasalVerbs' || currentCategoryValue === 'collocations') {
              stateForCategory.baseVerb = baseVerbSelect.value;
         } else {
-            stateForCategory.baseVerb = 'all'; 
+            stateForCategory.baseVerb = 'all';
         }
-        stateForCategory.tag = tagSelect.value; 
+        stateForCategory.tag = tagSelect.value;
     }
     appState.lastSelectedCategory = currentCategoryValue;
-    appState.lastSelectedSource = currentDatasetSource;
-    appState.lastSelectedDeckId = (currentDatasetSource === 'user') ? userDeckSelect.value : 'all_user_cards';
+    // appState.lastSelectedSource = currentDatasetSource; // Removed
+    appState.lastSelectedDeckId = userDeckSelect.value; // Always user deck
 
     appState.userPreferences = appState.userPreferences || {};
     appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
-    
+
 
     try{
         localStorage.setItem(appStateStorageKey,JSON.stringify(appState));
@@ -298,16 +301,18 @@ async function saveAppState(){
     }
 }
 
+// Simplified getCategoryState as source is always 'user'
 function getCategoryState(src, cat) {
-    const key = `${src}_${cat}`;
+    const key = `user_${cat}`; // Always use 'user_' prefix
     if (!appState.categoryStates[key]) {
         appState.categoryStates[key] = JSON.parse(JSON.stringify(defaultCategoryState));
     } else {
+        const existingState = appState.categoryStates[key];
         appState.categoryStates[key] = {
             ...defaultCategoryState,
-            ...appState.categoryStates[key],
-            searchTerm: appState.categoryStates[key].searchTerm || '',
-            filterMarked: appState.categoryStates[key].filterMarked || defaultCategoryState.filterMarked 
+            ...existingState,
+            searchTerm: existingState.searchTerm || '',
+            filterMarked: existingState.filterMarked || defaultCategoryState.filterMarked 
         };
     }
     return appState.categoryStates[key];
@@ -315,7 +320,7 @@ function getCategoryState(src, cat) {
 
 async function handleAuthStateChangedInApp(user) {
     await loadAppState(); 
-    renderRecentlyViewedList(); 
+    renderRecentlyViewedList();
 
     if (user) {
         if(userEmailDisplayMain) userEmailDisplayMain.textContent = user.email || "Người dùng";
@@ -348,17 +353,32 @@ async function handleAuthStateChangedInApp(user) {
 
 let toastTimeout;
 function showToast(message, duration = 3000, type = 'info') {
-    if (!srsFeedbackToastEl) return;
-    srsFeedbackToastEl.textContent = message;
-    srsFeedbackToastEl.className = 'fixed bottom-5 right-5 text-white text-sm py-3 px-5 rounded-lg shadow-md opacity-0 transition-opacity duration-500 ease-in-out z-[1010]'; 
-    srsFeedbackToastEl.classList.add('show');
+    const generalToastEl = document.createElement('div');
+    generalToastEl.id = 'general-feedback-toast';
+    generalToastEl.className = 'fixed bottom-5 right-5 text-white text-sm py-3 px-5 rounded-lg shadow-md opacity-0 transition-opacity duration-500 ease-in-out z-[1010]';
+    document.body.appendChild(generalToastEl);
 
-    if (type === 'error') srsFeedbackToastEl.classList.add('bg-red-600');
-    else if (type === 'success') srsFeedbackToastEl.classList.add('bg-green-600');
-    else srsFeedbackToastEl.classList.add('bg-slate-700');
+
+    generalToastEl.textContent = message;
+    generalToastEl.classList.remove('bg-red-600', 'bg-green-600', 'bg-slate-700', 'show');
+
+    if (type === 'error') generalToastEl.classList.add('bg-red-600');
+    else if (type === 'success') generalToastEl.classList.add('bg-green-600');
+    else generalToastEl.classList.add('bg-slate-700');
+
+    requestAnimationFrame(() => {
+        generalToastEl.classList.add('show');
+    });
 
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => { srsFeedbackToastEl.classList.remove('show'); }, duration);
+    toastTimeout = setTimeout(() => {
+        generalToastEl.classList.remove('show');
+        setTimeout(() => {
+            if (generalToastEl.parentNode) {
+                generalToastEl.parentNode.removeChild(generalToastEl);
+            }
+        }, 500);
+    }, duration);
 }
 
 
@@ -374,10 +394,10 @@ function loadExampleSpeechRate() {
 
 function saveExampleSpeechRate() {
     localStorage.setItem(EXAMPLE_SPEECH_RATE_KEY, currentExampleSpeechRate.toString());
-    if (getCurrentUserId() && appState) { 
+    if (getCurrentUserId() && appState) {
         appState.userPreferences = appState.userPreferences || {};
         appState.userPreferences.exampleSpeechRate = currentExampleSpeechRate;
-        saveAppState(); 
+        saveAppState();
     }
 }
 
@@ -396,7 +416,7 @@ function speakText(txt, meta = [], cb = null) {
     if ('speechSynthesis' in window) {
         const u = new SpeechSynthesisUtterance(txt);
         u.lang = 'en-US';
-        u.rate = 1.0; 
+        u.rate = 1.0;
         u.pitch = 1;
         window.speechSynthesis.cancel();
         if (meta.length > 0) {
@@ -422,7 +442,7 @@ function speakExample(text, spansMeta) {
     if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
-        utterance.rate = currentExampleSpeechRate; 
+        utterance.rate = currentExampleSpeechRate;
         utterance.pitch = 1.0;
         window.speechSynthesis.cancel();
 
@@ -462,42 +482,13 @@ function speakExample(text, spansMeta) {
     }
 }
 
-
-function generateCardLectureId(cardItem) {
-    if (!cardItem) return `unknown-lecture-${generateUniqueId('uid')}`;
-    let keyPart;
-    const category = cardItem.category || 'unknown';
-
-    switch(category) {
-        case 'phrasalVerbs':
-            keyPart = cardItem.phrasalVerb;
-            break;
-        case 'collocations':
-            keyPart = cardItem.collocation;
-            break;
-        case 'idioms': 
-            keyPart = cardItem.idiom;
-            break;
-        default:
-            keyPart = cardItem.word;
-    }
-    if (!keyPart) return `${category}-unknown-${generateUniqueId('lecturekey')}`;
-
-    const sanitizedKeyPart = String(keyPart).toLowerCase()
-                                .replace(/\s+/g, '-')
-                                .replace(/[().,/?!"':]/g, '')
-                                .replace(/[^a-z0-9-]/g, '');
-    return `${category}-${sanitizedKeyPart}`;
-}
-
-
 function renderRecentlyViewedList() {
     if (!recentlyViewedListElement || !noRecentCardsMessageElement) {
-        console.warn("renderRecentlyViewedList: DOM elements for recently viewed list not found."); 
+        console.warn("renderRecentlyViewedList: DOM elements for recently viewed list not found.");
         return;
     }
 
-    recentlyViewedListElement.innerHTML = ''; 
+    recentlyViewedListElement.innerHTML = '';
 
     if (!appState.recentlyViewedCards || appState.recentlyViewedCards.length === 0) {
         noRecentCardsMessageElement.style.display = 'block';
@@ -508,19 +499,20 @@ function renderRecentlyViewedList() {
 
     appState.recentlyViewedCards.forEach(recentCard => {
         const listItem = document.createElement('li');
-        listItem.className = 'recent-card-item group'; 
+        listItem.className = 'recent-card-item group';
         listItem.setAttribute('role', 'button');
-        listItem.tabIndex = 0; 
+        listItem.tabIndex = 0;
 
-        listItem.dataset.cardIdentifier = recentCard.identifier;
+        // Use card.id for user cards as identifier
+        listItem.dataset.cardIdentifier = recentCard.identifier; 
         listItem.dataset.cardCategory = recentCard.category;
-        listItem.dataset.cardSource = recentCard.source;
-        listItem.dataset.cardDeckId = recentCard.deckId || ''; 
+        // listItem.dataset.cardSource = recentCard.source; // Removed source
+        listItem.dataset.cardDeckId = recentCard.deckId || '';
 
         const termSpan = document.createElement('span');
         termSpan.className = 'recent-card-term';
-        termSpan.textContent = recentCard.term.length > 25 ? recentCard.term.substring(0, 22) + '...' : recentCard.term; 
-        termSpan.title = recentCard.term; 
+        termSpan.textContent = recentCard.term.length > 25 ? recentCard.term.substring(0, 22) + '...' : recentCard.term;
+        termSpan.title = recentCard.term;
 
         const metaSpan = document.createElement('span');
         metaSpan.className = 'recent-card-meta';
@@ -553,21 +545,23 @@ function renderRecentlyViewedList() {
 async function navigateToRecentCard(recentCardInfo) {
     if (!recentCardInfo) return;
     console.log("Navigating to recent card:", recentCardInfo);
-    closeSidebar(); 
+    closeSidebar();
 
-    if (cardSourceSelect) cardSourceSelect.value = recentCardInfo.source;
-    currentDatasetSource = recentCardInfo.source; 
+    // cardSourceSelect is removed, so currentDatasetSource is always 'user'
+    // if (cardSourceSelect) cardSourceSelect.value = recentCardInfo.source; 
+    currentDatasetSource = 'user'; // Always 'user'
 
     if (categorySelect) categorySelect.value = recentCardInfo.category;
 
-    if (recentCardInfo.source === 'user' && userDeckSelect) {
+    // Always user source now
+    if (userDeckSelect) {
         if (recentCardInfo.deckId) {
             userDeckSelect.value = recentCardInfo.deckId;
         } else {
             userDeckSelect.value = recentCardInfo.deckId || 'all_user_cards';
         }
     }
-    
+
     updateSidebarFilterVisibility();
     updateMainHeaderTitle();
 
@@ -576,16 +570,17 @@ async function navigateToRecentCard(recentCardInfo) {
     const originalTag = tagSelect ? tagSelect.value : 'all';
     const originalFilterMarked = filterCardStatusSelect.value;
 
-    searchInput.value = ''; 
+    searchInput.value = '';
     if (baseVerbSelect) baseVerbSelect.value = 'all';
     if (tagSelect) tagSelect.value = 'all';
     
-    await loadVocabularyData(recentCardInfo.category); 
+    await loadVocabularyData(recentCardInfo.category);
 
     let foundIndex = -1;
     if (window.currentData && window.currentData.length > 0) {
         foundIndex = window.currentData.findIndex(card => {
-            const cardId = card.isUserCard ? card.id : getCardIdentifier(card); 
+            // For user cards, use card.id directly
+            const cardId = card.id; 
             return cardId === recentCardInfo.identifier && card.category === recentCardInfo.category;
         });
     }
@@ -595,10 +590,10 @@ async function navigateToRecentCard(recentCardInfo) {
         const stateForCategory = getCategoryState(currentDatasetSource, recentCardInfo.category);
         stateForCategory.currentIndex = window.currentIndex;
         console.log(`Recent card found at index: ${window.currentIndex}. Calling updateFlashcard.`);
-        updateFlashcard(); 
+        updateFlashcard();
     } else {
         console.warn("Recent card not found in current dataset after loading. Displaying first card or empty state.");
-        window.currentIndex = 0; 
+        window.currentIndex = 0;
         const stateForCategory = getCategoryState(currentDatasetSource, recentCardInfo.category);
         stateForCategory.currentIndex = window.currentIndex;
         updateFlashcard();
@@ -615,7 +610,8 @@ function addCardToRecentlyViewed(cardItem) {
     if (!cardItem) return;
 
     const term = cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || cardItem.word || 'N/A';
-    const identifier = cardItem.isUserCard ? cardItem.id : getCardIdentifier(cardItem); 
+    // For user cards, use card.id directly as identifier
+    const identifier = cardItem.id; 
 
     if (!identifier) {
         console.warn("Could not generate identifier for recently viewed card:", cardItem);
@@ -626,8 +622,8 @@ function addCardToRecentlyViewed(cardItem) {
         identifier: identifier,
         term: term,
         category: cardItem.category,
-        source: currentDatasetSource, 
-        deckId: cardItem.isUserCard ? (cardItem.deckId || null) : null
+        // source: currentDatasetSource, // Removed source
+        deckId: cardItem.deckId || null
     };
 
     appState.recentlyViewedCards = appState.recentlyViewedCards.filter(rc => rc.identifier !== recentEntry.identifier);
@@ -637,79 +633,16 @@ function addCardToRecentlyViewed(cardItem) {
         appState.recentlyViewedCards.pop();
     }
 
-    renderRecentlyViewedList(); 
-    saveAppState(); 
-}
-
-async function toggleFavoriteStatus(cardItem, favoriteButtonElement) {
-    if (!cardItem) return;
-    const userId = getCurrentUserId();
-    if (!userId) {
-        showToast("Vui lòng đăng nhập để sử dụng chức năng yêu thích.", 3000, 'error');
-        openAuthModalFromAuth('login');
-        return;
-    }
-
-    const newFavoriteState = !(cardItem.isFavorite || false); 
-
-    let success = false;
-    const dataToUpdate = { 
-        isFavorite: newFavoriteState, 
-        updatedAt: serverTimestamp() 
-    };
-
-    if (cardItem.isUserCard) {
-        if (!cardItem.id || !cardItem.deckId) {
-            console.error("toggleFavoriteStatus: Missing id or deckId for user card.", cardItem);
-            showToast("Lỗi: Không thể cập nhật thẻ người dùng.", 3000, 'error');
-            return;
-        }
-        success = await FirestoreService.saveCardToFirestore(userId, cardItem.deckId, dataToUpdate, cardItem.id);
-    } else { 
-        const webCardGlobalId = getCardIdentifier(cardItem);
-        if (!webCardGlobalId) {
-            console.error("toggleFavoriteStatus: Could not get identifier for web card.", cardItem);
-            showToast("Lỗi: Không thể cập nhật thẻ web.", 3000, 'error');
-            return;
-        }
-        const statusUpdatePayload = { isFavorite: newFavoriteState, updatedAt: serverTimestamp() };
-        success = await FirestoreService.updateWebCardStatusInFirestore(userId, webCardGlobalId, cardItem, statusUpdatePayload);
-    }
-
-    if (success) {
-        cardItem.isFavorite = newFavoriteState; 
-        cardItem.updatedAt = Date.now(); 
-
-        if (favoriteButtonElement) {
-            updateFavoriteButtonUI(favoriteButtonElement, newFavoriteState);
-        }
-        showToast(newFavoriteState ? "Đã thêm vào Yêu thích!" : "Đã xóa khỏi Yêu thích.", 2000, 'success');
-        
-        if (filterCardStatusSelect && filterCardStatusSelect.value === 'favorites') {
-            applyAllFilters();
-        }
-    } else {
-        showToast("Lỗi cập nhật trạng thái yêu thích. Vui lòng thử lại.", 3000, 'error');
-    }
-}
-
-function updateFavoriteButtonUI(buttonElement, isFavorite) {
-    if (!buttonElement) return;
-    const icon = buttonElement.querySelector('i');
-    if (isFavorite) {
-        buttonElement.innerHTML = `<i class="fas fa-star w-5 mr-3 text-yellow-400"></i> Bỏ Yêu thích`;
-        buttonElement.classList.add('favorited');
-    } else {
-        buttonElement.innerHTML = `<i class="far fa-star w-5 mr-3 text-slate-500"></i> Thêm vào Yêu thích`;
-        buttonElement.classList.remove('favorited');
-    }
+    renderRecentlyViewedList();
+    saveAppState();
 }
 
 
 // Logic chính của ứng dụng
 document.addEventListener('DOMContentLoaded', async () => {
+    // DOM Element assignments
     mainHeaderTitle = document.getElementById('main-header-title');
-    cardSourceSelect = document.getElementById('card-source-select');
+    // cardSourceSelect = document.getElementById('card-source-select'); // Removed
     categorySelect = document.getElementById('category');
     flashcardElement = document.getElementById('flashcard');
     cardFrontElement = flashcardElement.querySelector('.card-front');
@@ -729,30 +662,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     searchInput = document.getElementById('search-input');
     baseVerbFilterContainer = document.getElementById('base-verb-filter-container');
     baseVerbSelect = document.getElementById('base-verb-filter');
-    practiceTypeSelect = document.getElementById('practice-type-select');
-    practiceArea = document.getElementById('practice-area');
-    multipleChoiceOptionsContainer = document.getElementById('multiple-choice-options');
-    feedbackMessage = document.getElementById('feedback-message');
     filterCardStatusSelect = document.getElementById('filter-card-status');
-    btnSrsAgain = document.getElementById('btn-srs-again');
-    btnSrsHard = document.getElementById('btn-srs-hard');
-    btnSrsGood = document.getElementById('btn-srs-good');
-    btnSrsEasy = document.getElementById('btn-srs-easy');
     hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
     filterSidebar = document.getElementById('filter-sidebar');
-    closeSidebarBtn = document.getElementById('close-sidebar-btn'); 
-    sidebarOverlay = document.getElementById('sidebar-overlay'); 
+    closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    sidebarOverlay = document.getElementById('sidebar-overlay');
     tagsDisplayFront = document.getElementById('tags-display-front');
-    typingInputContainer = document.getElementById('typing-input-container');
-    typingInput = document.getElementById('typing-input');
-    submitTypingAnswerBtn = document.getElementById('submit-typing-answer-btn');
     openAddCardModalBtn = document.getElementById('open-add-card-modal-btn');
     addEditCardModal = document.getElementById('add-edit-card-modal');
     closeModalBtn = document.getElementById('close-modal-btn');
     addEditCardForm = document.getElementById('add-edit-card-form');
     modalTitle = document.getElementById('modal-title');
     cardIdInput = document.getElementById('card-id-input');
-    cardWordLabel = document.querySelector('label[for="card-word-input"]'); 
+    cardWordLabel = document.querySelector('label[for="card-word-input"]');
     cardWordInput = document.getElementById('card-word-input');
     cardPronunciationInput = document.getElementById('card-pronunciation-input');
     cardGeneralNotesInput = document.getElementById('card-general-notes-input');
@@ -787,16 +709,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     jsonImportSuccessMessage = document.getElementById('json-import-success-message');
     jsonCardDeckAssignmentSelect = document.getElementById('json-card-deck-assignment-select');
     jsonDeckCreationHint = document.getElementById('json-deck-creation-hint');
-    copyToDeckModal = document.getElementById('copy-to-deck-modal');
-    closeCopyToDeckModalBtn = document.getElementById('close-copy-to-deck-modal-btn');
-    copyToDeckSelect = document.getElementById('copy-to-deck-select');
-    copyNewDeckNameContainer = document.getElementById('copy-new-deck-name-container');
-    copyNewDeckNameInput = document.getElementById('copy-new-deck-name-input');
-    copyNewDeckError = document.getElementById('copy-new-deck-error');
-    copyToDeckErrorMessage = document.getElementById('copy-to-deck-error-message');
-    copyToDeckSuccessMessage = document.getElementById('copy-to-deck-success-message');
-    cancelCopyToDeckBtn = document.getElementById('cancel-copy-to-deck-btn');
-    confirmCopyToDeckBtn = document.getElementById('confirm-copy-to-deck-btn');
+    // copyToDeckModal = document.getElementById('copy-to-deck-modal'); // Removed
+    // closeCopyToDeckModalBtn = document.getElementById('close-copy-to-deck-modal-btn'); // Removed
+    // copyToDeckSelect = document.getElementById('copy-to-deck-select'); // Removed
+    // copyNewDeckNameContainer = document.getElementById('copy-new-deck-name-container'); // Removed
+    // copyNewDeckNameInput = document.getElementById('copy-new-deck-name-input'); // Removed
+    // copyNewDeckError = document.getElementById('copy-new-deck-error'); // Removed
+    // copyToDeckErrorMessage = document.getElementById('copy-to-deck-error-message'); // Removed
+    // copyToDeckSuccessMessage = document.getElementById('copy-to-deck-success-message'); // Removed
+    // cancelCopyToDeckBtn = document.getElementById('cancel-copy-to-deck-btn'); // Removed
+    // confirmCopyToDeckBtn = document.getElementById('confirm-copy-to-deck-btn'); // Removed
     bottomSheetOverlay = document.getElementById('bottom-sheet-overlay');
     bottomSheet = document.getElementById('bottom-sheet');
     bottomSheetTitle = document.getElementById('bottom-sheet-title');
@@ -806,45 +728,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     cardOptionsMenuBtnBack = document.getElementById('card-options-menu-btn-back');
     authActionButtonMain = document.getElementById('auth-action-btn');
     userEmailDisplayMain = document.getElementById('user-email-display');
-    srsFeedbackToastEl = document.getElementById('srs-feedback-toast');
     actionBtnNotes = document.getElementById('action-btn-notes');
     actionBtnMedia = document.getElementById('action-btn-media');
     actionBtnPracticeCard = document.getElementById('action-btn-practice-card');
-    exitSingleCardPracticeBtn = document.getElementById('exit-single-card-practice-btn');
     bottomSheetTabsContainer = document.getElementById('bottom-sheet-tabs');
     tabBtnYouTube = document.getElementById('tab-btn-youtube');
     flipIconFront = document.getElementById('flip-icon-front');
     flipIconBack = document.getElementById('flip-icon-back');
-    recentlyViewedListElement = document.getElementById('recently-viewed-list'); 
-    noRecentCardsMessageElement = document.getElementById('no-recent-cards-message'); 
+    recentlyViewedListElement = document.getElementById('recently-viewed-list');
+    noRecentCardsMessageElement = document.getElementById('no-recent-cards-message');
 
 
     window.wordDisplay = wordDisplay;
     window.updateSidebarFilterVisibility = updateSidebarFilterVisibility;
     window.updateMainHeaderTitle = updateMainHeaderTitle;
     window.loadVocabularyData = loadVocabularyData;
-    window.updateFlashcard = updateFlashcard; 
+    window.updateFlashcard = updateFlashcard;
 
     initializeAuthModule(fbAuth, handleAuthStateChangedInApp);
     FirestoreService.initializeFirestoreService(db);
-    initializeSrsModule({
-        firestoreServiceModule: FirestoreService,
-        authGetCurrentUserIdFunc: getCurrentUserId,
-        utilGetWebCardGlobalIdFunc: getCardIdentifier, 
-        uiUpdateStatusButtonsFunc: updateStatusButtonsUI,
-        uiUpdateFlashcardFunc: updateFlashcard,
-        uiNextBtnElement: nextBtn,
-        dataGetCurrentCardFunc: () => window.currentData[window.currentIndex],
-        dataGetWindowCurrentDataFunc: () => window.currentData,
-        dataGetCurrentIndexFunc: () => window.currentIndex,
-        uiShowToastFunc: showToast
-    });
 
-    loadExampleSpeechRate(); 
+    loadExampleSpeechRate();
 
-    await setupInitialCategoryAndSource(); 
+    await setupInitialCategoryAndSource();
     setupEventListeners();
-    renderRecentlyViewedList(); 
+    renderRecentlyViewedList();
 
 
     function displayFieldError(inputElement, errorElement, message) { if (errorElement) { errorElement.textContent = message; errorElement.classList.remove('hidden'); } if (inputElement) { inputElement.classList.add('input-error-border'); } }
@@ -938,7 +846,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function populateDeckSelects() {
-        const deckSelects = [userDeckSelect, cardDeckAssignmentSelect, jsonCardDeckAssignmentSelect, copyToDeckSelect];
+        // Removed copyToDeckSelect
+        const deckSelects = [userDeckSelect, cardDeckAssignmentSelect, jsonCardDeckAssignmentSelect]; 
         deckSelects.forEach(selectEl => {
             if (selectEl) {
                 const currentValue = selectEl.value;
@@ -951,12 +860,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (Array.isArray(userDecks)) {
                     userDecks.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=d.name;selectEl.appendChild(o);});
                 }
-                if (selectEl !== userDeckSelect) {
-                    const createNewOpt = document.createElement('option');
-                    createNewOpt.value = "_create_new_deck_";
-                    createNewOpt.textContent = "< Tạo bộ thẻ mới... >";
-                    selectEl.appendChild(createNewOpt);
-                }
+                // Removed "_create_new_deck_" option from copyToDeckSelect
+                const createNewOpt = document.createElement('option');
+                createNewOpt.value = "_create_new_deck_";
+                createNewOpt.textContent = "< Tạo bộ thẻ mới... >";
+                selectEl.appendChild(createNewOpt);
+               
 
                 if (Array.from(selectEl.options).some(opt => opt.value === currentValue)) {
                     selectEl.value = currentValue;
@@ -1012,7 +921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const input = document.createElement('input');
         input.type='text';
         input.value=originalName;
-        input.className='editing-deck-input w-full border border-slate-300 rounded px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500'; 
+        input.className='editing-deck-input w-full border border-slate-300 rounded px-2 py-1 focus:ring-indigo-500 focus:border-indigo-500';
 
         const saveButton = document.createElement('button');
         saveButton.innerHTML='<i class="fas fa-check"></i>';
@@ -1030,8 +939,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         cancelButton.onclick=()=>cancelEditDeckName(id, el, originalName);
 
         const editControlsDiv = document.createElement('div');
-        editControlsDiv.className='flex items-center edit-deck-controls w-full'; 
-        editControlsDiv.appendChild(input); 
+        editControlsDiv.className='flex items-center edit-deck-controls w-full';
+        editControlsDiv.appendChild(input);
         editControlsDiv.appendChild(saveButton);
         editControlsDiv.appendChild(cancelButton);
 
@@ -1062,13 +971,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function getAllUniqueBaseVerbs() {
         const allBaseVerbs = new Set();
-        if (sampleData.phrasalVerbs) {
-            sampleData.phrasalVerbs.forEach(card => {if (card.baseVerb) allBaseVerbs.add(card.baseVerb.trim())});
-        }
-        if (sampleData.collocations) {
-            sampleData.collocations.forEach(card => {if (card.baseVerb) allBaseVerbs.add(card.baseVerb.trim())});
-        }
-        
+        // Removed sampleData usage
+        // if (sampleData.phrasalVerbs) {
+        //     sampleData.phrasalVerbs.forEach(card => {if (card.baseVerb) allBaseVerbs.add(card.baseVerb.trim())});
+        // }
+        // if (sampleData.collocations) {
+        //     sampleData.collocations.forEach(card => {if (card.baseVerb) allBaseVerbs.add(card.baseVerb.trim())});
+        // }
+
         const userCards = await loadUserCards();
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
@@ -1085,15 +995,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const allTags = new Set();
         const categoriesWithTags = ['phrasalVerbs', 'collocations', 'idioms'];
 
-        categoriesWithTags.forEach(category => {
-            if (sampleData[category]) {
-                sampleData[category].forEach(card => {
-                    if (card.tags && Array.isArray(card.tags)) {
-                        card.tags.forEach(tag => allTags.add(tag.trim().toLowerCase()));
-                    }
-                });
-            }
-        });
+        // Removed sampleData usage
+        // categoriesWithTags.forEach(category => {
+        //     if (sampleData[category]) {
+        //         sampleData[category].forEach(card => {
+        //             if (card.tags && Array.isArray(card.tags)) {
+        //                 card.tags.forEach(tag => allTags.add(tag.trim().toLowerCase()));
+        //             }
+        //         });
+        //     }
+        // });
 
         const userCards = await loadUserCards();
         if (Array.isArray(userCards)) {
@@ -1117,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (sidebarOverlay) sidebarOverlay.classList.remove('hidden');
         updateSidebarFilterVisibility();
     }
-    
+
     function updateSidebarFilterVisibility (){
         const cat=categorySelect.value;
         const isPVOrCollocation = cat === 'phrasalVerbs' || cat === 'collocations';
@@ -1126,7 +1037,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         baseVerbFilterContainer.style.display = isPVOrCollocation ? 'block' : 'none';
         tagFilterContainer.style.display = (isPVOrCollocation || isIdiom) ? 'block' : 'none';
 
-        const isUserSource = cardSourceSelect.value === 'user';
+        // Always assume 'user' source
+        const isUserSource = true; 
         const userId = getCurrentUserId();
         const isLoggedIn = !!userId;
 
@@ -1136,16 +1048,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userDeckSelect) userDeckSelect.disabled = !isUserSource || !isLoggedIn;
         if (manageDecksBtn) manageDecksBtn.disabled = !isUserSource || !isLoggedIn;
         if (openAddCardModalBtn) openAddCardModalBtn.disabled = !isUserSource || !isLoggedIn;
+
+        const practiceTypeSelectEl = document.getElementById('practice-type-select');
+        if (practiceTypeSelectEl && practiceTypeSelectEl.closest('div')) {
+             practiceTypeSelectEl.closest('div').style.display = 'none';
+        }
     }
 
     function updateMainHeaderTitle() {
         const userId = getCurrentUserId();
-        const sourceText = currentDatasetSource === 'web' ? "Thẻ của Web" : (userId ? "Thẻ của Tôi" : "Thẻ của Web (Chưa đăng nhập)");
+        // Source text is always "Thẻ của Tôi"
+        const sourceText = userId ? "Thẻ của Tôi" : "Thẻ của Tôi (Chưa đăng nhập)"; 
         let deckText = "";
-        if (currentDatasetSource === 'user' && userId && userDeckSelect.value && userDeckSelect.value !== 'all_user_cards' && userDeckSelect.value !== 'unassigned_cards') {
+        // currentDatasetSource is always 'user'
+        if (userId && userDeckSelect.value && userDeckSelect.value !== 'all_user_cards' && userDeckSelect.value !== 'unassigned_cards') {
             const selectedDeck = Array.isArray(userDecks) ? userDecks.find(d => d.id === userDeckSelect.value) : null;
             if (selectedDeck) deckText = ` - ${selectedDeck.name}`;
-        } else if (currentDatasetSource === 'user' && userId && userDeckSelect.value === 'unassigned_cards') {
+        } else if (userId && userDeckSelect.value === 'unassigned_cards') {
             deckText = " - Thẻ chưa có bộ";
         }
         const categoryText = categorySelect.options[categorySelect.selectedIndex].text;
@@ -1154,7 +1073,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function openAddEditModal(mode = 'add', cardData = null) {
         const userId = getCurrentUserId();
-        if (cardSourceSelect.value === 'user' && !userId && mode !== 'json_import') {
+        // Always check for user login as source is always 'user'
+        if (!userId && mode !== 'json_import') { 
             alert("Vui lòng đăng nhập để thêm hoặc sửa thẻ của bạn.");
             openAuthModalFromAuth('login');
             return;
@@ -1195,18 +1115,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isPVOrCollocation = currentCategoryForForm === 'phrasalVerbs' || currentCategoryForForm === 'collocations';
         const isIdiom = currentCategoryForForm === 'idioms';
 
-        const baseVerbField = phrasalVerbSpecificFields.querySelector('#card-base-verb-input').closest('.relative'); 
+        const baseVerbField = phrasalVerbSpecificFields.querySelector('#card-base-verb-input').closest('.relative');
         if (baseVerbField) baseVerbField.style.display = isPVOrCollocation ? 'block' : 'none';
 
-        const tagsField = phrasalVerbSpecificFields.querySelector('#card-tags-input').closest('.relative'); 
+        const tagsField = phrasalVerbSpecificFields.querySelector('#card-tags-input').closest('.relative');
         if (tagsField) tagsField.style.display = (isPVOrCollocation || isIdiom) ? 'block' : 'none';
 
         phrasalVerbSpecificFields.style.display = (isPVOrCollocation || isIdiom) ? 'block' : 'none';
 
 
-        if (isPVOrCollocation || isIdiom) { 
+        if (isPVOrCollocation || isIdiom) {
             if (isPVOrCollocation) baseVerbSuggestions = await getAllUniqueBaseVerbs();
-            tagSuggestions = await getAllUniqueTags(); 
+            tagSuggestions = await getAllUniqueTags();
         } else {
             hideAutocompleteSuggestions(cardBaseVerbInput);
             hideAutocompleteSuggestions(cardTagsInput);
@@ -1219,42 +1139,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         const deckHintToUse = currentInputMode === 'json' ? jsonDeckCreationHint : deckCreationHint;
 
 
-        if (cardSourceSelect.value === 'user' || mode === 'json_import') {
-            if (currentInputMode === 'json') {
-                document.getElementById('json-deck-assignment-container').style.display = 'block';
-            } else {
-                modalDeckAssignmentContainer.style.display = 'block';
-            }
-
-            if (mode === 'edit' && cardData && cardData.deckId) {
-                deckSelectToUse.value = cardData.deckId;
-                if (deckHintToUse) deckHintToUse.classList.add('hidden');
-            } else if (mode === 'add' && userDeckSelect.value && userDeckSelect.value !== 'all_user_cards' && userDeckSelect.value !== 'unassigned_cards') {
-                deckSelectToUse.value = userDeckSelect.value;
-                if (deckHintToUse) deckHintToUse.classList.add('hidden');
-            } else {
-                deckSelectToUse.value = '';
-                if ((!Array.isArray(userDecks) || userDecks.length === 0) && (mode === 'add' || mode === 'json_import')) {
-                    if (deckHintToUse) {
-                        deckHintToUse.innerHTML = "Mẹo: Bạn cần tạo một bộ thẻ trước khi thêm thẻ mới. Hãy vào menu <i class='fas fa-bars'></i> > Quản lý Bộ thẻ.";
-                        deckHintToUse.classList.remove('hidden');
-                    }
-                } else {
-                    if (deckHintToUse) deckHintToUse.classList.add('hidden');
-                }
-            }
+        // Always show deck assignment container as source is always 'user'
+        if (currentInputMode === 'json') {
+            document.getElementById('json-deck-assignment-container').style.display = 'block';
         } else {
-            modalDeckAssignmentContainer.style.display = 'none';
-            if (deckHintToUse) deckHintToUse.classList.add('hidden');
-            document.getElementById('json-deck-assignment-container').style.display = 'none';
+            modalDeckAssignmentContainer.style.display = 'block';
         }
+
+        if (mode === 'edit' && cardData && cardData.deckId) {
+            deckSelectToUse.value = cardData.deckId;
+            if (deckHintToUse) deckHintToUse.classList.add('hidden');
+        } else if (mode === 'add' && userDeckSelect.value && userDeckSelect.value !== 'all_user_cards' && userDeckSelect.value !== 'unassigned_cards') {
+            deckSelectToUse.value = userDeckSelect.value;
+            if (deckHintToUse) deckHintToUse.classList.add('hidden');
+        } else {
+            deckSelectToUse.value = '';
+            if ((!Array.isArray(userDecks) || userDecks.length === 0) && (mode === 'add' || mode === 'json_import')) {
+                if (deckHintToUse) {
+                    deckHintToUse.innerHTML = "Mẹo: Bạn cần tạo một bộ thẻ trước khi thêm thẻ mới. Hãy vào menu <i class='fas fa-bars'></i> > Quản lý Bộ thẻ.";
+                    deckHintToUse.classList.remove('hidden');
+                }
+            } else {
+                if (deckHintToUse) deckHintToUse.classList.add('hidden');
+            }
+        }
+
 
         if (mode === 'edit' && cardData) {
             cardIdInput.value = cardData.id;
             let wordOrPhrase = '';
             if (cardData.category === 'phrasalVerbs') wordOrPhrase = cardData.phrasalVerb;
             else if (cardData.category === 'collocations') wordOrPhrase = cardData.collocation;
-            else if (cardData.category === 'idioms') wordOrPhrase = cardData.idiom; 
+            else if (cardData.category === 'idioms') wordOrPhrase = cardData.idiom;
             else wordOrPhrase = cardData.word;
             cardWordInput.value = wordOrPhrase || '';
 
@@ -1270,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cardBaseVerbInput.value = cardData.baseVerb || '';
                 cardTagsInput.value = Array.isArray(cardData.tags) ? cardData.tags.filter(t => t && t !== 'all' && !t.startsWith('particle_')).join(', ') : '';
             } else if (cardData.category === 'idioms') {
-                cardBaseVerbInput.value = ''; 
+                cardBaseVerbInput.value = '';
                 cardTagsInput.value = Array.isArray(cardData.tags) ? cardData.tags.filter(t => t && t !== 'all' && !t.startsWith('particle_')).join(', ') : '';
             }
         } else if (mode === 'add') {
@@ -1301,75 +1217,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             switchToInputMode('manual');
         },250);
     }
-    function clearLearningTimer(){clearTimeout(learningCardNextButtonTimer);learningCardNextButtonTimer=null;clearInterval(learningCardCountdownInterval);learningCardCountdownInterval=null;if(nextBtn&&nextBtn.textContent.includes('('))nextBtn.innerHTML='Tiếp <i class="fas fa-arrow-right ml-1"></i>';}
 
-    async function startLearningTimer(){
-        clearLearningTimer();
-        if(window.currentData.length===0||practiceType!=="off"||!nextBtn){
-            if(nextBtn){
-                nextBtn.disabled=(window.currentIndex>=window.currentData.length-1||window.currentData.length===0);
-                if(!nextBtn.textContent.includes('('))nextBtn.innerHTML='Tiếp <i class="fas fa-arrow-right ml-1"></i>';
-            }
-            updateCardInfo();
-            return;
-        }
-        const i=window.currentData[window.currentIndex];
-        const sO = await getCardStatus(i);
+    // getCardStatus is no longer needed as there are no web cards to get status for.
+    // function getCardStatus(cardItem){ 
+    //     if (!cardItem) return {};
+    //     const userId = getCurrentUserId();
 
-        if(currentDatasetSource==='web'&&sO&&sO.status==='learning'&&!i.isUserCard){
-            nextBtn.disabled=true;let c=30;nextBtn.innerHTML=`Tiếp (${c}s) <i class="fas fa-arrow-right ml-1"></i>`;
-            learningCardCountdownInterval=setInterval(()=>{c--;if(c>0){if(nextBtn.disabled)nextBtn.innerHTML=`Tiếp (${c}s) <i class="fas fa-arrow-right ml-1"></i>`;}else{clearInterval(learningCardCountdownInterval);learningCardCountdownInterval=null;}},1000);
-            learningCardNextButtonTimer=setTimeout(()=>{clearInterval(learningCardCountdownInterval);learningCardCountdownInterval=null;nextBtn.disabled=false;nextBtn.innerHTML='Tiếp <i class="fas fa-arrow-right ml-1"></i>';updateCardInfo();},30000);
-        }else{
-            nextBtn.disabled=(window.currentIndex>=window.currentData.length-1||window.currentData.length===0);
-            nextBtn.innerHTML='Tiếp <i class="fas fa-arrow-right ml-1"></i>';
-        }
-        updateCardInfo();
-    }
+    //     if (cardItem.isUserCard) {
+    //         return {}; 
+    //     } else {
+    //         if (userId) {
+    //             const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem));
+    //             return {
+    //                 videoUrl: firestoreStatus?.videoUrl || null 
+    //             };
+    //         }
+    //         return { videoUrl: null }; 
+    //     }
+    // }
 
-    async function getCardStatus(cardItem){
-        if (!cardItem) return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false, isFavorite: false }; 
-        const userId = getCurrentUserId();
-
-        if (cardItem.isUserCard) {
-            return {
-                status: cardItem.status || 'new',
-                lastReviewed: cardItem.lastReviewed || null,
-                reviewCount: cardItem.reviewCount || 0,
-                nextReviewDate: cardItem.nextReviewDate || null,
-                interval: cardItem.interval || 0,
-                easeFactor: cardItem.easeFactor || 2.5,
-                repetitions: cardItem.repetitions || 0,
-                isSuspended: cardItem.isSuspended || false,
-                isFavorite: cardItem.isFavorite || false 
-            };
-        } else { 
-            if (userId) {
-                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, getCardIdentifier(cardItem));
-                return { 
-                    status: 'new', interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false, 
-                    ...firestoreStatus, 
-                    status: firestoreStatus?.status || 'new', 
-                    isSuspended: firestoreStatus?.isSuspended || false,
-                    isFavorite: firestoreStatus?.isFavorite || false
-                };
-            }
-            return {status:'new',lastReviewed:null,reviewCount:0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false, isFavorite: false};
-        }
-    }
-
-    async function updateStatusButtonsUI(){
-        const srsButtons = [btnSrsAgain, btnSrsHard, btnSrsGood, btnSrsEasy];
-        const currentCardItem = window.currentData.length > 0 ? window.currentData[window.currentIndex] : null;
-
-        const enableSrsButtons = currentCardItem &&
-                                 practiceType === 'off' &&
-                                 (currentCardItem.isUserCard || getCurrentUserId());
-
-        srsButtons.forEach(btn => {
-            if(btn) btn.disabled = !enableSrsButtons;
-        });
-    }
 
     async function loadUserCards(deckIdToLoad = null) {
         const userId = getCurrentUserId();
@@ -1392,20 +1258,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
              console.log(`All cards loaded for user ${userId}:`, cards);
         } else if (selectedDeckId === 'unassigned_cards') {
+            // If "unassigned_cards" is selected, we need to load all cards and then filter.
+            // This logic is already handled by applyAllFilters, so we just load all cards here.
             if (Array.isArray(userDecks)) {
-                for (const deck of userDecks) {
+                for (const deck of userDecks) { 
                     const deckCards = await FirestoreService.loadUserCardsFromFirestore(userId, deck.id);
                     cards.push(...deckCards);
                 }
             }
-            // Lọc thẻ không có deckId sẽ được thực hiện trong applyAllFilters
         }
-        return cards.map(card => ({ ...card, isSuspended: card.isSuspended || false, videoUrl: card.videoUrl || null }));
+        return cards.map(card => {
+            const { isFavorite, ...cardWithoutFavorite } = card; 
+            return {
+                ...cardWithoutFavorite,
+                isUserCard: true,
+                videoUrl: card.videoUrl || null
+            };
+        });
     }
 
     async function handleSaveCard() {
         const userId = getCurrentUserId();
-        if (!userId && cardSourceSelect.value === 'user') {
+        // Always check for user login as source is always 'user'
+        if (!userId) {
             alert("Vui lòng đăng nhập để lưu thẻ.");
             openAuthModalFromAuth('login');
             return;
@@ -1443,7 +1318,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const assignedDeckId = cardDeckAssignmentSelect.value;
-        if (cardSourceSelect.value === 'user' && !assignedDeckId) {
+        // Always require a deck assignment as source is always 'user'
+        if (!assignedDeckId) { 
             alert("Vui lòng chọn một bộ thẻ để lưu thẻ này.");
             isValid = false;
         }
@@ -1473,42 +1349,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).filter(m => m);
 
         const editingCardId = cardIdInput.value;
-        let existingCardData = {};
-        if (editingCardId) {
-            const currentCardInList = window.currentData.find(c => c.id === editingCardId && c.isUserCard);
-            if (currentCardInList) {
-                existingCardData = { ...currentCardInList }; // Sao chép toàn bộ dữ liệu cũ
-            }
-        }
-
-
+        
         const cardDataToSave = {
             pronunciation: cardPronunciationInput.value.trim(),
             meanings: meaningsData,
             generalNotes: cardGeneralNotesInput.value.trim(),
             videoUrl: cardVideoUrlInput.value.trim() || null,
             category: cardCategory,
-            // Giữ nguyên trạng thái SRS và isFavorite nếu đang sửa, đặt mặc định nếu tạo mới
-            status: editingCardId ? (existingCardData.status || 'new') : 'new',
-            lastReviewed: editingCardId ? existingCardData.lastReviewed : null,
-            reviewCount: editingCardId ? (existingCardData.reviewCount || 0) : 0,
-            nextReviewDate: editingCardId ? existingCardData.nextReviewDate : serverTimestamp(), 
-            interval: editingCardId ? (existingCardData.interval || 0) : 0,
-            easeFactor: editingCardId ? (existingCardData.easeFactor || 2.5) : 2.5,
-            repetitions: editingCardId ? (existingCardData.repetitions || 0) : 0,
-            isSuspended: editingCardId ? (existingCardData.isSuspended || false) : false,
-            isFavorite: editingCardId ? (existingCardData.isFavorite || false) : false, // Mặc định isFavorite là false khi tạo mới
             updatedAt: serverTimestamp()
         };
-        
-        if (!editingCardId) { 
+
+        if (!editingCardId) {
             cardDataToSave.createdAt = serverTimestamp();
         }
 
-
-        if (cardSourceSelect.value === 'user') {
-            cardDataToSave.deckId = assignedDeckId || null; 
-        }
+        // Always assign deckId as source is always 'user'
+        cardDataToSave.deckId = assignedDeckId || null; 
 
 
         if (cardCategory === 'phrasalVerbs' || cardCategory === 'collocations') {
@@ -1516,26 +1372,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (cardCategory === 'collocations') cardDataToSave.collocation = wordValue;
             cardDataToSave.baseVerb = cardBaseVerbInput.value.trim() || null;
             cardDataToSave.tags = cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_'));
-        } else if (cardCategory === 'idioms') { 
+        } else if (cardCategory === 'idioms') {
             cardDataToSave.idiom = wordValue;
-            cardDataToSave.baseVerb = null; 
+            cardDataToSave.baseVerb = null;
             cardDataToSave.tags = cardTagsInput.value.trim().split(',').map(t => t.trim().toLowerCase()).filter(t => t && t !== 'all' && !t.startsWith('particle_'));
         } else {
             cardDataToSave.word = wordValue;
         }
 
-        
-        const deckIdForSave = cardSourceSelect.value === 'user' ? (assignedDeckId || null) : null; 
-        
+        // deckIdForSave is always assignedDeckId
+        const deckIdForSave = assignedDeckId || null; 
+
         const savedCardId = await FirestoreService.saveCardToFirestore(userId, deckIdForSave, cardDataToSave, editingCardId);
 
 
         if (savedCardId) {
-            alert(editingCardId ? "Đã cập nhật thẻ!" : "Đã thêm thẻ mới!");
+            showToast(editingCardId ? "Đã cập nhật thẻ!" : "Đã thêm thẻ mới!", 2000, 'success');
             closeAddEditModal();
-            if (currentDatasetSource === 'user') {
-                await loadVocabularyData(categorySelect.value); 
-            }
+            // Always load user data
+            await loadVocabularyData(categorySelect.value); 
         }
         currentEditingCardId = null;
     }
@@ -1546,14 +1401,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Vui lòng đăng nhập để xóa thẻ.");
             return;
         }
-        if(window.currentData.length===0 || !window.currentData[window.currentIndex].isUserCard) {
+        // Always check if it's a user card, as source is always 'user'
+        if(window.currentData.length===0 || !window.currentData[window.currentIndex].isUserCard) { 
             alert("Không thể xóa thẻ này (không phải thẻ của bạn hoặc không có thẻ).");
             return;
         }
 
         const cardToDelete = window.currentData[window.currentIndex];
         const cardIdToDelete = cardToDelete.id;
-        const deckIdOfCard = cardToDelete.deckId; 
+        const deckIdOfCard = cardToDelete.deckId;
 
         if (!cardIdToDelete) {
             alert("Không thể xác định thẻ để xóa. Thiếu ID thẻ.");
@@ -1565,25 +1421,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const success = await FirestoreService.deleteCardFromFirestore(userId, deckIdOfCard, cardIdToDelete);
 
         if (success) {
-            alert("Đã xóa thẻ.");
+            showToast("Đã xóa thẻ.", 2000, 'success');
             let newIndex = window.currentIndex;
-            if(window.currentIndex >= window.currentData.length - 1 && window.currentIndex > 0) { 
+            if(window.currentIndex >= window.currentData.length - 1 && window.currentIndex > 0) {
                 newIndex = window.currentIndex - 1;
-            } else if (window.currentData.length - 1 === 0) { 
-                newIndex = 0; 
+            } else if (window.currentData.length - 1 === 0) {
+                newIndex = 0;
             }
-            
-            await loadVocabularyData(categorySelect.value); 
+
+            await loadVocabularyData(categorySelect.value);
 
             if(window.currentData.length > 0){
                 window.currentIndex = Math.min(newIndex, window.currentData.length - 1);
-                window.currentIndex = Math.max(0, window.currentIndex); 
+                window.currentIndex = Math.max(0, window.currentIndex);
             } else {
-                window.currentIndex = 0; 
+                window.currentIndex = 0;
             }
             getCategoryState(currentDatasetSource,categorySelect.value).currentIndex = window.currentIndex;
             saveAppState();
-            window.updateFlashcard(); 
+            window.updateFlashcard();
         }
     }
     function shuffleArray(arr){const nA=[...arr];for(let i=nA.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nA[i],nA[j]]=[nA[j],nA[i]];}return nA;}
@@ -1592,9 +1448,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function applyAllFilters(fromLoad=false){
         const userId = getCurrentUserId();
-        clearLearningTimer();
         const cCV = categorySelect.value;
-        const sFCSC = getCategoryState(currentDatasetSource, cCV);
+        // Source is always 'user'
+        const sFCSC = getCategoryState('user', cCV); 
         let cST = searchInput.value.trim().toLowerCase();
 
         if (!fromLoad) {
@@ -1606,33 +1462,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 sFCSC.tag = tagSelect.value;
             }
-            if (currentDatasetSource === 'user' && userId) {
-                sFCSC.deckId = userDeckSelect.value;
-            }
-            sFCSC.filterMarked = filterCardStatusSelect.value; 
-            sFCSC.currentIndex = 0; 
+            // Always set deckId as source is always 'user'
+            sFCSC.deckId = userDeckSelect.value; 
+            sFCSC.filterMarked = filterCardStatusSelect.value;
+            sFCSC.currentIndex = 0;
         }
 
         let lTP = [...activeMasterList];
 
-        if (currentDatasetSource === 'user' && userId) {
-            const sDI = sFCSC.deckId || userDeckSelect.value;
-            if (sDI && sDI !== 'all_user_cards') {
-                if (sDI === 'unassigned_cards') {
-                    lTP = lTP.filter(i => !i.deckId);
-                } else {
-                    lTP = lTP.filter(i => i.deckId === sDI);
-                }
+        // Always filter by user deck if applicable
+        const sDI = sFCSC.deckId || userDeckSelect.value;
+        if (sDI && sDI !== 'all_user_cards') {
+            if (sDI === 'unassigned_cards') {
+                lTP = lTP.filter(i => !i.deckId);
+            } else {
+                lTP = lTP.filter(i => i.deckId === sDI);
             }
-            // Đối với thẻ người dùng, activeMasterList đã được lọc theo category khi loadUserCards (nếu cần)
-            // hoặc chứa tất cả thẻ nếu deckId là 'all_user_cards'/'unassigned_cards'.
-            // Cần đảm bảo activeMasterList là nguồn đúng trước khi lọc category ở đây.
-            // Nếu loadUserCards(deckIdToLoad) trả về thẻ của *chỉ* deck đó, thì lọc category ở đây là đúng.
-            // Nếu loadUserCards trả về tất cả thẻ (ví dụ khi deckIdToLoad là 'all_user_cards'),
-            // thì lọc category ở đây cũng cần thiết.
-             lTP = lTP.filter(i => i.category === cCV);
         }
-        // Đối với thẻ web, activeMasterList đã được lọc theo category từ loadVocabularyData.
+        // Always filter by category for user cards
+        lTP = lTP.filter(i => i.category === cCV); 
+
 
         if (cCV === 'phrasalVerbs' || cCV === 'collocations') {
             if (sFCSC.baseVerb && sFCSC.baseVerb !== 'all') {
@@ -1662,37 +1511,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedFilterValue = sFCSC.filterMarked;
         console.log("Applying filter: ", selectedFilterValue);
 
-        if (selectedFilterValue === 'all_visible') {
-            // Không lọc thêm theo trạng thái SRS hoặc isSuspended, hiển thị tất cả (đã qua các bộ lọc khác)
-        } else {
-            // Các bộ lọc khác sẽ loại bỏ thẻ bị tạm ngưng trước
-            lTP = lTP.filter(item => !(item.isSuspended === true));
-
-            if (selectedFilterValue === 'favorites') {
-                if (userId) {
-                    lTP = lTP.filter(item => item.isFavorite === true);
-                } else {
-                    lTP = [];
-                    showToast("Vui lòng đăng nhập để xem thẻ yêu thích.", 3000, 'info');
-                }
-            } else if (selectedFilterValue === 'review_today') {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                lTP = lTP.filter(item => {
-                    if (item.nextReviewDate && typeof item.nextReviewDate === 'number') {
-                        const reviewDate = new Date(item.nextReviewDate);
-                        reviewDate.setHours(0, 0, 0, 0);
-                        return reviewDate <= today;
-                    }
-                    // Thẻ mới (status 'new' hoặc không có status và không có nextReviewDate) cũng được coi là cần ôn tập
-                    return (item.status === 'new' || !item.status) && item.nextReviewDate === null; 
-                });
-            } else if (['new', 'learning', 'learned'].includes(selectedFilterValue)) {
-                lTP = lTP.filter(item => (item.status || 'new') === selectedFilterValue);
-            } else if (selectedFilterValue === 'all_active') {
-                // Đã lọc isSuspended ở trên, không cần làm gì thêm ở đây cho 'all_active'
-            }
+        if (selectedFilterValue === 'learned') {
+             lTP = lTP.filter(item => item.isLearned === true);
         }
+        // 'all_cards' không cần filter thêm
+
         console.log(`Filtered list length for '${selectedFilterValue}': ${lTP.length} cards`);
 
 
@@ -1703,9 +1526,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             else{nI=Math.min(nI,window.currentData.length-1);nI=Math.max(0,nI);}
             window.currentIndex=nI;
         } else {
-            window.currentIndex=0; 
+            window.currentIndex=0;
         }
-        sFCSC.currentIndex=window.currentIndex; 
+        sFCSC.currentIndex=window.currentIndex;
         saveAppState();
         window.updateFlashcard();
         window.updateMainHeaderTitle();
@@ -1713,167 +1536,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadVocabularyData (category) {
         const userId = getCurrentUserId();
-        clearLearningTimer();
         wordDisplay.innerHTML = '<span class="text-slate-400 text-xl">Đang tải dữ liệu...</span>';
         currentWordSpansMeta = []; pronunciationDisplay.textContent = ''; tagsDisplayFront.textContent = ''; meaningDisplayContainer.innerHTML = ''; notesDisplay.innerHTML = '';
         window.currentData = []; activeMasterList = []; speakerBtn.disabled = true;
-        if (speakerExampleBtn) speakerExampleBtn.style.display = 'none'; 
+        if (speakerExampleBtn) speakerExampleBtn.style.display = 'none';
 
-        const stateForCurrentSourceCategory = getCategoryState(currentDatasetSource, category);
-        // Đặt giá trị filterCardStatusSelect từ appState, nếu không có thì dùng giá trị mặc định của defaultCategoryState
+        // Source is always 'user'
+        const stateForCurrentSourceCategory = getCategoryState('user', category); 
         filterCardStatusSelect.value = stateForCurrentSourceCategory.filterMarked || defaultCategoryState.filterMarked;
 
 
-        if (currentDatasetSource === 'user') {
-            if (!userId) {
-                wordDisplay.classList.add('word-display-empty-state');
-                wordDisplay.innerHTML = `<p>Vui lòng đăng nhập để xem hoặc tạo thẻ của bạn.</p><button id="login-prompt-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md mt-2">Đăng nhập ngay</button>`;
-                const loginPromptBtn = document.getElementById('login-prompt-btn');
-                if(loginPromptBtn) loginPromptBtn.onclick = () => {
-                    openAuthModalFromAuth('login');
-                };
-                pronunciationDisplay.style.display = 'none'; tagsDisplayFront.style.display = 'none'; speakerBtn.style.display = 'none';
-                updateStatusButtonsUI(null, null); updateCardInfo(); window.updateMainHeaderTitle(); window.updateSidebarFilterVisibility();
-                return;
-            }
-            await loadUserDecks(); 
-            userDeckSelect.value = stateForCurrentSourceCategory.deckId || appState.lastSelectedDeckId || 'all_user_cards';
-            activeMasterList = await loadUserCards(userDeckSelect.value); 
-        } else { 
-            try {
-                const response = await fetch(`data/${category}.json?v=${new Date().getTime()}`); 
-                if (!response.ok) {
-                    console.warn(`Lỗi HTTP: ${response.status} khi tải ${category}.json. Sử dụng dữ liệu mẫu.`);
-                    throw new Error(`HTTP error ${response.status}`);
-                }
-                const jsonData = await response.json();
-                if (jsonData && jsonData[category] && jsonData[category].length > 0) {
-                    let webCards = jsonData[category].map(card => {
-                        let meaningsArray = [];
-                        if (Array.isArray(card.meanings)) {
-                            meaningsArray = card.meanings.map(m => ({
-                                id: m.id || generateUniqueId('wm_'),
-                                text: m.text || '',
-                                notes: m.notes || '',
-                                examples: Array.isArray(m.examples) ? m.examples.map(ex => ({
-                                    id: ex.id || generateUniqueId('wex_'),
-                                    eng: ex.eng || '',
-                                    vie: ex.vie || '',
-                                    exampleNotes: ex.exampleNotes || ''
-                                })) : []
-                            }));
-                        } else if (card.meaning) { 
-                            let examplesArray = [];
-                            if (card.example) { 
-                                examplesArray.push({
-                                    id: generateUniqueId('wex_'),
-                                    eng: card.example,
-                                    vie: card.exampleVie || ''
-                                });
-                            }
-                            meaningsArray.push({
-                                id: generateUniqueId('wm_'),
-                                text: card.meaning,
-                                notes: '', 
-                                examples: examplesArray
-                            });
-                        }
-
-                        return {
-                            ...card,
-                            id: getCardIdentifier(card), 
-                            isUserCard: false,
-                            category: category, 
-                            meanings: meaningsArray,
-                            generalNotes: card.generalNotes || card.notes || '', 
-                            videoUrl: card.videoUrl || null,
-                            status: 'new',
-                            lastReviewed: null,
-                            reviewCount: 0,
-                            nextReviewDate: null,
-                            interval: 0,
-                            easeFactor: 2.5,
-                            repetitions: 0,
-                            isSuspended: false,
-                            isFavorite: false 
-                        };
-                    });
-
-                    if (userId && webCards.length > 0) {
-                        const statusPromises = webCards.map(async (card) => {
-                            const webId = card.id; 
-                            if (webId) {
-                                const firestoreStatus = await FirestoreService.getWebCardStatusFromFirestore(userId, webId);
-                                if (firestoreStatus) { // firestoreStatus có thể null hoặc là object chứa isFavorite
-                                    card.status = firestoreStatus.status || 'new';
-                                    card.lastReviewed = firestoreStatus.lastReviewed; 
-                                    card.reviewCount = firestoreStatus.reviewCount || 0;
-                                    card.nextReviewDate = firestoreStatus.nextReviewDate; 
-                                    card.interval = firestoreStatus.interval || 0;
-                                    card.easeFactor = firestoreStatus.easeFactor || 2.5;
-                                    card.repetitions = firestoreStatus.repetitions || 0;
-                                    card.isSuspended = firestoreStatus.isSuspended || false;
-                                    card.videoUrl = firestoreStatus.videoUrl || card.videoUrl || null; 
-                                    card.isFavorite = firestoreStatus.isFavorite || false; 
-                                }
-                            }
-                            return card;
-                        });
-                        activeMasterList = await Promise.all(statusPromises);
-                    } else {
-                        activeMasterList = webCards; 
-                    }
-                } else {
-                    console.warn(`Không có dữ liệu trong ${category}.json. Sử dụng dữ liệu mẫu.`);
-                    throw new Error('Empty JSON data');
-                }
-            } catch (error) {
-                console.error(`Lỗi tải dữ liệu Web cho '${category}':`, error.message);
-                if (sampleData[category] && sampleData[category].length > 0) {
-                    activeMasterList = sampleData[category].map(card => ({
-                        ...card,
-                        id: getCardIdentifier({category: category, word: card.word, phrasalVerb: card.phrasalVerb, collocation: card.collocation, idiom: card.idiom}), 
-                        isUserCard: false,
-                        category: category,
-                        status: 'new', lastReviewed: null, reviewCount: 0, nextReviewDate: null, interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false,
-                        isFavorite: false, 
-                        videoUrl: card.videoUrl || null
-                    }));
-                    console.log(`Đã tải dữ liệu mẫu cho '${category}'.`);
-                } else {
-                    activeMasterList = [];
-                    console.log(`Không có dữ liệu mẫu cho '${category}'.`);
-                }
-            }
+        // Always load user cards
+        if (!userId) {
+            wordDisplay.classList.add('word-display-empty-state');
+            wordDisplay.innerHTML = `<p>Vui lòng đăng nhập để xem hoặc tạo thẻ của bạn.</p><button id="login-prompt-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md mt-2">Đăng nhập ngay</button>`;
+            const loginPromptBtn = document.getElementById('login-prompt-btn');
+            if(loginPromptBtn) loginPromptBtn.onclick = () => {
+                openAuthModalFromAuth('login');
+            };
+            pronunciationDisplay.style.display = 'none'; tagsDisplayFront.style.display = 'none'; speakerBtn.style.display = 'none';
+            updateCardInfo(); window.updateMainHeaderTitle(); window.updateSidebarFilterVisibility();
+            return;
         }
+        await loadUserDecks();
+        userDeckSelect.value = stateForCurrentSourceCategory.deckId || appState.lastSelectedDeckId || 'all_user_cards';
+        activeMasterList = await loadUserCards(userDeckSelect.value); 
+        
         window.updateSidebarFilterVisibility();
         baseVerbSelect.innerHTML = ''; tagSelect.innerHTML = '';
-        if (category !== 'phrasalVerbs' && category !== 'collocations' && category !== 'idioms') { 
+        if (category !== 'phrasalVerbs' && category !== 'collocations' && category !== 'idioms') {
             stateForCurrentSourceCategory.baseVerb = 'all';
             stateForCurrentSourceCategory.tag = 'all';
         }
 
         activeMasterList = shuffleArray(activeMasterList);
-        const relevantCardsForFilters = (currentDatasetSource === 'web' || !userId) ? activeMasterList : activeMasterList.filter(card => card.category === category);
+        // Filter relevant cards for filters is always activeMasterList as it's all user cards now
+        const relevantCardsForFilters = activeMasterList.filter(card => card.category === category); 
 
-        if ((category === 'phrasalVerbs' || category === 'collocations') && relevantCardsForFilters.length > 0) { 
+        if ((category === 'phrasalVerbs' || category === 'collocations') && relevantCardsForFilters.length > 0) {
             populateBaseVerbFilter(relevantCardsForFilters);
             baseVerbSelect.value = stateForCurrentSourceCategory.baseVerb || 'all';
         }
-        if ((category === 'phrasalVerbs' || category === 'collocations' || category === 'idioms') && relevantCardsForFilters.length > 0) { 
+        if ((category === 'phrasalVerbs' || category === 'collocations' || category === 'idioms') && relevantCardsForFilters.length > 0) {
             populateTagFilter(relevantCardsForFilters);
             tagSelect.value = stateForCurrentSourceCategory.tag || 'all';
         }
-        applyAllFilters(true); 
+        applyAllFilters(true);
     }
 
     function updateFlashcard() {
         const userId = getCurrentUserId();
-        clearLearningTimer(); currentAnswerChecked = false;
-        feedbackMessage.textContent = ''; feedbackMessage.className = 'mt-3 p-3 rounded-md w-full text-center font-semibold hidden';
-        multipleChoiceOptionsContainer.innerHTML = '';
-        typingInputContainer.style.display = 'none'; typingInput.value = ''; typingInput.disabled = false; submitTypingAnswerBtn.disabled = false;
-
+        
         if(wordDisplay) {
             wordDisplay.innerHTML = '';
             wordDisplay.className = 'text-3xl sm:text-4xl font-bold break-words';
@@ -1895,97 +1608,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
         if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
         if (actionBtnMedia) actionBtnMedia.style.display = 'flex';
-        if (exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none';
         if (speakerExampleBtn) speakerExampleBtn.style.display = 'none';
 
+        if(pronunciationDisplay) pronunciationDisplay.style.display = 'block';
+        if(tagsDisplayFront) tagsDisplayFront.style.display = 'block';
+        if(speakerBtn) speakerBtn.style.display = 'block';
+        if(flipBtn) flipBtn.style.display = 'inline-flex';
+        if(prevBtn) prevBtn.style.display = 'inline-flex';
+        if(nextBtn) nextBtn.style.display = 'inline-flex';
 
-        if (practiceType !== "off") {
-            if(flipBtn) flipBtn.style.display = 'none';
-            if(practiceArea) practiceArea.style.display = 'block';
-            if(flashcardElement) flashcardElement.classList.add('practice-mode-front-only');
-            if (practiceType === 'typing_practice') {
-                if(typingInputContainer) typingInputContainer.style.display = 'block';
-                if(multipleChoiceOptionsContainer) multipleChoiceOptionsContainer.style.display = 'none';
-                if (window.currentData.length > 0 && window.currentData[window.currentIndex]) {
-                    const cI = window.currentData[window.currentIndex];
-                    if (cI.category === 'phrasalVerbs') currentCorrectAnswerForPractice = cI.phrasalVerb || '';
-                    else if (cI.category === 'collocations') currentCorrectAnswerForPractice = cI.collocation || '';
-                    else if (cI.category === 'idioms') currentCorrectAnswerForPractice = cI.idiom || ''; 
-                    else currentCorrectAnswerForPractice = cI.word || '';
-                } else {
-                    if(typingInputContainer) typingInputContainer.innerHTML = '<p class="text-slate-500 italic">Không có thẻ để luyện tập.</p>';
-                }
-            } else {
-                if(typingInputContainer) typingInputContainer.style.display = 'none';
-                if(multipleChoiceOptionsContainer) multipleChoiceOptionsContainer.style.display = 'grid';
-                if (window.currentData.length > 0 && window.currentData[window.currentIndex]) {
-                    displayMultipleChoiceOptions();
-                } else {
-                     if(multipleChoiceOptionsContainer) multipleChoiceOptionsContainer.innerHTML = '<p class="text-slate-500 italic">Không có thẻ để luyện tập.</p>';
-                }
-            }
-            if (practiceType === 'word_quiz') {
-                if(pronunciationDisplay) pronunciationDisplay.style.display = 'none';
-                if(tagsDisplayFront) tagsDisplayFront.style.display = 'none';
-                if(speakerBtn) speakerBtn.style.display = 'none';
-                if(flashcardElement) flashcardElement.classList.add('practice-mode-word-quiz');
-            } else {
-                if(pronunciationDisplay) pronunciationDisplay.style.display = 'block';
-                if(tagsDisplayFront) tagsDisplayFront.style.display = 'block';
-                if(speakerBtn) speakerBtn.style.display = 'block';
-                if(flashcardElement) flashcardElement.classList.remove('practice-mode-word-quiz');
-            }
-            if (isSingleCardPracticeMode && exitSingleCardPracticeBtn) {
-                exitSingleCardPracticeBtn.style.display = 'inline-flex';
-                if(prevBtn) prevBtn.style.display = 'none';
-                if(nextBtn) nextBtn.style.display = 'none';
-                if(flipBtn) flipBtn.style.display = 'none';
-            } else {
-                 if(prevBtn) prevBtn.style.display = 'inline-flex';
-                 if(nextBtn) nextBtn.style.display = 'inline-flex';
-                 if(flipBtn) flipBtn.style.display = 'inline-flex';
-            }
-
-        } else {
-            if(practiceArea) practiceArea.style.display = 'none';
-            if(flashcardElement) flashcardElement.classList.remove('practice-mode-front-only');
-            if(pronunciationDisplay) pronunciationDisplay.style.display = 'block';
-            if(tagsDisplayFront) tagsDisplayFront.style.display = 'block';
-            if(speakerBtn) speakerBtn.style.display = 'block';
-            if(flipBtn) flipBtn.style.display = 'inline-flex';
-            if(prevBtn) prevBtn.style.display = 'inline-flex';
-            if(nextBtn) nextBtn.style.display = 'inline-flex';
-        }
 
         const item = window.currentData.length > 0 ? window.currentData[window.currentIndex] : null;
         console.log('[updateFlashcard] Rendering card. Item:', JSON.parse(JSON.stringify(item)));
 
-        if (item) { 
+        if (item) {
             addCardToRecentlyViewed(item);
-            if (typeof item.isFavorite === 'undefined') { // Đảm bảo isFavorite tồn tại
-                item.isFavorite = false;
-            }
-            if (typeof item.isSuspended === 'undefined') { // Đảm bảo isSuspended tồn tại
-                item.isSuspended = false;
-            }
-            if (!item.status) { // Đảm bảo status tồn tại
-                item.status = 'new';
-            }
+            flashcardElement.classList.toggle('is-learned', !!item.isLearned);
+        } else {
+             flashcardElement.classList.remove('is-learned');
         }
 
 
         if (!item) {
             if(wordDisplay) {
                 wordDisplay.classList.add('word-display-empty-state');
-                if (currentDatasetSource === 'user' && !userId) {
+                // Always user source
+                if (!userId) {
                      wordDisplay.innerHTML = `<p>Vui lòng đăng nhập để xem hoặc tạo thẻ của bạn.</p><button id="login-prompt-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md mt-2">Đăng nhập ngay</button>`;
                      const loginPromptBtn = document.getElementById('login-prompt-btn');
                      if(loginPromptBtn) loginPromptBtn.onclick = () => {
                          openAuthModalFromAuth('login');
                      };
-                } else if (currentDatasetSource === 'user' && userId && (!userDecks || userDecks.length === 0) && activeMasterList.length === 0) {
+                } else if ((!userDecks || userDecks.length === 0) && activeMasterList.length === 0) {
                     wordDisplay.innerHTML = `<p>Bạn chưa có thẻ nào và chưa có bộ thẻ nào. Hãy bắt đầu bằng cách tạo một bộ thẻ từ menu <i class='fas fa-bars'></i>, sau đó thêm thẻ mới!</p>`;
-                } else if (currentDatasetSource === 'user' && userId && activeMasterList.length === 0) {
+                } else if (activeMasterList.length === 0) { // Removed currentDatasetSource === 'user' && userId
                     wordDisplay.innerHTML = `<p>Bạn chưa có thẻ nào trong bộ sưu tập "Thẻ của Tôi" cho bộ lọc hiện tại.</p><button id="empty-state-add-card-btn-on-card"><i class="fas fa-plus mr-2"></i>Tạo Thẻ Đầu Tiên</button>`;
                     const emptyAddBtn = document.getElementById('empty-state-add-card-btn-on-card');
                     if(emptyAddBtn) emptyAddBtn.addEventListener('click', async (e) => {
@@ -2002,70 +1658,58 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(flipBtn) flipBtn.disabled = true;
             if(flipIconFront) flipIconFront.style.display = 'none';
             if(flipIconBack) flipIconBack.style.display = 'none';
-            updateStatusButtonsUI();
         } else {
             if(pronunciationDisplay) pronunciationDisplay.style.display = 'block';
             if(tagsDisplayFront) tagsDisplayFront.style.display = 'block';
             if(speakerBtn) speakerBtn.style.display = 'block';
-            if(flipBtn) flipBtn.disabled = (practiceType !== "off");
-            if(flipIconFront) flipIconFront.style.display = (practiceType === "off") ? 'block' : 'none';
-            if(flipIconBack) flipIconBack.style.display = (practiceType === "off") ? 'block' : 'none';
+            if(flipBtn) flipBtn.disabled = false;
+            if(flipIconFront) flipIconFront.style.display = 'block';
+            if(flipIconBack) flipIconBack.style.display = 'block';
 
 
             currentWordSpansMeta = []; let accCC = 0;
             const iCV = item.category;
-            const firstMeaningText = (item.meanings && item.meanings.length > 0) ? item.meanings[0].text : '';
             let textForTTS;
             let mainTermToDisplay = '';
 
             if (iCV === 'phrasalVerbs') mainTermToDisplay = item.phrasalVerb || '';
             else if (iCV === 'collocations') mainTermToDisplay = item.collocation || '';
-            else if (iCV === 'idioms') mainTermToDisplay = item.idiom || ''; 
+            else if (iCV === 'idioms') mainTermToDisplay = item.idiom || '';
             else mainTermToDisplay = item.word || '';
 
-            if (practiceType === 'word_quiz') {
-                textForTTS = firstMeaningText;
-                const mTSp = document.createElement('span');
-                mTSp.className = 'text-3xl sm:text-4xl font-bold';
-                mTSp.textContent = firstMeaningText;
-                if(wordDisplay) wordDisplay.appendChild(mTSp);
-
-                if(pronunciationDisplay) pronunciationDisplay.style.display = 'none';
-                if(tagsDisplayFront) tagsDisplayFront.style.display = 'none';
-                if(speakerBtn) speakerBtn.style.display = 'none';
-            } else {
-                let bTFM = "";
-                const pts = mainTermToDisplay.split(/(\([^)]+\))/g).filter(p => p);
-                pts.forEach((p, pI) => {
-                    const iD = p.startsWith('(') && p.endsWith(')');
-                    const cS = document.createElement('span');
-                    cS.className = iD ? 'text-xl opacity-80 ml-1' : 'text-3xl sm:text-4xl font-bold';
-                    const segs = p.split(/(\s+)/);
-                    segs.forEach(s => {
-                        bTFM += s;
-                        if (s.trim() !== '') {
-                            const wS = document.createElement('span');
-                            wS.textContent = s;
-                            cS.appendChild(wS);
-                            currentWordSpansMeta.push({ element: wS, start: bTFM.length - s.length, length: s.length });
-                        } else {
-                            cS.appendChild(document.createTextNode(s));
-                        }
-                    });
-                    if(wordDisplay) wordDisplay.appendChild(cS);
-                    if (pI < pts.length - 1) {
-                        const nPID = pts[pI+1].startsWith('(') && pts[pI+1].endsWith(')');
-                        if (!p.endsWith(' ') && !pts[pI+1].startsWith(' ') && !(iD && nPID) ) {
-                             if(wordDisplay) wordDisplay.appendChild(document.createTextNode(' '));
-                             bTFM += ' ';
-                        }
+            
+            let bTFM = "";
+            const pts = mainTermToDisplay.split(/(\([^)]+\))/g).filter(p => p);
+            pts.forEach((p, pI) => {
+                const iD = p.startsWith('(') && p.endsWith(')');
+                const cS = document.createElement('span');
+                cS.className = iD ? 'text-xl opacity-80 ml-1' : 'text-3xl sm:text-4xl font-bold';
+                const segs = p.split(/(\s+)/);
+                segs.forEach(s => {
+                    bTFM += s;
+                    if (s.trim() !== '') {
+                        const wS = document.createElement('span');
+                        wS.textContent = s;
+                        cS.appendChild(wS);
+                        currentWordSpansMeta.push({ element: wS, start: bTFM.length - s.length, length: s.length });
+                    } else {
+                        cS.appendChild(document.createTextNode(s));
                     }
                 });
-                textForTTS = bTFM;
-            }
+                if(wordDisplay) wordDisplay.appendChild(cS);
+                if (pI < pts.length - 1) {
+                    const nPID = pts[pI+1].startsWith('(') && pts[pI+1].endsWith(')');
+                    if (!p.endsWith(' ') && !pts[pI+1].startsWith(' ') && !(iD && nPID) ) {
+                         if(wordDisplay) wordDisplay.appendChild(document.createTextNode(' '));
+                         bTFM += ' ';
+                    }
+                }
+            });
+            textForTTS = bTFM;
+            
             if(wordDisplay) wordDisplay.dataset.ttsText = textForTTS;
             if(pronunciationDisplay) pronunciationDisplay.textContent = item.pronunciation || '';
-            if ((iCV === 'phrasalVerbs' || iCV === 'collocations' || iCV === 'idioms') && item.tags && practiceType !== 'word_quiz') { 
+            if ((iCV === 'phrasalVerbs' || iCV === 'collocations' || iCV === 'idioms') && item.tags) {
                 const dT = item.tags.filter(t => t && t !== 'all' && !t.startsWith('particle_') && tagDisplayNames[t]).map(t => tagDisplayNames[t]);
                 if(tagsDisplayFront) {tagsDisplayFront.textContent = dT.join(' | '); tagsDisplayFront.style.display = dT.length > 0 ? 'block' : 'none';}
             } else {
@@ -2073,7 +1717,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const cardBackScrollableContent = flashcardElement.querySelector('.card-back .card-scrollable-content');
-            if (cardBackScrollableContent && mainTermToDisplay && practiceType === 'off') {
+            if (cardBackScrollableContent && mainTermToDisplay) {
                 const originalTermDiv = document.createElement('div');
                 originalTermDiv.className = 'original-term-on-back';
                 originalTermDiv.textContent = mainTermToDisplay;
@@ -2084,9 +1728,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const hasActionsForBottomSheet = (item.isUserCard && userId) || (!item.isUserCard && userId);
-            if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = hasActionsForBottomSheet ? 'block' : 'none';
-            if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = hasActionsForBottomSheet ? 'block' : 'none';
+            // cardOptionsMenuBtn is always visible for user cards
+            const canShowOptionsMenu = !!userId; // Simplified, always true if logged in
+            if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = canShowOptionsMenu ? 'block' : 'none';
+            if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = canShowOptionsMenu ? 'block' : 'none';
+
             if (actionBtnMedia && item) actionBtnMedia.style.display = 'flex'; else if (actionBtnMedia) actionBtnMedia.style.display = 'none';
 
 
@@ -2110,7 +1756,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         meaningBlockDiv.appendChild(meaningNotesP);
                     }
 
-                    
+
                     const rateControlContainer = document.createElement('div');
                     rateControlContainer.className = 'example-speech-rate-dropdown-container flex items-center space-x-2 mb-2 ml-3';
 
@@ -2137,7 +1783,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                     rateControlContainer.appendChild(rateSelect);
                     meaningBlockDiv.appendChild(rateControlContainer);
-                    
+
 
 
                     if (mObj.examples && mObj.examples.length > 0) {
@@ -2230,13 +1876,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             copyBtn.innerHTML = initialCopySvg;
                             copyBtn.onclick = (e) => {
                                 e.stopPropagation();
-                                navigator.clipboard.writeText(ex.eng).then(() => {
-                                    copyBtn.innerHTML = copiedSvg;
-                                    setTimeout(() => { copyBtn.innerHTML = initialCopySvg; }, 1500);
-                                }).catch(err => {
-                                    console.error('Không thể sao chép: ', err);
-                                    showToast('Lỗi sao chép vào clipboard!', 2000, 'error');
-                                });
+                                document.execCommand('copy'); // Use document.execCommand for clipboard access in iframe
+                                showToast('Đã sao chép!', 1500, 'success');
+                                copyBtn.innerHTML = copiedSvg;
+                                setTimeout(() => { copyBtn.innerHTML = initialCopySvg; }, 1500);
                             };
                             controlsDiv.appendChild(copyBtn);
                             eP.appendChild(controlsDiv);
@@ -2300,138 +1943,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (notesDisplay) notesDisplay.innerHTML = '';
 
 
-            if(speakerBtn) speakerBtn.disabled = !textForTTS.trim() || (practiceType === 'word_quiz');
-            updateStatusButtonsUI();
+            if(speakerBtn) speakerBtn.disabled = !textForTTS.trim();
         }
         updateCardInfo();
-        if (practiceType === 'off' && !isSingleCardPracticeMode) startLearningTimer();
     };
 
     function updateCardInfo(){
         if(currentCardIndexDisplay) currentCardIndexDisplay.textContent = window.currentData.length > 0 ? window.currentIndex + 1 : 0;
         if(totalCardsDisplay) totalCardsDisplay.textContent = window.currentData.length;
 
-        if (isSingleCardPracticeMode) {
-            if(prevBtn) prevBtn.style.display = 'none';
-            if(nextBtn) nextBtn.style.display = 'none';
-            if(flipBtn) flipBtn.style.display = 'none';
-            if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'inline-flex';
-        } else {
-            if(prevBtn) prevBtn.style.display = 'inline-flex';
-            if(nextBtn) nextBtn.style.display = 'inline-flex';
-            if(flipBtn) flipBtn.style.display = 'inline-flex';
-            if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.style.display = 'none';
-
-            if(prevBtn) prevBtn.disabled = window.currentIndex === 0 || window.currentData.length === 0;
-            let nextDisabled = (window.currentIndex >= window.currentData.length - 1 || window.currentData.length === 0);
-            if (practiceType !== "off") nextDisabled = nextDisabled || (!currentAnswerChecked && window.currentData.length > 0) || (window.currentData.length > 0 && window.currentIndex >= window.currentData.length - 1 && !currentAnswerChecked);
-            if (!learningCardNextButtonTimer && nextBtn) nextBtn.disabled = nextDisabled;
-            if (flipBtn) flipBtn.disabled = window.currentData.length === 0 || (practiceType !== "off");
-        }
-    }
-
-    function displayMultipleChoiceOptions() {
-        multipleChoiceOptionsContainer.innerHTML = '';
-        const sourceCard = isSingleCardPracticeMode ? originalCurrentData[originalCurrentIndex] : window.currentData[window.currentIndex];
-
-        if (!sourceCard) {
-            multipleChoiceOptionsContainer.innerHTML = '<p class="text-slate-500 italic col-span-full">Không có thẻ để luyện tập.</p>';
-            return;
-        }
-
-        let questionText = '';
-        let correctAnswerText = '';
-        let options = [];
-        const numberOfOptions = 4;
-
-        if (practiceType === 'meaning_quiz') {
-            questionText = sourceCard.category === 'phrasalVerbs' ? sourceCard.phrasalVerb : (sourceCard.category === 'collocations' ? sourceCard.collocation : (sourceCard.category === 'idioms' ? sourceCard.idiom : sourceCard.word)); 
-            correctAnswerText = sourceCard.meanings[0].text;
-            options.push(correctAnswerText);
-
-            let wrongOptionsCount = 0;
-            const otherCards = activeMasterList.filter(card =>
-                card.category === sourceCard.category &&
-                getCardIdentifier(card) !== getCardIdentifier(sourceCard) &&
-                card.meanings && card.meanings.length > 0 && card.meanings[0].text
-            );
-            shuffleArray(otherCards);
-            for (const otherCard of otherCards) {
-                if (wrongOptionsCount < (numberOfOptions - 1) && otherCard.meanings[0].text !== correctAnswerText) {
-                    options.push(otherCard.meanings[0].text);
-                    wrongOptionsCount++;
-                }
-                if (wrongOptionsCount >= (numberOfOptions - 1)) break;
-            }
-        } else if (practiceType === 'word_quiz') {
-            questionText = sourceCard.meanings[0].text;
-            correctAnswerText = sourceCard.category === 'phrasalVerbs' ? sourceCard.phrasalVerb : (sourceCard.category === 'collocations' ? sourceCard.collocation : (sourceCard.category === 'idioms' ? sourceCard.idiom : sourceCard.word)); 
-            options.push(correctAnswerText);
-
-            let wrongOptionsCount = 0;
-            const otherCards = activeMasterList.filter(card =>
-                card.category === sourceCard.category &&
-                getCardIdentifier(card) !== getCardIdentifier(sourceCard)
-            );
-            shuffleArray(otherCards);
-            for (const otherCard of otherCards) {
-                const wrongOption = otherCard.category === 'phrasalVerbs' ? otherCard.phrasalVerb : (otherCard.category === 'collocations' ? otherCard.collocation : (otherCard.category === 'idioms' ? otherCard.idiom : otherCard.word)); 
-                if (wrongOptionsCount < (numberOfOptions - 1) && wrongOption !== correctAnswerText) {
-                    options.push(wrongOption);
-                    wrongOptionsCount++;
-                }
-                if (wrongOptionsCount >= (numberOfOptions - 1)) break;
-            }
-        }
-
-        let dummyOptionIndex = 1;
-        while (options.length < Math.min(numberOfOptions, activeMasterList.filter(c => c.category === sourceCard.category).length) && options.length > 0 && options.length < numberOfOptions) {
-             options.push(`Lựa chọn sai ${dummyOptionIndex++}`);
-        }
-         while (options.length < 2 && options.length > 0) { 
-            options.push(`Lựa chọn sai ${dummyOptionIndex++}`);
-        }
-
-
-        options = shuffleArray(options);
-
-        options.forEach(optionText => {
-            const button = document.createElement('button');
-            button.className = 'choice-button';
-            button.textContent = optionText;
-            button.addEventListener('click', () => checkMultipleChoiceAnswer(optionText, correctAnswerText, button));
-            multipleChoiceOptionsContainer.appendChild(button);
-        });
-    }
-
-    function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer, buttonElement) {
-        currentAnswerChecked = true;
-        feedbackMessage.classList.remove('hidden');
-        const allChoiceButtons = multipleChoiceOptionsContainer.querySelectorAll('.choice-button');
-        allChoiceButtons.forEach(btn => btn.disabled = true);
-
-        const isCorrect = selectedAnswer === correctAnswer;
-
-        if (isCorrect) {
-            buttonElement.classList.add('correct');
-            feedbackMessage.textContent = 'Chính xác!';
-            feedbackMessage.className = 'mt-3 p-3 rounded-md w-full text-center font-semibold bg-green-100 text-green-700 border border-green-300';
-        } else {
-            buttonElement.classList.add('incorrect');
-            feedbackMessage.textContent = `Không đúng! Đáp án là: ${correctAnswer}`;
-            feedbackMessage.className = 'mt-3 p-3 rounded-md w-full text-center font-semibold bg-red-100 text-red-700 border border-red-300';
-            allChoiceButtons.forEach(btn => {
-                if (btn.textContent === correctAnswer) {
-                    btn.classList.add('correct');
-                }
-            });
-        }
-
-        flashcardElement.classList.remove('practice-mode-front-only');
-        flashcardElement.classList.add('flipped');
-
-        processSrsRatingWrapper(isCorrect ? 'easy' : 'again');
-        updateCardInfo();
+        if(prevBtn) prevBtn.style.display = 'inline-flex';
+        if(nextBtn) nextBtn.style.display = 'inline-flex';
+        if(flipBtn) flipBtn.style.display = 'inline-flex';
+        
+        if(prevBtn) prevBtn.disabled = window.currentIndex === 0 || window.currentData.length === 0;
+        let nextDisabled = (window.currentIndex >= window.currentData.length - 1 || window.currentData.length === 0);
+        if (nextBtn) nextBtn.disabled = nextDisabled;
+        if (flipBtn) flipBtn.disabled = window.currentData.length === 0;
     }
 
     function switchToInputMode(mode) {
@@ -2441,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             addEditCardForm.style.display = 'none';
             jsonInputArea.style.display = 'block';
             document.getElementById('json-deck-assignment-container').style.display = 'block';
-            modalDeckAssignmentContainer.style.display = 'none';
+            modalDeckAssignmentContainer.style.display = 'none'; // Always hide manual deck assignment
 
             saveCardBtn.style.display = 'none';
             processJsonBtn.style.display = 'inline-flex';
@@ -2457,11 +1985,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             addEditCardForm.style.display = 'block';
             jsonInputArea.style.display = 'none';
             document.getElementById('json-deck-assignment-container').style.display = 'none';
-            if (cardSourceSelect.value === 'user') {
-                 modalDeckAssignmentContainer.style.display = 'block';
-            } else {
-                 modalDeckAssignmentContainer.style.display = 'none';
-            }
+            // Always show manual deck assignment
+            modalDeckAssignmentContainer.style.display = 'block'; 
 
             saveCardBtn.style.display = 'inline-flex';
             processJsonBtn.style.display = 'none';
@@ -2524,7 +2049,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let errorMessages = [];
 
         for (const cardJson of cardsToProcess) {
-            let mainTerm = cardJson.word || cardJson.phrasalVerb || cardJson.collocation || cardJson.idiom || 'Thẻ không tên'; 
+            let mainTerm = cardJson.word || cardJson.phrasalVerb || cardJson.collocation || cardJson.idiom || 'Thẻ không tên';
             if (!cardJson.category ||
                 !mainTerm ||
                 !Array.isArray(cardJson.meanings) || cardJson.meanings.length === 0 ||
@@ -2535,9 +2060,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 continue;
             }
 
+            const { isFavorite, ...cardJsonClean } = cardJson;
+
             const cardDataToSave = {
-                pronunciation: cardJson.pronunciation || '',
-                meanings: cardJson.meanings.map(m => ({
+                ...cardJsonClean, 
+                pronunciation: cardJsonClean.pronunciation || '',
+                meanings: cardJsonClean.meanings.map(m => ({
                     id: m.id || generateUniqueId('m_json_'),
                     text: m.text || '',
                     notes: m.notes || '',
@@ -2548,39 +2076,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                         exampleNotes: ex.exampleNotes || ''
                     })) : []
                 })),
-                generalNotes: cardJson.generalNotes || '',
-                videoUrl: cardJson.videoUrl || null,
-                category: cardJson.category,
-                deckId: selectedDeckId, 
-                status: 'new',
-                lastReviewed: null,
-                reviewCount: 0,
-                nextReviewDate: serverTimestamp(),
-                interval: 0,
-                easeFactor: 2.5,
-                repetitions: 0,
-                isSuspended: false,
-                isUserCard: true, 
-                isFavorite: cardJson.isFavorite || false, 
+                generalNotes: cardJsonClean.generalNotes || '',
+                videoUrl: cardJsonClean.videoUrl || null,
+                category: cardJsonClean.category,
+                deckId: selectedDeckId, // Always assign deckId
+                isUserCard: true,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             };
 
-            if (cardJson.category === 'phrasalVerbs') {
-                cardDataToSave.phrasalVerb = cardJson.phrasalVerb;
-                cardDataToSave.baseVerb = cardJson.baseVerb || null;
-                cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
-            } else if (cardJson.category === 'collocations') {
-                cardDataToSave.collocation = cardJson.collocation;
-                cardDataToSave.baseVerb = cardJson.baseVerb || null;
-                cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
-            } else if (cardJson.category === 'idioms') { 
-                cardDataToSave.idiom = cardJson.idiom;
-                cardDataToSave.baseVerb = null; 
-                cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
-            } else { 
-                cardDataToSave.word = cardJson.word;
-                 cardDataToSave.tags = Array.isArray(cardJson.tags) ? cardJson.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
+            if (cardJsonClean.category === 'phrasalVerbs') {
+                cardDataToSave.phrasalVerb = cardJsonClean.phrasalVerb;
+                cardDataToSave.baseVerb = cardJsonClean.baseVerb || null;
+                cardDataToSave.tags = Array.isArray(cardJsonClean.tags) ? cardJsonClean.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
+            } else if (cardJsonClean.category === 'collocations') {
+                cardDataToSave.collocation = cardJsonClean.collocation;
+                cardDataToSave.baseVerb = cardJsonClean.baseVerb || null;
+                cardDataToSave.tags = Array.isArray(cardJsonClean.tags) ? cardJsonClean.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
+            } else if (cardJsonClean.category === 'idioms') {
+                cardDataToSave.idiom = cardJsonClean.idiom;
+                cardDataToSave.baseVerb = null;
+                cardDataToSave.tags = Array.isArray(cardJsonClean.tags) ? cardJsonClean.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
+            } else {
+                cardDataToSave.word = cardJsonClean.word;
+                 cardDataToSave.tags = Array.isArray(cardJsonClean.tags) ? cardJsonClean.tags.map(t => String(t).trim().toLowerCase()).filter(t => t) : [];
             }
 
             const savedCardId = await FirestoreService.saveCardToFirestore(userId, selectedDeckId, cardDataToSave);
@@ -2605,142 +2124,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (successCount > 0) {
-            await loadVocabularyData(categorySelect.value); 
+            await loadVocabularyData(categorySelect.value);
         }
     }
 
-    function openCopyToDeckModal() {
-        const currentCard = window.currentData[window.currentIndex];
-        if (!currentCard || currentCard.isUserCard) {
-            console.warn("Không thể sao chép thẻ này (không phải thẻ web hoặc không có thẻ).");
-            return;
-        }
-        if (!getCurrentUserId()) {
-            alert("Vui lòng đăng nhập để sao chép thẻ.");
-            openAuthModalFromAuth('login');
-            return;
-        }
+    // Removed openCopyToDeckModal, closeCopyToDeckModal, handleConfirmCopyToDeck as the Copy to Deck modal is removed.
 
-        populateDeckSelects();
-        copyNewDeckNameContainer.style.display = 'none';
-        copyNewDeckNameInput.value = '';
-        copyNewDeckError.classList.add('hidden');
-        copyToDeckErrorMessage.classList.add('hidden');
-        copyToDeckSuccessMessage.classList.add('hidden');
-        copyToDeckSelect.value = '';
-
-        copyToDeckModal.classList.remove('hidden', 'opacity-0');
-        copyToDeckModal.querySelector('.modal-content').classList.remove('scale-95');
-        copyToDeckModal.querySelector('.modal-content').classList.add('scale-100');
-    }
-
-    function closeCopyToDeckModal() {
-        copyToDeckModal.classList.add('opacity-0');
-        copyToDeckModal.querySelector('.modal-content').classList.add('scale-95');
-        setTimeout(() => copyToDeckModal.classList.add('hidden'), 250);
-    }
-
-    async function handleConfirmCopyToDeck() {
-        const currentCard = window.currentData[window.currentIndex];
-        if (!currentCard || currentCard.isUserCard) {
-            copyToDeckErrorMessage.textContent = "Thẻ hiện tại không phải là thẻ web để sao chép.";
-            copyToDeckErrorMessage.classList.remove('hidden');
-            return;
-        }
-
-        const userId = getCurrentUserId();
-        if (!userId) {
-            copyToDeckErrorMessage.textContent = "Vui lòng đăng nhập.";
-            copyToDeckErrorMessage.classList.remove('hidden');
-            openAuthModalFromAuth('login');
-            return;
-        }
-
-        let targetDeckId = copyToDeckSelect.value;
-        let newDeckName = copyNewDeckNameInput.value.trim();
-
-        copyToDeckErrorMessage.classList.add('hidden');
-        copyToDeckSuccessMessage.classList.add('hidden');
-        copyNewDeckError.classList.add('hidden');
-
-        if (targetDeckId === "_create_new_deck_") {
-            if (!newDeckName) {
-                copyNewDeckError.textContent = "Vui lòng nhập tên cho bộ thẻ mới.";
-                copyNewDeckError.classList.remove('hidden');
-                return;
-            }
-            const createdDeck = await createDeck(newDeckName);
-            if (createdDeck && createdDeck.id) {
-                targetDeckId = createdDeck.id;
-                await loadUserDecks(); 
-                copyToDeckSelect.value = targetDeckId; 
-                populateDeckSelects(); 
-            } else {
-                copyNewDeckError.textContent = "Không thể tạo bộ thẻ mới. Vui lòng thử lại.";
-                copyNewDeckError.classList.remove('hidden');
-                return;
-            }
-        } else if (!targetDeckId) {
-            copyToDeckErrorMessage.textContent = "Vui lòng chọn một bộ thẻ đích hoặc tạo bộ thẻ mới.";
-            copyToDeckErrorMessage.classList.remove('hidden');
-            return;
-        }
-
-        const cardToCopy = { ...currentCard };
-        delete cardToCopy.id; 
-        cardToCopy.isUserCard = true;
-        cardToCopy.deckId = targetDeckId;
-        cardToCopy.status = 'new';
-        cardToCopy.lastReviewed = null;
-        cardToCopy.reviewCount = 0;
-        cardToCopy.nextReviewDate = serverTimestamp();
-        cardToCopy.interval = 0;
-        cardToCopy.easeFactor = 2.5;
-        cardToCopy.repetitions = 0;
-        cardToCopy.isSuspended = false;
-        cardToCopy.isFavorite = currentCard.isFavorite || false; 
-        cardToCopy.videoUrl = currentCard.videoUrl || null;
-        cardToCopy.createdAt = serverTimestamp();
-        cardToCopy.updatedAt = serverTimestamp();
-
-        delete cardToCopy.webCardGlobalId; 
-
-        
-        if (currentCard.category === 'phrasalVerbs') cardToCopy.phrasalVerb = currentCard.phrasalVerb;
-        else if (currentCard.category === 'collocations') cardToCopy.collocation = currentCard.collocation;
-        else if (currentCard.category === 'idioms') cardToCopy.idiom = currentCard.idiom;
-        else cardToCopy.word = currentCard.word;
-
-
-        const newCardId = await FirestoreService.saveCardToFirestore(userId, targetDeckId, cardToCopy);
-
-        if (newCardId) {
-            console.log("Web card copied to user deck. New card ID:", newCardId);
-            copyToDeckSuccessMessage.textContent = `Đã sao chép thẻ "${cardToCopy.word || cardToCopy.phrasalVerb || cardToCopy.collocation || cardToCopy.idiom}" vào bộ thẻ đã chọn!`;
-            copyToDeckSuccessMessage.classList.remove('hidden');
-
-            setTimeout(async () => {
-                closeCopyToDeckModal();
-                if (cardSourceSelect.value === 'user' && userDeckSelect.value === targetDeckId) {
-                    await loadVocabularyData(categorySelect.value); 
-                }
-            }, 2000);
-        } else {
-            copyToDeckErrorMessage.textContent = "Lỗi khi sao chép thẻ. Vui lòng thử lại.";
-            copyToDeckErrorMessage.classList.remove('hidden');
-        }
-    }
-
-    async function openBottomSheet(cardItem, viewType = 'default', subView = 'youtube_custom') {
+    async function openBottomSheet(cardItem, viewType = 'default', subView = null) { 
         if (!cardItem || !bottomSheetContent || !bottomSheetTitle || !bottomSheetOverlay || !bottomSheet) return;
 
         let hasActions = false;
         bottomSheetContent.innerHTML = ''; 
         const loggedInUserId = getCurrentUserId();
         const isAdmin = loggedInUserId === ADMIN_UID;
-        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "Thẻ"; 
+        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "Thẻ";
 
-        bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
+        bottomSheet.classList.remove('bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode', 'bottom-sheet-exercise-mode');
         bottomSheet.style.paddingBottom = '';
 
         if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
@@ -2749,123 +2148,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (viewType === 'default') {
             bottomSheetTitle.textContent = `Tùy chọn cho: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             
-            if (loggedInUserId) { 
-                const favoriteBtnEl = document.createElement('button');
-                favoriteBtnEl.className = 'favorite-btn'; 
-                updateFavoriteButtonUI(favoriteBtnEl, cardItem.isFavorite || false); 
-                favoriteBtnEl.onclick = async () => {
-                    await toggleFavoriteStatus(cardItem, favoriteBtnEl);
-                };
-                bottomSheetContent.appendChild(favoriteBtnEl);
-                hasActions = true;
-            }
+            const learnedBtnEl = document.createElement('button');
+            learnedBtnEl.className = 'learned-btn';
+            const isLearned = cardItem.isLearned || false;
+            learnedBtnEl.innerHTML = `<i class="fas ${isLearned ? 'fa-check-circle text-yellow-400' : 'fa-circle text-slate-400'} w-5 mr-3"></i> ${isLearned ? 'Bỏ đánh dấu Đã học' : 'Đánh dấu Đã học'}`;
+            learnedBtnEl.onclick = async () => {
+                const newLearnedStatus = !isLearned;
+                let success = false;
+                // Always save to user card
+                const updatedData = { isLearned: newLearnedStatus, updatedAt: serverTimestamp() };
+                success = await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, updatedData, cardItem.id);
+                
 
-
-             if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
-                const srsInfoDiv = document.createElement('div');
-                srsInfoDiv.className = 'text-xs text-slate-600 dark:text-slate-300 mb-3 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-700/50';
-                let srsInfoHtml = `<h4 class="font-semibold text-sm mb-1 text-slate-700 dark:text-slate-100">Thông tin Ôn tập (Trạng thái: <strong class="uppercase">${cardItem.status || 'MỚI'}</strong>):</h4><ul class="list-inside space-y-0.5">`;
-                if (cardItem.nextReviewDate) {
-                    const nextReview = new Date(cardItem.nextReviewDate);
-                    const today = new Date(); today.setHours(0,0,0,0);
-                    const reviewDay = new Date(nextReview.getTime()); reviewDay.setHours(0,0,0,0);
-                    let reviewText = `Lần ôn tiếp theo: ${nextReview.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
-                    if (reviewDay <= today) reviewText += ' <span class="font-semibold text-amber-600 dark:text-amber-400">(Đến hạn)</span>';
-                    srsInfoHtml += `<li>${reviewText}</li>`;
+                if (success) {
+                    cardItem.isLearned = newLearnedStatus;
+                    updateFlashcard(); 
+                    showToast(newLearnedStatus ? "Đã đánh dấu thẻ là Đã học" : "Đã bỏ đánh dấu Đã học", 2000, "success");
+                    closeBottomSheet();
                 } else {
-                    srsInfoHtml += `<li>Lần ôn tiếp theo: Chưa có (thẻ mới)</li>`;
+                    showToast("Lỗi cập nhật trạng thái thẻ", 2000, "error");
                 }
-                srsInfoHtml += `<li>Khoảng cách: ${cardItem.interval || 0} ngày</li>`;
-                srsInfoHtml += `<li>Độ dễ: ${((cardItem.easeFactor || 2.5) * 100).toFixed(0)}%</li>`;
-                srsInfoHtml += `<li>Ôn đúng liên tiếp: ${cardItem.repetitions || 0}</li>`;
-                if (cardItem.isSuspended) {
-                    srsInfoHtml += `<li class="text-orange-500 font-semibold">Trạng thái ôn tập: Đang tạm ngưng</li>`;
-                }
-                srsInfoHtml += '</ul>';
-                srsInfoDiv.innerHTML = srsInfoHtml;
-                bottomSheetContent.appendChild(srsInfoDiv);
-                hasActions = true;
-            }
+            };
+            bottomSheetContent.appendChild(learnedBtnEl);
+            hasActions = true;
 
-            if (!cardItem.isUserCard && loggedInUserId) {
-                const copyBtnEl = document.createElement('button');
-                copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
-                copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
-                bottomSheetContent.appendChild(copyBtnEl);
-                hasActions = true;
-            }
-            if (cardItem.isUserCard && loggedInUserId) {
+
+            // Removed "Copy to My Cards" button as there are no web cards to copy
+            // if (!cardItem.isUserCard && loggedInUserId) {
+            //     const copyBtnEl = document.createElement('button');
+            //     copyBtnEl.innerHTML = `<i class="fas fa-copy w-5 mr-3 text-sky-500"></i> Sao chép vào Thẻ của Tôi`;
+            //     copyBtnEl.onclick = () => { openCopyToDeckModal(); closeBottomSheet(); };
+            //     bottomSheetContent.appendChild(copyBtnEl);
+            //     hasActions = true;
+            // }
+            // Always check for user card and logged in
+            if (cardItem.isUserCard && loggedInUserId) { 
                 const editBtnEl = document.createElement('button');
                 editBtnEl.innerHTML = `<i class="fas fa-edit w-5 mr-3 text-blue-500"></i> Sửa thẻ`;
                 editBtnEl.onclick = async () => { await openAddEditModal('edit', cardItem); closeBottomSheet(); };
                 bottomSheetContent.appendChild(editBtnEl);
                 hasActions = true;
             }
-            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
-                const resetSrsBtn = document.createElement('button');
-                resetSrsBtn.innerHTML = `<i class="fas fa-undo-alt w-5 mr-3 text-amber-500"></i> Đặt lại Tiến độ Học`;
-                resetSrsBtn.onclick = async () => {
-                    if (confirm("Bạn có chắc muốn đặt lại tiến độ học cho thẻ này? Thẻ sẽ được coi như mới học.")) {
-                        const srsResetData = {
-                            status: 'new', lastReviewed: serverTimestamp(), reviewCount: 0,
-                            nextReviewDate: serverTimestamp(), interval: 0, easeFactor: 2.5, repetitions: 0, isSuspended: false
-                        };
-                        let updateSuccess = false;
-                        if (cardItem.isUserCard) {
-                            // Khi reset thẻ user, isFavorite vẫn giữ nguyên
-                            const dataWithFavorite = {...srsResetData, isFavorite: cardItem.isFavorite || false };
-                            updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataWithFavorite, cardItem.id);
-                        } else {
-                            const webCardGlobalId = getCardIdentifier(cardItem);
-                            if (webCardGlobalId) {
-                                // Khi reset thẻ web, cũng giữ nguyên isFavorite
-                                const statusUpdatePayload = {...srsResetData, isFavorite: cardItem.isFavorite || false};
-                                updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, statusUpdatePayload);
-                            }
-                        }
-                        if (updateSuccess) {
-                            Object.assign(cardItem, { ...srsResetData, nextReviewDate: Date.now(), lastReviewed: Date.now() }); // isFavorite không đổi ở client
-                            alert("Đã đặt lại tiến độ học cho thẻ."); updateFlashcard(); applyAllFilters();
-                        }
-                        closeBottomSheet();
-                    }
-                };
-                bottomSheetContent.appendChild(resetSrsBtn);
-                hasActions = true;
-            }
-            if (loggedInUserId && (cardItem.isUserCard || (cardItem.nextReviewDate || (cardItem.repetitions && cardItem.repetitions > 0) ))) {
-                const suspendBtn = document.createElement('button');
-                suspendBtn.innerHTML = cardItem.isSuspended
-                    ? `<i class="fas fa-play-circle w-5 mr-3 text-green-500"></i> Tiếp tục Ôn tập`
-                    : `<i class="fas fa-pause-circle w-5 mr-3 text-yellow-500"></i> Tạm ngưng Ôn tập`;
-                suspendBtn.onclick = async () => {
-                    const newSuspendedState = !cardItem.isSuspended;
-                    const dataToUpdate = { isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
-                    let updateSuccess = false;
-                    if (cardItem.isUserCard) {
-                         // Khi tạm ngưng thẻ user, isFavorite vẫn giữ nguyên
-                        const dataWithFavorite = {...dataToUpdate, isFavorite: cardItem.isFavorite || false };
-                        updateSuccess = !!await FirestoreService.saveCardToFirestore(loggedInUserId, cardItem.deckId, dataWithFavorite, cardItem.id);
-                    } else {
-                        const webCardGlobalId = getCardIdentifier(cardItem);
-                        if (webCardGlobalId) {
-                            const existingWebStatus = await FirestoreService.getWebCardStatusFromFirestore(loggedInUserId, webCardGlobalId) || {isFavorite: cardItem.isFavorite || false}; 
-                            const fullDataToSet = { ...existingWebStatus, originalCategory: cardItem.category, originalWordOrPhrase: cardTerm, isSuspended: newSuspendedState, updatedAt: serverTimestamp() };
-                            // isFavorite đã có trong existingWebStatus hoặc từ cardItem
-                            updateSuccess = await FirestoreService.updateWebCardStatusInFirestore(loggedInUserId, webCardGlobalId, cardItem, fullDataToSet);
-                        }
-                    }
-                    if (updateSuccess) {
-                        cardItem.isSuspended = newSuspendedState; cardItem.updatedAt = Date.now(); 
-                        alert(newSuspendedState ? "Đã tạm ngưng thẻ này." : "Đã tiếp tục ôn tập thẻ này.");
-                        updateFlashcard(); applyAllFilters();
-                    }
-                    closeBottomSheet();
-                };
-                bottomSheetContent.appendChild(suspendBtn);
-                hasActions = true;
-            }
-            if (cardItem.isUserCard && loggedInUserId) {
+
+            // Always check for user card and logged in
+            if (cardItem.isUserCard && loggedInUserId) { 
                 const deleteBtnEl = document.createElement('button');
                 deleteBtnEl.classList.add('text-red-600', 'dark:text-red-400');
                 deleteBtnEl.innerHTML = `<i class="fas fa-trash-alt w-5 mr-3"></i> Xóa thẻ`;
@@ -2876,8 +2202,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } else if (viewType === 'lecture') {
             bottomSheet.classList.add('bottom-sheet-lecture-mode');
-
-            const cardLectureId = generateCardLectureId(cardItem);
+            const cardLectureId = generateCardLectureId(cardItem); 
+            console.log("Attempting to load lecture with ID:", cardLectureId); 
             const lectureTitlePrefix = "Bài giảng: ";
             bottomSheetTitle.textContent = `${lectureTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
             bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài giảng...</p>';
@@ -2885,7 +2211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             FirestoreService.getLectureContent(cardLectureId)
                 .then(lectureData => {
                     if (isAdmin) {
-                        bottomSheetContent.innerHTML = ''; 
+                        bottomSheetContent.innerHTML = '';
 
                         const titleLabel = document.createElement('label');
                         titleLabel.htmlFor = 'lecture-title-input';
@@ -2920,7 +2246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         saveLectureBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
                         saveLectureBtn.onclick = async () => {
                             const newTitle = titleInput.value.trim();
-                            const newContentHTML = contentTextarea.value; 
+                            const newContentHTML = contentTextarea.value;
                             if (!newTitle) {
                                 alert("Tiêu đề bài giảng không được để trống.");
                                 return;
@@ -2939,7 +2265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         };
                         bottomSheetContent.appendChild(saveLectureBtn);
 
-                    } else { 
+                    } else {
                         if (lectureData && lectureData.contentHTML) {
                             bottomSheetTitle.textContent = lectureData.title || `${lectureTitlePrefix}${cardTerm}`;
                             bottomSheetContent.innerHTML = `<div class="lecture-html-content p-2 prose dark:prose-invert max-w-none">${lectureData.contentHTML}</div>`;
@@ -2948,11 +2274,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 })
-                .catch(error => { 
+                .catch(error => {
                     console.error("Lỗi khi tải bài giảng:", error);
                     bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài giảng. Vui lòng thử lại.</p>';
                 });
-            hasActions = true; 
+            hasActions = true;
         } else if (viewType === 'media') {
             bottomSheet.classList.add('bottom-sheet-media-mode');
             bottomSheetTitle.textContent = `Nghe/Xem: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
@@ -2960,44 +2286,103 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
 
             let youtubeContentDiv = document.getElementById('youtube-tab-content');
-            if (!youtubeContentDiv) { 
+            if (!youtubeContentDiv) {
                 youtubeContentDiv = document.createElement('div');
                 youtubeContentDiv.id = 'youtube-tab-content';
-                youtubeContentDiv.className = 'bottom-sheet-tab-content'; 
+                youtubeContentDiv.className = 'bottom-sheet-tab-content';
                 bottomSheetContent.appendChild(youtubeContentDiv);
             }
-            setActiveMediaTab('youtube_custom', cardItem); 
+            setActiveMediaTab('youtube_custom', cardItem);
             hasActions = true;
-        } else if (viewType === 'practice_options') {
-             bottomSheetTitle.textContent = `Luyện tập: ${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
-             const practiceMeaningBtn = document.createElement('button');
-             practiceMeaningBtn.innerHTML = `<i class="fas fa-list-alt w-5 mr-3 text-purple-500"></i> Luyện Nghĩa (Thẻ này)`;
-             practiceMeaningBtn.onclick = () => {
-                startSingleCardPractice(cardItem, 'meaning_quiz');
-                closeBottomSheet();
-            };
-             bottomSheetContent.appendChild(practiceMeaningBtn);
+        } else if (viewType === 'custom_exercise') { 
+            bottomSheet.classList.add('bottom-sheet-exercise-mode'); 
+            const exerciseId = generateCardExerciseId(cardItem);
+            const exerciseTitlePrefix = "Bài tập: ";
+            bottomSheetTitle.textContent = `${exerciseTitlePrefix}${cardTerm.length > 20 ? cardTerm.substring(0,17) + '...' : cardTerm}`;
+            bottomSheetContent.innerHTML = '<p class="text-slate-400 dark:text-slate-300 p-4 text-center">Đang tải bài tập...</p>';
 
-             const practiceTypingBtn = document.createElement('button');
-             practiceTypingBtn.innerHTML = `<i class="fas fa-keyboard w-5 mr-3 text-teal-500"></i> Luyện Gõ Từ (Thẻ này)`;
-             practiceTypingBtn.onclick = () => {
-                startSingleCardPractice(cardItem, 'typing_practice');
-                closeBottomSheet();
-            };
-             bottomSheetContent.appendChild(practiceTypingBtn);
-             hasActions = true;
+            FirestoreService.getCustomExercise(exerciseId)
+                .then(exerciseData => {
+                    if (isAdmin) {
+                        bottomSheetContent.innerHTML = ''; 
+
+                        const titleLabel = document.createElement('label');
+                        titleLabel.htmlFor = 'exercise-title-input';
+                        titleLabel.textContent = 'Tiêu đề Bài tập (tùy chọn):';
+                        titleLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(titleLabel);
+
+                        const titleInput = document.createElement('input');
+                        titleInput.type = 'text';
+                        titleInput.id = 'exercise-title-input';
+                        titleInput.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3';
+                        titleInput.value = exerciseData?.title || `${exerciseTitlePrefix}${cardTerm}`;
+                        bottomSheetContent.appendChild(titleInput);
+
+                        const contentLabel = document.createElement('label');
+                        contentLabel.htmlFor = 'exercise-html-input';
+                        contentLabel.textContent = 'Nội dung HTML Bài tập:';
+                        contentLabel.className = 'block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1';
+                        bottomSheetContent.appendChild(contentLabel);
+
+                        const contentTextarea = document.createElement('textarea');
+                        contentTextarea.id = 'exercise-html-input';
+                        contentTextarea.rows = 15; 
+                        contentTextarea.className = 'w-full p-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-700 dark:text-white mb-3 min-h-[300px]'; 
+                        contentTextarea.placeholder = 'Dán hoặc nhập mã HTML của bài tập vào đây...\nVí dụ:\n<div class="exercise-container" data-exercise-type="fill-in-the-blank">\n  <p>Điền từ: I ___ (be) happy.</p>\n  <input type="text" data-answer-input />\n  <button data-action="check-answer">Kiểm tra</button>\n  <div data-feedback-area></div>\n  <div data-correct-answer="am" style="display:none;"></div>\n</div>';
+                        contentTextarea.value = exerciseData?.exerciseHTML || '';
+                        bottomSheetContent.appendChild(contentTextarea);
+
+                        const saveExerciseBtn = document.createElement('button');
+                        saveExerciseBtn.id = 'save-exercise-btn';
+                        saveExerciseBtn.textContent = 'Lưu Bài Tập';
+                        saveExerciseBtn.className = 'w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm';
+                        saveExerciseBtn.onclick = async () => {
+                            const newTitle = titleInput.value.trim(); 
+                            const newExerciseHTML = contentTextarea.value; 
+                            
+                            saveExerciseBtn.disabled = true;
+                            saveExerciseBtn.textContent = 'Đang lưu...';
+                            const success = await FirestoreService.saveCustomExercise(exerciseId, newTitle, newExerciseHTML);
+                            if (success) {
+                                showToast("Đã lưu bài tập!", 2000, 'success');
+                                closeBottomSheet();
+                            } else {
+                                showToast("Lỗi: Không thể lưu bài tập.", 3000, 'error');
+                            }
+                            saveExerciseBtn.disabled = false;
+                            saveExerciseBtn.textContent = 'Lưu Bài Tập';
+                        };
+                        bottomSheetContent.appendChild(saveExerciseBtn);
+
+                    } else { 
+                        if (exerciseData && exerciseData.exerciseHTML) {
+                            bottomSheetTitle.textContent = exerciseData.title || `${exerciseTitlePrefix}${cardTerm}`;
+                            bottomSheetContent.innerHTML = `<div class="custom-exercise-render-area p-2">${exerciseData.exerciseHTML}</div>`;
+                            initializeCustomExerciseInteractions(bottomSheetContent.querySelector('.custom-exercise-render-area')); 
+                        } else {
+                            bottomSheetContent.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Hiện chưa có bài tập cho từ này.</p>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi khi tải bài tập tùy chỉnh:", error);
+                    bottomSheetContent.innerHTML = '<p class="text-red-500 dark:text-red-400 p-4 text-center">Lỗi tải bài tập. Vui lòng thử lại.</p>';
+                });
+            hasActions = true; 
         }
+
 
         if (!hasActions && viewType === 'default') {
              console.log("Không có hành động nào cho thẻ này trong bottom sheet (default view).");
-             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none'; 
+             if (cardOptionsMenuBtn) cardOptionsMenuBtn.style.display = 'none';
              if (cardOptionsMenuBtnBack) cardOptionsMenuBtnBack.style.display = 'none';
              return; 
         }
 
         bottomSheetOverlay.classList.remove('hidden');
         bottomSheet.classList.remove('translate-y-full');
-        requestAnimationFrame(() => { 
+        requestAnimationFrame(() => {
             bottomSheetOverlay.classList.add('active');
             bottomSheet.classList.add('active');
         });
@@ -3005,23 +2390,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function setActiveMediaTab(tabName, cardItem) {
         const youtubeContentDiv = document.getElementById('youtube-tab-content');
-        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
+        let cardTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "";
 
-        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden'); 
-        if (tabBtnYouTube) tabBtnYouTube.classList.remove('active'); 
+        if (youtubeContentDiv) youtubeContentDiv.classList.add('hidden');
+        if (tabBtnYouTube) tabBtnYouTube.classList.remove('active');
 
         if (tabName === 'youtube_custom') {
             if (youtubeContentDiv) {
-                youtubeContentDiv.classList.remove('hidden'); 
-                youtubeContentDiv.innerHTML = ''; 
+                youtubeContentDiv.classList.remove('hidden');
+                youtubeContentDiv.innerHTML = '';
 
                 if (cardItem.videoUrl) {
                     const videoId = extractYouTubeVideoId(cardItem.videoUrl);
                     if (videoId) {
                         const iframeContainer = document.createElement('div');
-                        iframeContainer.className = 'video-iframe-container w-full'; 
+                        iframeContainer.className = 'video-iframe-container w-full';
                         const iframe = document.createElement('iframe');
-                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                        iframe.src = `https://www.youtube.com/embed/${videoId}`; // Corrected YouTube embed URL
                         iframe.title = "YouTube video player";
                         iframe.frameBorder = "0";
                         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
@@ -3032,7 +2417,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         youtubeContentDiv.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-4 text-center">Link video YouTube không hợp lệ.</p>';
                     }
                 } else {
-                     
+
                      const searchButtonContainer = document.createElement('div');
                      searchButtonContainer.className = 'p-4 text-center';
 
@@ -3043,92 +2428,140 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                      const searchButton = document.createElement('button');
                      searchButton.className = 'py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm flex items-center justify-center mx-auto';
-                     const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || ""; 
-                     const youtubeSearchTerm = `học từ ${baseSearchTerm}`; 
+                     const baseSearchTerm = cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom || "";
+                     const youtubeSearchTerm = `học từ ${baseSearchTerm}`;
                      searchButton.innerHTML = `<i class="fab fa-youtube mr-2"></i> Tìm trên YouTube với từ khóa "${baseSearchTerm}"`;
                      searchButton.onclick = () => {
-                         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank');
+                         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchTerm)}`, '_blank'); // Corrected YouTube search URL
                      };
                      searchButtonContainer.appendChild(searchButton);
                      youtubeContentDiv.appendChild(searchButtonContainer);
                 }
             }
-            if (tabBtnYouTube) tabBtnYouTube.classList.add('active'); 
+            if (tabBtnYouTube) tabBtnYouTube.classList.add('active');
         }
     }
 
 
     function closeBottomSheet() {
         if (!bottomSheet || !bottomSheetOverlay) return;
-        bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode');
+        bottomSheet.classList.remove('active', 'bottom-sheet-video-mode', 'bottom-sheet-notes-mode', 'bottom-sheet-media-mode', 'bottom-sheet-lecture-mode', 'bottom-sheet-exercise-mode');
         bottomSheetOverlay.classList.remove('active');
-        bottomSheet.style.paddingBottom = ''; 
-        if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none'; 
+        bottomSheet.style.paddingBottom = '';
+        if(bottomSheetTabsContainer) bottomSheetTabsContainer.style.display = 'none';
 
         setTimeout(() => {
             bottomSheet.classList.add('translate-y-full');
             bottomSheetOverlay.classList.add('hidden');
-            
+
             const videoIframe = bottomSheetContent.querySelector('iframe');
             if (videoIframe) {
-                videoIframe.src = ''; 
+                videoIframe.src = '';
             }
-            bottomSheetContent.innerHTML = ''; 
-        }, 300); 
+            bottomSheetContent.innerHTML = '';
+        }, 300);
     }
 
     function extractYouTubeVideoId(url) {
         if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2] && match[2].length === 11) ? match[2] : null;
+        // Updated regex to correctly extract YouTube video ID
+        const regExp = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/g;
+        const match = regExp.exec(url);
+        return (match && match[1] && match[1].length === 11) ? match[1] : null;
     }
 
-    function startSingleCardPractice(cardItem, practiceMode) {
-        if (!cardItem) return;
-        console.log(`Starting single card practice for: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}, Mode: ${practiceMode}`); 
-
-        isSingleCardPracticeMode = true;
-        originalCurrentData = [...window.currentData]; 
-        originalCurrentIndex = window.currentIndex;
-
-        window.currentData = [cardItem]; 
-        window.currentIndex = 0;
-
-        practiceType = practiceMode; 
-
-        updateFlashcard(); 
-        showToast(`Bắt đầu luyện tập thẻ: ${cardItem.word || cardItem.phrasalVerb || cardItem.collocation || cardItem.idiom}`, 3000); 
+    function initializeCustomExerciseInteractions(container) {
+        if (!container) return;
+        console.log("Initializing custom exercise interactions for container:", container);
+        // Logic xử lý chung đã được chuyển vào event listener của bottomSheetContent
     }
 
-    function exitSingleCardPractice() {
-        if (!isSingleCardPracticeMode) return;
-        console.log("Exiting single card practice mode.");
+    if (bottomSheetContent) {
+        bottomSheetContent.addEventListener('click', function(event) {
+            const target = event.target;
+            const exerciseContainer = target.closest('.exercise-container'); 
+            if (!exerciseContainer) return;
 
-        isSingleCardPracticeMode = false;
-        window.currentData = [...originalCurrentData]; 
-        window.currentIndex = originalCurrentIndex; 
+            const action = target.dataset.action;
 
-        practiceType = 'off'; 
-        if (practiceTypeSelect) practiceTypeSelect.value = 'off'; 
+            if (action === 'check-answer') { 
+                const input = exerciseContainer.querySelector('[data-answer-input]');
+                const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
+                const correctAnswerEl = exerciseContainer.querySelector('[data-correct-answer]');
+                
+                if (!input || !feedbackArea || !correctAnswerEl) {
+                    console.warn("Missing elements for fill-in-the-blank check in:", exerciseContainer);
+                    if(feedbackArea) feedbackArea.textContent = "Lỗi cấu trúc bài tập.";
+                    return;
+                }
+                const correctAnswer = correctAnswerEl.textContent;
+                feedbackArea.textContent = ''; // Xóa phản hồi cũ
 
-        updateFlashcard(); 
-        showToast("Đã thoát chế độ luyện tập thẻ.", 2000);
+                if (input.value.trim().toLowerCase() === correctAnswer.toLowerCase()) {
+                    feedbackArea.textContent = "Chính xác!";
+                    feedbackArea.className = 'text-green-600 dark:text-green-400 mt-2 text-sm';
+                } else {
+                    feedbackArea.textContent = `Sai rồi. Đáp án đúng là: "${correctAnswer}"`;
+                    feedbackArea.className = 'text-red-600 dark:text-red-400 mt-2 text-sm';
+                }
+            } else if (action === 'check-mcq-sentence') {
+                const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
+                const correctAnswer = target.dataset.correctChoice; // 'target' ở đây là nút button
+                const selectedOption = exerciseContainer.querySelector('input[name="mcq_make_up_for_usage"]:checked');
+                
+                if (!feedbackArea) {
+                    console.warn("Missing feedback area for MCQ check in:", exerciseContainer);
+                    return;
+                }
+                feedbackArea.textContent = ''; // Xóa phản hồi cũ
+
+                if (selectedOption) {
+                    if (selectedOption.value === correctAnswer) {
+                        feedbackArea.textContent = "Chính xác! 'Make up for' trong câu này có nghĩa là bù đắp, đền bù.";
+                        feedbackArea.className = 'text-green-600 dark:text-green-400 mt-2 text-sm';
+                    } else {
+                        feedbackArea.textContent = "Chưa đúng. Hãy xem lại các lựa chọn và nghĩa của 'make up for'.";
+                        feedbackArea.className = 'text-red-600 dark:text-red-400 mt-2 text-sm';
+                    }
+                } else {
+                    feedbackArea.textContent = "Vui lòng chọn một đáp án.";
+                    feedbackArea.className = 'text-yellow-600 dark:text-yellow-400 mt-2 text-sm';
+                }
+            } else if (action === 'check-rewrite') {
+                const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
+                const suggestedAnswerEl = feedbackArea.querySelector('[data-suggested-answer]');
+                 if (!feedbackArea || !suggestedAnswerEl) {
+                    console.warn("Missing elements for rewrite check in:", exerciseContainer);
+                    return;
+                }
+                suggestedAnswerEl.style.display = 'block'; 
+                feedbackArea.className = 'text-slate-500 dark:text-slate-400 mt-2 text-sm'; // Đảm bảo class đúng
+            } else if (action === 'show-example-sentence-creation') {
+                const feedbackArea = exerciseContainer.querySelector('[data-feedback-area]');
+                const exampleSentenceEl = feedbackArea.querySelector('[data-example-sentence]');
+                 if (!feedbackArea || !exampleSentenceEl) {
+                    console.warn("Missing elements for sentence creation example in:", exerciseContainer);
+                    return;
+                }
+                exampleSentenceEl.style.display = 'block'; 
+                feedbackArea.className = 'text-slate-500 dark:text-slate-400 mt-2 text-sm'; // Đảm bảo class đúng
+            }
+        });
     }
 
-    
+
     function handleTouchStart(event) {
-        if (flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+        if (flashcardElement.classList.contains('flipped') || window.currentData.length === 0) {
             return;
         }
         touchStartX = event.touches[0].clientX;
         touchStartY = event.touches[0].clientY;
-        touchEndX = touchStartX; 
+        touchEndX = touchStartX;
         touchEndY = touchStartY;
     }
 
     function handleTouchMove(event) {
-        if (flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+        if (flashcardElement.classList.contains('flipped') || window.currentData.length === 0) {
             return;
         }
         touchEndX = event.touches[0].clientX;
@@ -3136,14 +2569,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function handleTouchEnd(event) {
-        if (flashcardElement.classList.contains('flipped') || practiceType !== "off" || window.currentData.length === 0) {
+        if (flashcardElement.classList.contains('flipped') || window.currentData.length === 0) {
             return;
         }
 
         const horizontalDiff = touchEndX - touchStartX;
         const verticalDiff = touchEndY - touchStartY;
 
-        
+
         if (Math.abs(horizontalDiff) > Math.abs(verticalDiff) && Math.abs(horizontalDiff) > swipeThreshold) {
             event.preventDefault(); 
             if (horizontalDiff > 0) { 
@@ -3156,13 +2589,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
         }
-        
         touchStartX = 0;
         touchEndX = 0;
         touchStartY = 0;
         touchEndY = 0;
     }
-    
+
 
 
     function setupEventListeners() {
@@ -3170,42 +2602,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
         if(sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-        
-        if (cardFrontElement) { 
+
+        if (cardFrontElement) {
             cardFrontElement.addEventListener('touchstart', handleTouchStart, { passive: true }); 
             cardFrontElement.addEventListener('touchmove', handleTouchMove, { passive: true });
             cardFrontElement.addEventListener('touchend', handleTouchEnd, false); 
         }
 
-        if(cardSourceSelect) cardSourceSelect.addEventListener('change', async (e)=>{
-            currentDatasetSource=e.target.value;
-            const userId = getCurrentUserId();
-            if (currentDatasetSource === 'user' && !userId) {
-                
-                openAuthModalFromAuth('login');
-                
-                window.currentData = []; 
-                window.updateFlashcard(); 
-                window.updateSidebarFilterVisibility();
-                return; 
-            }
-            if(practiceTypeSelect) practiceTypeSelect.value="off"; 
-            practiceType="off";
-            if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards'; 
-            await loadVocabularyData(categorySelect.value);
-            window.updateSidebarFilterVisibility();
-            window.updateMainHeaderTitle();
-        });
+        // cardSourceSelect is removed, so this event listener is removed.
+        // if(cardSourceSelect) cardSourceSelect.addEventListener('change', async (e)=>{
+        //     currentDatasetSource=e.target.value;
+        //     const userId = getCurrentUserId();
+        //     if (currentDatasetSource === 'user' && !userId) {
+        //         openAuthModalFromAuth('login');
+        //         window.currentData = [];
+        //         window.updateFlashcard();
+        //         window.updateSidebarFilterVisibility();
+        //         return;
+        //     }
+        //     if(currentDatasetSource!=='user' && userDeckSelect)userDeckSelect.value='all_user_cards';
+        //     await loadVocabularyData(categorySelect.value);
+        //     window.updateSidebarFilterVisibility();
+        //     window.updateMainHeaderTitle();
+        // });
 
         if(userDeckSelect) userDeckSelect.addEventListener('change', async ()=>{
             const userId = getCurrentUserId();
-            if(!userId) return; 
+            if(!userId) return;
             const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
             stateForCurrentCategory.deckId = userDeckSelect.value;
             appState.lastSelectedDeckId = userDeckSelect.value;
             saveAppState();
-            activeMasterList = await loadUserCards(userDeckSelect.value); 
-            applyAllFilters(false); 
+            activeMasterList = await loadUserCards(userDeckSelect.value);
+            applyAllFilters(false);
         });
 
         if(manageDecksBtn) manageDecksBtn.addEventListener('click', async ()=>{
@@ -3215,7 +2644,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 openAuthModalFromAuth('login');
                 return;
             }
-            await loadUserDecks(); 
+            await loadUserDecks();
             renderExistingDecksList();
             manageDecksModal.classList.remove('hidden','opacity-0');
             if (deckModalContent) deckModalContent.classList.remove('scale-95');
@@ -3245,21 +2674,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const createdDeck = await createDeck(deckName); 
+            const createdDeck = await createDeck(deckName);
 
             if(createdDeck){
-                newDeckNameInput.value = ''; 
-                
-                if(currentDatasetSource === 'user'){
-                    appState.lastSelectedDeckId = createdDeck.id; 
-                    const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
-                    stateForCurrentCategory.deckId = createdDeck.id;
-                    saveAppState();
-                    userDeckSelect.value = createdDeck.id; 
-                    activeMasterList = await loadUserCards(createdDeck.id); 
-                    applyAllFilters(false); 
-                    updateMainHeaderTitle();
-                }
+                newDeckNameInput.value = '';
+
+                // Always user source
+                appState.lastSelectedDeckId = createdDeck.id;
+                const stateForCurrentCategory = getCategoryState(currentDatasetSource, categorySelect.value);
+                stateForCurrentCategory.deckId = createdDeck.id;
+                saveAppState();
+                userDeckSelect.value = createdDeck.id;
+                activeMasterList = await loadUserCards(createdDeck.id);
+                applyAllFilters(false);
+                updateMainHeaderTitle();
             }
         });
 
@@ -3283,27 +2711,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             processJsonBtn.addEventListener('click', processAndSaveJsonCards);
         }
 
-        if (closeCopyToDeckModalBtn) {
-            closeCopyToDeckModalBtn.addEventListener('click', closeCopyToDeckModal);
-        }
-        if (cancelCopyToDeckBtn) {
-            cancelCopyToDeckBtn.addEventListener('click', closeCopyToDeckModal);
-        }
-        if (confirmCopyToDeckBtn) {
-            confirmCopyToDeckBtn.addEventListener('click', handleConfirmCopyToDeck);
-        }
-        if (copyToDeckSelect) {
-            copyToDeckSelect.addEventListener('change', function() {
-                if (this.value === '_create_new_deck_') {
-                    copyNewDeckNameContainer.style.display = 'block';
-                    copyNewDeckNameInput.focus();
-                } else {
-                    copyNewDeckNameContainer.style.display = 'none';
-                    copyNewDeckNameInput.value = '';
-                    copyNewDeckError.classList.add('hidden');
-                }
-            });
-        }
+        // Removed all copy to deck modal event listeners
+        // if (closeCopyToDeckModalBtn) {
+        //     closeCopyToDeckModalBtn.addEventListener('click', closeCopyToDeckModal);
+        // }
+        // if (cancelCopyToDeckBtn) {
+        //     cancelCopyToDeckBtn.addEventListener('click', closeCopyToDeckModal);
+        // }
+        // if (confirmCopyToDeckBtn) {
+        //     confirmCopyToDeckBtn.addEventListener('click', handleConfirmCopyToDeck);
+        // }
+        // if (copyToDeckSelect) {
+        //     copyToDeckSelect.addEventListener('change', function() {
+        //         if (this.value === '_create_new_deck_') {
+        //             copyNewDeckNameContainer.style.display = 'block';
+        //             copyNewDeckNameInput.focus();
+        //         } else {
+        //             copyNewDeckNameContainer.style.display = 'none';
+        //             copyNewDeckNameInput.value = '';
+        //             copyNewDeckError.classList.add('hidden');
+        //         }
+        //     });
+        // }
 
         if (cardOptionsMenuBtn) {
             cardOptionsMenuBtn.addEventListener('click', () => {
@@ -3334,9 +2763,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         if(actionBtnPracticeCard) actionBtnPracticeCard.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
-            if (currentCard) openBottomSheet(currentCard, 'practice_options');
+            if (currentCard) openBottomSheet(currentCard, 'custom_exercise'); 
         });
-        if(exitSingleCardPracticeBtn) exitSingleCardPracticeBtn.addEventListener('click', exitSingleCardPractice);
 
         if(tabBtnYouTube) tabBtnYouTube.addEventListener('click', () => {
             const currentCard = window.currentData[window.currentIndex];
@@ -3344,25 +2772,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
 
-        if(practiceTypeSelect) practiceTypeSelect.addEventListener('change', (e)=>{clearLearningTimer();practiceType=e.target.value;const cat=categorySelect.value;const st=getCategoryState(currentDatasetSource,cat);searchInput.value='';
-            if(cat==='phrasalVerbs' || cat === 'collocations' || cat === 'idioms'){ 
-                if (cat === 'phrasalVerbs' || cat === 'collocations') { 
-                    st.baseVerb='all';if(baseVerbSelect)baseVerbSelect.value='all';
-                }
-                st.tag='all';if(tagSelect)tagSelect.value='all';
-            } const userId = getCurrentUserId(); if(currentDatasetSource==='user' && userId){st.deckId='all_user_cards';if(userDeckSelect)userDeckSelect.value='all_user_cards';}
-            // Khi thay đổi chế độ luyện tập, nên reset bộ lọc hiển thị thẻ về một giá trị mặc định hợp lý, ví dụ 'all_active'
-            st.filterMarked = defaultCategoryState.filterMarked; 
-            if(filterCardStatusSelect) filterCardStatusSelect.value = defaultCategoryState.filterMarked;
-            st.currentIndex=0;applyAllFilters();closeSidebar();});
         if(categorySelect) categorySelect.addEventListener('change', async (e)=>{
-            clearLearningTimer();
             const selCat=e.target.value;
-            if(practiceTypeSelect)practiceTypeSelect.value="off"; 
-            practiceType="off";
-            searchInput.value=''; 
-            // Khi đổi category, cũng nên reset filterMarked về mặc định của category đó
-            const stateForNewCategory = getCategoryState(currentDatasetSource, selCat);
+            searchInput.value='';
+            // Source is always 'user'
+            const stateForNewCategory = getCategoryState('user', selCat); 
             if(filterCardStatusSelect) filterCardStatusSelect.value = stateForNewCategory.filterMarked;
 
             await loadVocabularyData(selCat);
@@ -3375,15 +2789,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         if(flipBtn) flipBtn.addEventListener('click', ()=>{
-            if(practiceType==="off" && window.currentData.length>0) {
+            if(window.currentData.length>0) {
                 flashcardElement.classList.toggle('flipped');
             }
         });
 
         if (flipIconFront) {
             flipIconFront.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                if (practiceType === "off" && window.currentData.length > 0) {
+                e.stopPropagation();
+                if (window.currentData.length > 0) {
                     flashcardElement.classList.toggle('flipped');
                 }
             });
@@ -3391,8 +2805,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (flipIconBack) {
             flipIconBack.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                if (practiceType === "off" && window.currentData.length > 0) {
+                e.stopPropagation();
+                if (window.currentData.length > 0) {
                     flashcardElement.classList.toggle('flipped');
                 }
             });
@@ -3400,38 +2814,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         if(nextBtn) nextBtn.addEventListener('click', ()=>{
-            window.speechSynthesis.cancel(); 
-            if(nextBtn.disabled)return;clearLearningTimer();if(window.currentIndex<window.currentData.length-1){window.currentIndex++;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}else if(practiceType!=="off"&&currentAnswerChecked&&window.currentIndex>=window.currentData.length-1)applyAllFilters();});
+            window.speechSynthesis.cancel();
+            if(nextBtn.disabled)return;
+            if(window.currentIndex<window.currentData.length-1){
+                window.currentIndex++;
+                getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;
+                saveAppState();
+                window.updateFlashcard();
+            } 
+        });
         if(prevBtn) prevBtn.addEventListener('click', ()=>{
-            window.speechSynthesis.cancel(); 
-            clearLearningTimer();if(window.currentIndex>0){window.currentIndex--;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}});
+            window.speechSynthesis.cancel();
+            if(window.currentIndex>0){window.currentIndex--;getCategoryState(currentDatasetSource,categorySelect.value).currentIndex=window.currentIndex;saveAppState();window.updateFlashcard();}});
         if(speakerBtn) speakerBtn.addEventListener('click', (e)=>{
-            e.stopPropagation(); 
-            window.speechSynthesis.cancel(); 
+            e.stopPropagation();
+            window.speechSynthesis.cancel();
             const txt=wordDisplay.dataset.ttsText;
             if(txt&&!speakerBtn.disabled)speakText(txt,currentWordSpansMeta);});
 
 
-        if(btnSrsAgain) btnSrsAgain.addEventListener('click', () => processSrsRatingWrapper('again'));
-        if(btnSrsHard) btnSrsHard.addEventListener('click', () => processSrsRatingWrapper('hard'));
-        if(btnSrsGood) btnSrsGood.addEventListener('click', () => processSrsRatingWrapper('good'));
-        if(btnSrsEasy) btnSrsEasy.addEventListener('click', () => processSrsRatingWrapper('easy'));
-
-        function checkTypingAnswer(){if(window.currentData.length===0||!currentCorrectAnswerForPractice)return;currentAnswerChecked=true;feedbackMessage.classList.remove('hidden');typingInput.disabled=true;submitTypingAnswerBtn.disabled=true;const uA=typingInput.value.trim().toLowerCase();const cA=currentCorrectAnswerForPractice.trim().toLowerCase();const iC=uA===cA;if(iC){feedbackMessage.textContent='Đúng!';feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-green-100 text-green-700 border border-green-300';}else{feedbackMessage.textContent=`Sai! Đáp án đúng: ${currentCorrectAnswerForPractice}`;feedbackMessage.className='mt-3 p-3 rounded-md w-full text-center font-semibold bg-red-100 text-red-700 border border-red-300';}flashcardElement.classList.remove('practice-mode-front-only');flashcardElement.classList.add('flipped');const i=window.currentData[window.currentIndex];const iCV=i.category;const id=getCardIdentifier(i,iCV);if(id)processSrsRatingWrapper(iC?'easy':'again');updateCardInfo();}
-
-        if(submitTypingAnswerBtn) submitTypingAnswerBtn.addEventListener('click', checkTypingAnswer);
-        if(typingInput) typingInput.addEventListener('keypress', (e)=>{if(e.key==='Enter'&&practiceType==='typing_practice'&&!submitTypingAnswerBtn.disabled)checkTypingAnswer();});
-
         if(addAnotherMeaningBlockAtEndBtn) addAnotherMeaningBlockAtEndBtn.addEventListener('click', () => addMeaningBlockToEnd());
         if(cardWordInput) cardWordInput.addEventListener('input', () => clearFieldError(cardWordInput, cardWordError));
-        initializeClearButtonForSearch(); 
+        initializeClearButtonForSearch();
         if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('input', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); if (inputValue.length === 0) { hideAutocompleteSuggestions(cardBaseVerbInput); return; } const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions); });
-        if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('focus', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); if (filteredSuggestions.length > 0 || inputValue.length === 0) { showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions.slice(0, 5)); } }); 
+        if(cardBaseVerbInput) cardBaseVerbInput.addEventListener('focus', () => { const inputValue = cardBaseVerbInput.value.toLowerCase(); const filteredSuggestions = baseVerbSuggestions.filter(verb => verb.toLowerCase().includes(inputValue) ); if (filteredSuggestions.length > 0 || inputValue.length === 0) { showAutocompleteSuggestions(cardBaseVerbInput, filteredSuggestions.slice(0, 5)); } });
         if(cardTagsInput) cardTagsInput.addEventListener('input', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); if (currentTagQuery.length === 0) { hideAutocompleteSuggestions(cardTagsInput); return; } const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); showAutocompleteSuggestions(cardTagsInput, filteredSuggestions, true); });
-        if(cardTagsInput) cardTagsInput.addEventListener('focus', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); if (filteredSuggestions.length > 0 || currentTagQuery.length === 0) { showAutocompleteSuggestions(cardTagsInput, filteredSuggestions.slice(0, 5), true); } }); 
+        if(cardTagsInput) cardTagsInput.addEventListener('focus', () => { const fullInputValue = cardTagsInput.value; const lastCommaIndex = fullInputValue.lastIndexOf(','); const currentTagQuery = (lastCommaIndex === -1 ? fullInputValue : fullInputValue.substring(lastCommaIndex + 1)).trim().toLowerCase(); const alreadyAddedTags = fullInputValue.substring(0, lastCommaIndex + 1).split(',').map(t => t.trim().toLowerCase()); const filteredSuggestions = tagSuggestions.filter(tag => tag.toLowerCase().includes(currentTagQuery) && !alreadyAddedTags.includes(tag.toLowerCase()) ); if (filteredSuggestions.length > 0 || currentTagQuery.length === 0) { showAutocompleteSuggestions(cardTagsInput, filteredSuggestions.slice(0, 5), true); } });
         document.addEventListener('click', function(event) { const activeSuggestionsList = document.querySelector('.autocomplete-suggestions-list'); if (activeSuggestionsList) { const inputId = activeSuggestionsList.id.replace('-suggestions', ''); const inputElement = document.getElementById(inputId); if (inputElement && !inputElement.contains(event.target) && !activeSuggestionsList.contains(event.target)) { hideAutocompleteSuggestions(inputElement); } } });
 
-        
+
         if (meaningDisplayContainer) {
             meaningDisplayContainer.addEventListener('change', function(event) {
                 const targetSelect = event.target.closest('.example-speech-rate-select');
@@ -3445,29 +2856,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function setupInitialCategoryAndSource() {
-        
-        await loadAppState();
-        // Đặt giá trị cho filterCardStatusSelect từ appState *sau khi* loadAppState
-        if (filterCardStatusSelect && appState.categoryStates[`${currentDatasetSource}_${categorySelect.value}`]) {
-             filterCardStatusSelect.value = appState.categoryStates[`${currentDatasetSource}_${categorySelect.value}`].filterMarked || defaultCategoryState.filterMarked;
-        } else if (filterCardStatusSelect) {
-            filterCardStatusSelect.value = defaultCategoryState.filterMarked;
+
+        await loadAppState(); 
+        const initialCategory = appState.lastSelectedCategory || 'phrasalVerbs';
+        // Source is always 'user'
+        const initialSource = 'user'; 
+        const currentCategoryStateInitial = getCategoryState(initialSource, initialCategory);
+
+        if (filterCardStatusSelect) {
+            filterCardStatusSelect.value = currentCategoryStateInitial.filterMarked; 
         }
 
-        renderRecentlyViewedList(); 
+        renderRecentlyViewedList();
 
         const urlParams = new URLSearchParams(window.location.search);
-        const sourceFromUrl = urlParams.get('source');
-        currentDatasetSource = sourceFromUrl || appState.lastSelectedSource || 'web';
-        if(cardSourceSelect) cardSourceSelect.value = currentDatasetSource;
-        if(categorySelect) categorySelect.value = appState.lastSelectedCategory || 'phrasalVerbs';
+        // Source is always 'user'
+        // const sourceFromUrl = urlParams.get('source'); 
+        currentDatasetSource = initialSource; 
+        // if(cardSourceSelect) cardSourceSelect.value = currentDatasetSource; // Removed
+        if(categorySelect) categorySelect.value = initialCategory; 
 
-        // Đảm bảo filterCardStatusSelect được cập nhật một lần nữa sau khi category và source có thể đã thay đổi
-        const currentCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
-        if(filterCardStatusSelect) filterCardStatusSelect.value = currentCategoryState.filterMarked;
+        const finalCategoryState = getCategoryState(currentDatasetSource, categorySelect.value);
+        if(filterCardStatusSelect) filterCardStatusSelect.value = finalCategoryState.filterMarked;
 
 
-        await loadVocabularyData(categorySelect.value); 
+        await loadVocabularyData(categorySelect.value);
     }
 
 }); // END DOMContentLoaded
